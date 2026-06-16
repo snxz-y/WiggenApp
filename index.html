@@ -405,12 +405,19 @@ function getFilteredHealth(){
 
 function initHealthDates(){
   if(!healthData.length)return;
+  // Calculate yesterday's date
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate()-1);
+  const yStr = yesterday.toISOString().slice(0,10);
+  // Find if we have data for yesterday, otherwise use latest available
   const sorted=[...healthData].sort((a,b)=>b.date.localeCompare(a.date));
-  const latest=sorted[0].date;
-  healthEndDate=latest;
+  const target = healthData.find(h=>h.date===yStr) ? yStr : sorted[0].date;
+  healthEndDate=target;
+  healthStartDate=target;
   healthSingleDay=true;
-  document.getElementById('health-date').value=latest;
-  
+  const el=document.getElementById('health-date');
+  if(el)el.value=target;
+  try{renderHealth();}catch(e){console.error('renderHealth:',e);}
 }
 
 function applyHealthRange(){
@@ -419,9 +426,8 @@ function applyHealthRange(){
   healthStartDate=d;
   healthEndDate=d;
   healthSingleDay=true;
-  healthSingleDay=start===end;
   document.querySelectorAll('.period-tab').forEach(t=>t.classList.remove('active'));
-  renderHealth();
+  try{renderHealth();}catch(e){console.error('renderHealth:',e);}
 }
 
 function setHealthPreset(p,el){
@@ -854,23 +860,25 @@ let nutrSingleDay = true;
 
 function initNutrDates() {
   if (!nutritionData.length) return;
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate()-1);
+  const yStr = yesterday.toISOString().slice(0,10);
   const sorted = [...nutritionData].sort((a,b) => b.date.localeCompare(a.date));
-  const latest = sorted[0].date;
-  nutrEndDate = latest;
-  nutrStartDate = latest;
+  const target = nutritionData.find(n=>n.date===yStr) ? yStr : sorted[0].date;
+  nutrEndDate = target;
+  nutrStartDate = target;
   nutrSingleDay = true;
   const el = document.getElementById('nutr-date');
-  if(el) el.value = latest;
+  if(el) el.value = target;
   try{renderNutrition();}catch(e){console.error('renderNutrition:',e);}
 }
 
 function applyNutrRange() {
-  const start = document.getElementById('nutr-start').value;
-  const end = document.getElementById('nutr-end').value;
-  if (!start || !end) return;
-  nutrStartDate = start;
-  nutrEndDate = end;
-  nutrSingleDay = start === end;
+  const d = document.getElementById('nutr-date').value;
+  if (!d) return;
+  nutrStartDate = d;
+  nutrEndDate = d;
+  nutrSingleDay = true;
   document.querySelectorAll('.period-tab').forEach(t => t.classList.remove('active'));
   renderNutrition();
 }
