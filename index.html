@@ -256,7 +256,14 @@ const fmtD=m=>(m/1000).toFixed(2)+'km';
 const fmtSpd=mps=>((mps*3.6).toFixed(1))+'km/h';
 const pace=(d,s)=>fmt(s/(d/1000))+'/km';
 const n=(v,dec=0,suf='')=>v==null?'—':(dec?parseFloat(v).toFixed(dec):Math.round(v))+suf;
-const hrCls=hr=>hr>175?'hi':hr>160?'warn':'';
+const hrCls=hr=>{
+  if(hr==null)return'';
+  if(hr>=187)return'color:#ff4d4d;font-weight:600';      // Z5
+  if(hr>=166)return'color:#f87171;font-weight:600';      // Z4
+  if(hr>=146)return'color:#fcd34d';                      // Z3
+  if(hr>=125)return'color:#60a5fa';                      // Z2
+  return'color:#3af58a';                                 // Z1
+};
 const zbar=a=>{
   const t=(a.z1||0)+(a.z2||0)+(a.z3||0)+(a.z4||0)+(a.z5||0);
   if(!t)return'—';
@@ -281,8 +288,8 @@ function sort(tab,col){if(ss[tab].col===col)ss[tab].asc=!ss[tab].asc;else{ss[tab
 function renderRuns(){
   const rows=getSorted(activities.filter(a=>a.type==='running'),'runs');
   document.getElementById('tbody-runs').innerHTML=rows.map(r=>`<tr>
-    <td>${r.date}</td><td>${fmtD(r.distanceM)}</td><td style="font-weight:600">${pace(r.distanceM,r.durationSec)}</td>
-    <td class="${hrCls(r.avgHR)}">${r.avgHR}</td><td class="${hrCls(r.maxHR)}">${r.maxHR}</td>
+    <td>${r.date}</td><td style="font-weight:700;font-size:13px">${fmtD(r.distanceM)}</td><td style="font-weight:600">${pace(r.distanceM,r.durationSec)}</td>
+    <td style="${hrCls(r.avgHR)}">${r.avgHR}</td><td class="${r.maxHR>=187?'hi':r.maxHR>=166?'warn':''}">${r.maxHR}</td>
     <td>${n(r.elevGain)}m</td><td class="muted-cell">${n(r.elevLoss)}m</td>
     <td>${n(r.cadence)} spm</td><td>${n(r.strideLen,1)}cm</td><td>${n(r.gct)}ms</td>
     <td>${n(r.avgPower)}W</td><td>${n(r.normPower)}W</td>
@@ -296,7 +303,7 @@ function renderBikes(){
   const rows=getSorted(activities.filter(a=>a.type==='cycling'),'bikes');
   document.getElementById('tbody-bikes').innerHTML=rows.map(b=>`<tr>
     <td>${b.date}</td><td>${fmtD(b.distanceM)}</td><td style="font-weight:600">${fmtSpd(b.distanceM/b.durationSec)}</td>
-    <td class="${hrCls(b.avgHR)}">${b.avgHR}</td><td class="${hrCls(b.maxHR)}">${b.maxHR}</td>
+    <td style="${hrCls(b.avgHR)}">${b.avgHR}</td><td class="${b.maxHR>=187?'hi':b.maxHR>=166?'warn':''}">${b.maxHR}</td>
     <td>${n(b.elevGain)}m</td><td class="muted-cell">${n(b.elevLoss)}m</td>
     <td>${fmt(b.durationSec)}</td><td>${n(b.load,1)}</td><td class="muted-cell">-${n(b.bodyBatDrain)}</td><td>${n(b.calories)}</td>
     <td>${zbar(b)}</td><td class="muted-cell" style="font-size:11px">${b.label||'—'}</td>
@@ -305,7 +312,7 @@ function renderBikes(){
 function renderWalks(){
   const rows=getSorted(activities.filter(a=>a.type==='walking'),'walks');
   document.getElementById('tbody-walks').innerHTML=rows.map(w=>`<tr>
-    <td>${w.date}</td><td>${fmtD(w.distanceM)}</td><td>${pace(w.distanceM,w.durationSec)}</td>
+    <td>${w.date}</td><td style="font-weight:700;font-size:13px">${fmtD(w.distanceM)}</td><td>${pace(w.distanceM,w.durationSec)}</td>
     <td>${w.avgHR}</td><td>${w.maxHR}</td>
     <td>${n(w.elevGain)}m</td><td class="muted-cell">${n(w.elevLoss)}m</td>
     <td>${fmt(w.durationSec)}</td><td>${n(w.steps)}</td><td>${n(w.strideLen,1)}cm</td>
@@ -323,7 +330,7 @@ function renderAll(){
     <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis">${a.name}</td>
     <td>${fmtD(a.distanceM)}</td><td>${fmt(a.durationSec)}</td>
     <td style="font-weight:600">${a.type==='cycling'?fmtSpd(a.distanceM/a.durationSec):pace(a.distanceM,a.durationSec)}</td>
-    <td class="${hrCls(a.avgHR)}">${a.avgHR}</td><td class="${hrCls(a.maxHR)}">${a.maxHR}</td>
+    <td style="${hrCls(a.avgHR)}">${a.avgHR}</td><td class="${a.maxHR>=187?'hi':a.maxHR>=166?'warn':''}">${a.maxHR}</td>
     <td>${n(a.elevGain)}m</td><td>${n(a.load,1)}</td>
     <td class="${a.vo2max>=47?'ok':''}">${a.vo2max||'—'}</td>
     <td>${n(a.calories)}</td><td class="muted-cell">-${n(a.bodyBatDrain)}</td>
@@ -604,7 +611,7 @@ function renderHealth(){
           const rangeHigh=Math.min(100,Math.round((v.max||100)/cap*100));
           const inRange=vv!=null&&vv>=v.min&&vv<=v.max;
           const valColor=inRange?v.color:'#ff4d4d';
-          return '<div class="load-row"><span class="load-lbl">'+v.lbl+'</span><div class="load-track"><div style="position:absolute;top:0;height:100%;left:'+rangeLow+'%;width:'+(rangeHigh-rangeLow)+'%;background:'+v.color+'33;border-left:3px solid '+v.color+';border-right:3px solid '+v.color+';box-sizing:border-box;border-radius:2px;z-index:1"></div><div class="load-fill" style="width:'+fillPct+'%;background:'+v.color+';opacity:'+(inRange?1:.4)+';z-index:2;position:absolute;top:0;left:0;height:100%;border-radius:4px"></div></div><span class="load-val" style="color:'+valColor+'">'+(vv!=null?vv:'—')+' <span style="color:#666;font-size:10px">('+v.min+'-'+v.max+')</span></span></div>';
+          return '<div class="load-row"><span class="load-lbl">'+v.lbl+'</span><div class="load-track"><div style="position:absolute;top:0;height:100%;left:'+rangeLow+'%;width:'+(rangeHigh-rangeLow)+'%;background:'+v.color+'33;border-left:3px solid '+v.color+';border-right:3px solid '+v.color+';box-sizing:border-box;border-radius:2px;z-index:3"></div><div class="load-fill" style="width:'+fillPct+'%;background:'+v.color+';opacity:'+(inRange?1:.4)+';z-index:1;position:absolute;top:0;left:0;height:100%;border-radius:4px"></div></div><span class="load-val" style="color:'+valColor+'">'+(vv!=null?vv:'—')+' <span style="color:#666;font-size:10px">('+v.min+'-'+v.max+')</span></span></div>';
         }).join('')+'<div class="load-focus-label">Focus: '+(isToday&&d.loadFocus?d.loadFocus.replace(/_/g,' '):'—')+'</div>';
       })()}
     </div>
