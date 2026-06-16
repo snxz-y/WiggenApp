@@ -404,7 +404,7 @@ function getFilteredHealth(){
 function initHealthDates(){
   if(!healthData.length)return;
   const d=new Date(); d.setDate(d.getDate()-1);
-  const yesterday=d.toISOString().slice(0,10);
+  const yesterday=[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
   healthEndDate=yesterday;
   healthStartDate=yesterday;
   healthSingleDay=true;
@@ -854,7 +854,7 @@ let nutrSingleDay = true;
 function initNutrDates() {
   if (!nutritionData.length) return;
   const d=new Date(); d.setDate(d.getDate()-1);
-  const yesterday=d.toISOString().slice(0,10);
+  const yesterday=[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
   nutrEndDate = yesterday;
   nutrStartDate = yesterday;
   nutrSingleDay = true;
