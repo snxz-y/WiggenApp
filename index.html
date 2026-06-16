@@ -102,8 +102,8 @@ tr:hover td{background:var(--surface2)}
 <body>
 <div class="header">
   <div class="header-inner">
-    <div class="logo">Jørgen <span>/ Training Hub</span></div>
-    <div class="last-updated" id="last-updated">Loading...</div>
+    <div class="logo">Wiggen <span>/ Health Portal Super APP Code King</span></div>
+    <div id="last-updated" style="display:none"></div>
   </div>
 </div>
 <div class="nav">
@@ -504,7 +504,7 @@ function renderHealth(){
   const imWeekly=isToday?d.weeklyIntensityTotal:null;
   const imPct=imGoal?Math.min(100,Math.round((imWeekly||imTotal)/imGoal*100)):0;
 
-  const periodLabel=isToday?`Latest data: ${d.date}`:`${hrows.length} day${hrows.length>1?'s':''}  /  ${hrows[hrows.length-1].date} → ${hrows[0].date}`;
+  const periodLabel=isToday?`Currently showing: ${fmtDate(d.date)}`:`${hrows.length} day${hrows.length>1?'s':''}  /  ${hrows[hrows.length-1].date} to ${fmtDate(hrows[0].date)}`;
 
   const stepsGoal=d.stepsGoal||9590;
   const stepsVal=isToday?d.steps:Math.round(avgg(hrows,'steps'));
@@ -1101,7 +1101,7 @@ function renderNutrition() {
   const carbPct = pctOf(carb, TARGETS.carbs);
   const fatPct = pctOf(fat, TARGETS.fat);
 
-  const periodLabel = isToday ? 'Data for: ' + fmtDate(d.date) : hrows.length + ' days · ' + rows[rows.length-1].date + ' to ' + rows[0].date;
+  const periodLabel = isToday ? 'Currently showing: ' + fmtDate(d.date) : hrows.length + ' days · ' + rows[rows.length-1].date + ' to ' + rows[0].date;
 
   // Macro split: protein=4kcal/g, carbs=4kcal/g, fat=9kcal/g
   const proKcal = (pro||0) * 4;
@@ -1163,15 +1163,15 @@ function renderNutrition() {
     <div class="section-head">Macro Split</div>
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:1.5rem;display:flex;align-items:center;gap:24px">
       <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
-        <div style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase">Actual</div>
-        <div style="position:relative;width:100px;height:100px;flex-shrink:0">
-          <canvas id="macroPie" width="100" height="100" role="img" aria-label="Actual macro split">Actual macro split.</canvas>
-        </div>
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
         <div style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase">Goal</div>
         <div style="position:relative;width:100px;height:100px;flex-shrink:0">
           <canvas id="macroPieGoal" width="100" height="100" role="img" aria-label="Goal macro split">Goal macro split.</canvas>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+        <div style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase">Actual</div>
+        <div style="position:relative;width:100px;height:100px;flex-shrink:0">
+          <canvas id="macroPie" width="100" height="100" role="img" aria-label="Actual macro split">Actual macro split.</canvas>
         </div>
       </div>
       <div style="display:flex;flex-direction:column;gap:10px">
@@ -1297,13 +1297,13 @@ Promise.all([
   healthData=health;
   nutritionData=nutr;
   reviewsData=revs;
+  try{renderActivities();}catch(e){console.error('renderActivities error:',e);}
   initReviewDates();
   initHealthDates();
   initNutrDates();
   renderReviewHistory();
   const lastDate=health.length?[...health].sort((a,b)=>b.date.localeCompare(a.date))[0].date:'—';
   document.getElementById('last-updated').textContent='Health: '+lastDate;
-  try{renderActivities();}catch(e){console.error('renderActivities error:',e);}
   // renderHealth called by initHealthDates
   try{renderHealth();}catch(e){
     console.error('renderHealth error:',e);
