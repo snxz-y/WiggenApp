@@ -235,7 +235,6 @@ tr:hover td{background:var(--surface2)}
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:1.5rem;flex-wrap:wrap">
       <input type="date" id="health-date" style="font-size:12px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);color-scheme:dark">
       <button onclick="applyHealthRange()" style="padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;border:none;border-radius:6px;background:var(--accent2);color:#fff">Apply</button>
-      <button class="period-tab active" id="health-yesterday-btn" onclick="setHealthPreset('today',this)">Yesterday</button>
     </div>
     <div id="health-content"></div>
   </div>
@@ -245,7 +244,6 @@ tr:hover td{background:var(--surface2)}
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:1.5rem;flex-wrap:wrap">
       <input type="date" id="nutr-date" style="font-size:12px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);color-scheme:dark">
       <button onclick="applyNutrRange()" style="padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;border:none;border-radius:6px;background:var(--accent2);color:#fff">Apply</button>
-      <button class="period-tab active" id="nutr-yesterday-btn" onclick="setNutrPreset('yesterday',this)">Yesterday</button>
     </div>
     <div id="nutrition-content"></div>
   </div>
@@ -405,13 +403,13 @@ function getFilteredHealth(){
 
 function initHealthDates(){
   if(!healthData.length)return;
-  const sorted=[...healthData].sort((a,b)=>b.date.localeCompare(a.date));
-  const target=sorted[0].date;
-  healthEndDate=target;
-  healthStartDate=target;
+  const d=new Date(); d.setDate(d.getDate()-1);
+  const yesterday=d.toISOString().slice(0,10);
+  healthEndDate=yesterday;
+  healthStartDate=yesterday;
   healthSingleDay=true;
   const el=document.getElementById('health-date');
-  if(el)el.value=target;
+  if(el)el.value=yesterday;
   try{renderHealth();}catch(e){console.error('renderHealth:',e);}
 }
 
@@ -855,13 +853,13 @@ let nutrSingleDay = true;
 
 function initNutrDates() {
   if (!nutritionData.length) return;
-  const sorted = [...nutritionData].sort((a,b) => b.date.localeCompare(a.date));
-  const target = sorted[0].date;
-  nutrEndDate = target;
-  nutrStartDate = target;
+  const d=new Date(); d.setDate(d.getDate()-1);
+  const yesterday=d.toISOString().slice(0,10);
+  nutrEndDate = yesterday;
+  nutrStartDate = yesterday;
   nutrSingleDay = true;
   const el = document.getElementById('nutr-date');
-  if(el) el.value = target;
+  if(el) el.value = yesterday;
   try{renderNutrition();}catch(e){console.error('renderNutrition:',e);}
 }
 
