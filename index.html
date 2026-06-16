@@ -233,9 +233,9 @@ tr:hover td{background:var(--surface2)}
   <!-- HEALTH -->
   <div id="nav-health" class="panel">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:1.5rem;flex-wrap:wrap">
-      <input type="text" id="health-start" placeholder="DD/MM/YYYY" maxlength="10" style="font-size:12px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);width:110px">
+      <input type="date" id="health-start" style="font-size:12px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text)">
       <span style="font-size:12px;color:var(--muted)">to</span>
-      <input type="text" id="health-end" placeholder="DD/MM/YYYY" maxlength="10" style="font-size:12px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);width:110px">
+      <input type="date" id="health-end" style="font-size:12px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text)">
       <button onclick="applyHealthRange()" style="padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;border:none;border-radius:6px;background:var(--accent2);color:#fff">Apply</button>
       <div style="display:flex;gap:4px;flex-wrap:wrap">
         <button class="period-tab active" onclick="setHealthPreset('today',this)">Yesterday</button>
@@ -253,9 +253,9 @@ tr:hover td{background:var(--surface2)}
   <!-- NUTRITION -->
   <div id="nav-nutrition" class="panel">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:1.5rem;flex-wrap:wrap">
-      <input type="text" id="nutr-start" placeholder="DD/MM/YYYY" maxlength="10" style="font-size:12px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);width:110px">
+      <input type="date" id="nutr-start" style="font-size:12px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text)">
       <span style="font-size:12px;color:var(--muted)">to</span>
-      <input type="text" id="nutr-end" placeholder="DD/MM/YYYY" maxlength="10" style="font-size:12px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);width:110px">
+      <input type="date" id="nutr-end" style="font-size:12px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text)">
       <button onclick="applyNutrRange()" style="padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;border:none;border-radius:6px;background:var(--accent2);color:#fff">Apply</button>
       <div style="display:flex;gap:4px;flex-wrap:wrap">
         <button class="period-tab active" onclick="setNutrPreset('yesterday',this)">Yesterday</button>
@@ -273,9 +273,9 @@ tr:hover td{background:var(--surface2)}
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;flex-wrap:wrap">
       <div style="display:flex;align-items:center;gap:8px">
         <span style="font-size:12px;color:var(--muted)">From</span>
-        <input type="text" id="review-start" placeholder="DD/MM/YYYY" maxlength="10" style="font-size:12px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);width:110px">
+        <input type="date" id="review-start" style="font-size:12px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text)">
         <span style="font-size:12px;color:var(--muted)">to</span>
-        <input type="text" id="review-end" placeholder="DD/MM/YYYY" maxlength="10" style="font-size:12px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);width:110px">
+        <input type="date" id="review-end" style="font-size:12px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text)">
       </div>
       <button onclick="generateReview()" id="review-btn" style="padding:8px 20px;font-size:13px;font-weight:600;cursor:pointer;border:none;border-radius:6px;background:var(--accent);color:#000;letter-spacing:.02em">
         Generate Sunday Review
@@ -427,13 +427,13 @@ function initHealthDates(){
   const latest=sorted[0].date;
   healthEndDate=latest;
   healthSingleDay=true;
-  document.getElementById('health-end').value=toDisplay(latest);
-  document.getElementById('health-start').value=toDisplay(latest);
+  document.getElementById('health-end').value=latest;
+  document.getElementById('health-start').value=latest;
 }
 
 function applyHealthRange(){
-  const start=parseDate(document.getElementById('health-start').value);
-  const end=parseDate(document.getElementById('health-end').value);
+  const start=document.getElementById('health-start').value;
+  const end=document.getElementById('health-end').value;
   if(!start||!end)return;
   healthStartDate=start;
   healthEndDate=end;
@@ -862,8 +862,8 @@ function initReviewDates() {
   const today = new Date();
   const end = today.toISOString().slice(0,10);
   const start = new Date(today - 7*24*60*60*1000).toISOString().slice(0,10);
-  document.getElementById('review-end').value = toDisplay(end);
-  document.getElementById('review-start').value = toDisplay(start);
+  document.getElementById('review-end').value=end;
+  document.getElementById('review-start').value=start;
 }
 
 let nutrStartDate = null;
@@ -877,13 +877,13 @@ function initNutrDates() {
   nutrEndDate = latest;
   nutrStartDate = latest;
   nutrSingleDay = true;
-  document.getElementById('nutr-end').value = toDisplay(latest);
-  document.getElementById('nutr-start').value = toDisplay(latest);
+  document.getElementById('nutr-end').value=latest;
+  document.getElementById('nutr-start').value=latest;
 }
 
 function applyNutrRange() {
-  const start = parseDate(document.getElementById('nutr-start').value);
-  const end = parseDate(document.getElementById('nutr-end').value);
+  const start = document.getElementById('nutr-start').value;
+  const end = document.getElementById('nutr-end').value;
   if (!start || !end) return;
   nutrStartDate = start;
   nutrEndDate = end;
@@ -898,18 +898,18 @@ function setNutrPreset(p, el) {
   const latest = sorted[0].date;
   const ref = new Date(latest);
   nutrEndDate = latest;
-  document.getElementById('nutr-end').value = latest;
+  document.getElementById('nutr-end').value=latest;
   if (p === 'yesterday') {
     nutrStartDate = latest; nutrEndDate = latest; nutrSingleDay = true;
-    document.getElementById('nutr-start').value = latest;
+    document.getElementById('nutr-start').value=latest;
   } else {
     nutrSingleDay = false;
     if (p === '7d') ref.setDate(ref.getDate()-7);
     else if (p === '14d') ref.setDate(ref.getDate()-14);
     else if (p === '4w') ref.setDate(ref.getDate()-28);
-    else if (p === 'all') { nutrStartDate = sorted[sorted.length-1].date; document.getElementById('nutr-start').value = toDisplay(nutrStartDate); renderNutrition(); document.querySelectorAll('.period-tab').forEach(t=>t.classList.remove('active')); if(el)el.classList.add('active'); return; }
+    else if (p === 'all') { nutrStartDate = sorted[sorted.length-1].date; document.getElementById('nutr-start').value=nutrStartDate; renderNutrition(); document.querySelectorAll('.period-tab').forEach(t=>t.classList.remove('active')); if(el)el.classList.add('active'); return; }
     nutrStartDate = ref.toISOString().slice(0,10);
-    document.getElementById('nutr-start').value = toDisplay(nutrStartDate);
+    document.getElementById('nutr-start').value=nutrStartDate;
   }
   document.querySelectorAll('.period-tab').forEach(t => t.classList.remove('active'));
   if (el) el.classList.add('active');
@@ -942,8 +942,8 @@ async function pushReviewToGithub(review) {
 }
 
 async function generateReview() {
-  const start = parseDate(document.getElementById('review-start').value);
-  const end = parseDate(document.getElementById('review-end').value);
+  const start = document.getElementById('review-start').value;
+  const end = document.getElementById('review-end').value;
   if (!start || !end) { alert('Enter dates in DD/MM/YYYY format'); return; }
 
   const btn = document.getElementById('review-btn');
@@ -1118,7 +1118,7 @@ function renderNutrition() {
   const carbPct = pctOf(carb, TARGETS.carbs);
   const fatPct = pctOf(fat, TARGETS.fat);
 
-  const periodLabel = isToday ? 'Latest: ' + fmtDate(d.date) : hrows.length + ' days · ' + rows[rows.length-1].date + ' to ' + rows[0].date;
+  const periodLabel = isToday ? 'Data for: ' + fmtDate(d.date) : hrows.length + ' days · ' + rows[rows.length-1].date + ' to ' + rows[0].date;
 
   // Macro split: protein=4kcal/g, carbs=4kcal/g, fat=9kcal/g
   const proKcal = (pro||0) * 4;
