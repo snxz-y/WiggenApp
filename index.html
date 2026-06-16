@@ -819,12 +819,15 @@ function renderHealth(){
   `;
 
   // Render kcal donut
-  setTimeout(()=>{
+  const _drawDonut=(tries=0)=>{
     const donut=document.getElementById('kcalDonut');
     if(donut&&activeKcal&&bmrKcal){
       destroyChartById('kcalDonut');
       chartInstances['kcalDonut']=new Chart(donut,{type:'doughnut',data:{datasets:[{data:[activeKcal,bmrKcal],backgroundColor:['#c8f53a','#378ADD'],borderWidth:0,hoverOffset:0}]},options:{cutout:'72%',responsive:false,plugins:{legend:{display:false},tooltip:{enabled:false}}}});
-    }
+    } else if(tries<5){setTimeout(()=>_drawDonut(tries+1),100);}
+  };
+  setTimeout(()=>{
+    _drawDonut();
     // Body comp charts
     if(showCharts){
 
