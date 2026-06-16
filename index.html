@@ -859,8 +859,9 @@ function initNutrDates() {
   nutrEndDate = latest;
   nutrStartDate = latest;
   nutrSingleDay = true;
-  document.getElementById('nutr-end').value=latest;
-  document.getElementById('nutr-start').value=latest;
+  const el = document.getElementById('nutr-date');
+  if(el) el.value = latest;
+  try{renderNutrition();}catch(e){console.error('renderNutrition:',e);}
 }
 
 function applyNutrRange() {
@@ -1303,6 +1304,7 @@ Promise.all([
   const lastDate=health.length?[...health].sort((a,b)=>b.date.localeCompare(a.date))[0].date:'—';
   document.getElementById('last-updated').textContent='Health: '+lastDate;
   try{renderActivities();}catch(e){console.error('renderActivities error:',e);}
+  // renderHealth called by initHealthDates
   try{renderHealth();}catch(e){
     console.error('renderHealth error:',e);
     document.getElementById('health-content').innerHTML='<div style="padding:2rem;color:#ff4d4d">Health render error: '+e.message+'</div>';
