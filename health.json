@@ -124,9 +124,9 @@
         "altitudeAcclimationLocalTimestamp": "2026-06-15T23:11:26.0"
       }
     },
-    "enduranceScore": null,
+    "enduranceScore": 5297,
     "enduranceClass": "Intermediate",
-    "fitnessAge": null,
+    "fitnessAge": 25.4,
     "recoveryTimeHrs": null,
     "lactateHR": 184,
     "weight": 76.44,
