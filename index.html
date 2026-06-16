@@ -3,165 +3,283 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Jørgen — Activity Tracker</title>
+<title>Jørgen — Training Hub</title>
 <style>
+:root {
+  --bg: #0a0a0c;
+  --surface: #111115;
+  --surface2: #18181f;
+  --border: #222230;
+  --accent: #c8f53a;
+  --accent2: #7c6dfa;
+  --red: #ff4d4d;
+  --amber: #ffb020;
+  --green: #3af58a;
+  --text: #f0f0f5;
+  --muted: #6b6b80;
+  --muted2: #9090a8;
+}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:13px;background:#f9f9f8;color:#1a1a1a;padding:1.5rem}
-h1{font-size:18px;font-weight:500;margin-bottom:4px}
-.subtitle{font-size:12px;color:#999;margin-bottom:1.5rem}
-.tabs{display:flex;gap:0;border-bottom:1px solid #e0e0dc;margin-bottom:1.5rem}
-.tab{padding:8px 16px;font-size:13px;cursor:pointer;border:none;background:none;color:#666;border-bottom:2px solid transparent;margin-bottom:-1px}
-.tab.active{color:#1a1a1a;border-bottom-color:#1a1a1a;font-weight:500}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;font-size:13px;min-height:100vh}
+
+/* HEADER */
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.5rem}
+.header-inner{max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:56px}
+.logo{font-size:15px;font-weight:600;letter-spacing:-.3px;color:var(--text)}
+.logo span{color:var(--accent)}
+.last-updated{font-size:11px;color:var(--muted)}
+
+/* NAV */
+.nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.5rem;position:sticky;top:0;z-index:100}
+.nav-inner{max-width:1400px;margin:0 auto;display:flex;gap:0}
+.nav-tab{padding:12px 18px;font-size:13px;font-weight:500;cursor:pointer;border:none;background:none;color:var(--muted);border-bottom:2px solid transparent;transition:color .15s;margin-bottom:-1px}
+.nav-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.nav-tab:hover{color:var(--text)}
+
+/* CONTENT */
+.content{max-width:1400px;margin:0 auto;padding:1.5rem}
 .panel{display:none}.panel.active{display:block}
-.tbl-wrap{overflow-x:auto;width:100%;border:1px solid #e0e0dc;border-radius:8px;background:#fff}
+
+/* SUB TABS */
+.subtabs{display:flex;gap:6px;margin-bottom:1.25rem;flex-wrap:wrap}
+.subtab{padding:5px 14px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);border-radius:99px;background:none;color:var(--muted);transition:all .15s}
+.subtab.active{background:var(--accent);color:#000;border-color:var(--accent)}
+.subtab:hover:not(.active){color:var(--text);border-color:var(--muted)}
+
+/* HEALTH PERIOD TABS */
+.period-tabs{display:flex;gap:4px;margin-bottom:1.5rem;flex-wrap:wrap}
+.period-tab{padding:4px 12px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border);border-radius:4px;background:none;color:var(--muted);letter-spacing:.05em;transition:all .15s}
+.period-tab.active{background:var(--accent2);color:#fff;border-color:var(--accent2)}
+.period-tab:hover:not(.active){color:var(--text)}
+
+/* STAT GRID */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:1.5rem}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.stat-label{font-size:10px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+.stat-value{font-size:24px;font-weight:700;letter-spacing:-1px;line-height:1}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:4px}
+.stat-badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;margin-top:6px;letter-spacing:.04em}
+.badge-good{background:rgba(58,245,138,.12);color:var(--green)}
+.badge-warn{background:rgba(255,176,32,.12);color:var(--amber)}
+.badge-bad{background:rgba(255,77,77,.12);color:var(--red)}
+.badge-neutral{background:rgba(124,109,250,.12);color:var(--accent2)}
+
+/* SECTION HEADER */
+.section-head{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;margin-top:1.5rem;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.section-head:first-child{margin-top:0}
+
+/* SLEEP BAR */
+.sleep-bar-wrap{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:1.5rem}
+.sleep-bar-label{font-size:11px;color:var(--muted);margin-bottom:8px;display:flex;justify-content:space-between}
+.sleep-bar{display:flex;height:14px;border-radius:7px;overflow:hidden;gap:2px}
+.sleep-seg{border-radius:3px;transition:width .3s}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:10px}
 table{width:100%;border-collapse:collapse;min-width:500px}
-th{text-align:left;font-weight:500;font-size:11px;color:#888;padding:8px 10px;border-bottom:1px solid #e0e0dc;white-space:nowrap;cursor:pointer;user-select:none;background:#fafaf9}
-th:hover{color:#1a1a1a}
-td{padding:7px 10px;border-bottom:1px solid #f0f0ec;color:#1a1a1a;vertical-align:middle;white-space:nowrap}
+th{text-align:left;font-weight:600;font-size:10px;color:var(--muted);padding:10px 12px;border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;background:var(--surface)}
+th:hover{color:var(--text)}
+td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle;white-space:nowrap;font-size:12px}
 tr:last-child td{border-bottom:none}
-tr:hover td{background:#f5f5f2}
-.badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:99px;font-weight:500}
-.r{background:#dbeafe;color:#1d4ed8}.b{background:#dcfce7;color:#166534}.w{background:#fef3c7;color:#92400e}
-.zbar{display:flex;height:6px;border-radius:3px;overflow:hidden;width:80px}
-.hi{color:#dc2626;font-weight:500}.muted{color:#999}
+tr:hover td{background:var(--surface2)}
+.hi{color:var(--red);font-weight:600}
+.ok{color:var(--green)}
+.warn{color:var(--amber)}
+.muted-cell{color:var(--muted)}
+
+/* BADGES */
+.type-badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;letter-spacing:.05em}
+.tb-run{background:rgba(124,109,250,.15);color:#a89ef8}
+.tb-bike{background:rgba(58,245,138,.1);color:#3af58a}
+.tb-walk{background:rgba(200,245,58,.1);color:#c8f53a}
+
+/* ZONE BAR */
+.zbar{display:flex;height:5px;border-radius:3px;overflow:hidden;width:72px}
+
+/* TREND INDICATOR */
+.trend-up{color:var(--green);font-size:11px}
+.trend-down{color:var(--red);font-size:11px}
+
+/* LOAD BAR */
+.load-bar-wrap{display:flex;flex-direction:column;gap:4px;margin-bottom:1rem}
+.load-row{display:flex;align-items:center;gap:8px;font-size:11px}
+.load-row .lbl{width:100px;color:var(--muted);flex-shrink:0}
+.load-track{flex:1;height:6px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.load-fill{height:100%;border-radius:3px}
+.load-val{width:60px;text-align:right;color:var(--muted2);flex-shrink:0}
+
+/* FILTERS */
 .filters{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;align-items:center}
-.filters select,.filters input{font-size:12px;padding:5px 8px;border:1px solid #ddd;border-radius:6px;background:#fff}
-.legend{display:flex;gap:12px;font-size:11px;color:#666;margin-bottom:8px;flex-wrap:wrap;align-items:center}
-.legend span{display:flex;align-items:center;gap:4px}
-.leg-dot{width:10px;height:6px;border-radius:2px}
-.loading{padding:2rem;text-align:center;color:#999;font-size:14px}
-.error{padding:2rem;text-align:center;color:#dc2626;font-size:13px}
+.filters select,.filters input{font-size:12px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text)}
+.filters select:focus,.filters input:focus{outline:none;border-color:var(--accent2)}
+
+/* LOADING */
+.loading{padding:3rem;text-align:center;color:var(--muted)}
+.dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 1.2s infinite}
+.dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
+@keyframes pulse{0%,80%,100%{opacity:.2}40%{opacity:1}}
 </style>
 </head>
 <body>
-<h1>Jørgen — activity tracker</h1>
-<p class="subtitle">Auto-updated · snxz-y/Workouts-tracked</p>
 
-<div class="tabs">
-  <button class="tab active" onclick="showTab('runs',this)">Runs</button>
-  <button class="tab" onclick="showTab('bikes',this)">Bikes</button>
-  <button class="tab" onclick="showTab('walks',this)">Walks</button>
-  <button class="tab" onclick="showTab('all',this)">All activities</button>
-</div>
-
-<div id="panel-runs" class="panel active">
-  <div class="legend">
-    <span><span class="leg-dot" style="background:#86efac"></span>Z1</span>
-    <span><span class="leg-dot" style="background:#60a5fa"></span>Z2</span>
-    <span><span class="leg-dot" style="background:#fcd34d"></span>Z3</span>
-    <span><span class="leg-dot" style="background:#f87171"></span>Z4</span>
-    <span><span class="leg-dot" style="background:#991b1b"></span>Z5</span>
-    <span style="margin-left:8px;color:#dc2626;font-size:11px">Red = HR &gt;175 avg / &gt;185 max</span>
+<div class="header">
+  <div class="header-inner">
+    <div class="logo">Jørgen <span>/ Training Hub</span></div>
+    <div class="last-updated" id="last-updated">Loading...</div>
   </div>
-  <div class="tbl-wrap"><div class="loading" id="loading-runs">Loading...</div><table id="tbl-runs" style="display:none">
-    <thead><tr>
-      <th onclick="sort('runs','date')">Date ↕</th>
-      <th onclick="sort('runs','distanceM')">Distance</th>
-      <th onclick="sort('runs','pace')">Pace</th>
-      <th onclick="sort('runs','avgHR')">Avg HR</th>
-      <th onclick="sort('runs','maxHR')">Max HR</th>
-      <th onclick="sort('runs','elevGain')">Elev ↑</th>
-      <th onclick="sort('runs','elevLoss')">Elev ↓</th>
-      <th onclick="sort('runs','cadence')">Cadence</th>
-      <th onclick="sort('runs','strideLen')">Stride</th>
-      <th onclick="sort('runs','gct')">GCT</th>
-      <th onclick="sort('runs','vo')">Vert osc</th>
-      <th onclick="sort('runs','vertRatio')">Vert ratio</th>
-      <th onclick="sort('runs','avgPower')">Avg W</th>
-      <th onclick="sort('runs','normPower')">NP</th>
-      <th onclick="sort('runs','avgResp')">Resp</th>
-      <th onclick="sort('runs','fastest1k')">Best 1km</th>
-      <th onclick="sort('runs','fastest5k')">Best 5km</th>
-      <th onclick="sort('runs','vo2max')">VO₂max</th>
-      <th onclick="sort('runs','load')">Load</th>
-      <th onclick="sort('runs','bodyBatDrain')">BB drain</th>
-      <th onclick="sort('runs','calories')">kcal</th>
-      <th>HR zones</th>
-      <th onclick="sort('runs','label')">Effect</th>
-    </tr></thead>
-    <tbody id="tbody-runs"></tbody>
-  </table></div>
 </div>
 
-<div id="panel-bikes" class="panel">
-  <div class="tbl-wrap"><div class="loading" id="loading-bikes">Loading...</div><table id="tbl-bikes" style="display:none">
-    <thead><tr>
-      <th onclick="sort('bikes','date')">Date ↕</th>
-      <th onclick="sort('bikes','distanceM')">Distance</th>
-      <th onclick="sort('bikes','speed')">Avg speed</th>
-      <th onclick="sort('bikes','avgHR')">Avg HR</th>
-      <th onclick="sort('bikes','maxHR')">Max HR</th>
-      <th onclick="sort('bikes','elevGain')">Elev ↑</th>
-      <th onclick="sort('bikes','elevLoss')">Elev ↓</th>
-      <th onclick="sort('bikes','durationSec')">Duration</th>
-      <th onclick="sort('bikes','load')">Load</th>
-      <th onclick="sort('bikes','bodyBatDrain')">BB drain</th>
-      <th onclick="sort('bikes','calories')">kcal</th>
-      <th>HR zones</th>
-      <th onclick="sort('bikes','label')">Effect</th>
-    </tr></thead>
-    <tbody id="tbody-bikes"></tbody>
-  </table></div>
-</div>
-
-<div id="panel-walks" class="panel">
-  <div class="tbl-wrap"><div class="loading" id="loading-walks">Loading...</div><table id="tbl-walks" style="display:none">
-    <thead><tr>
-      <th onclick="sort('walks','date')">Date ↕</th>
-      <th onclick="sort('walks','distanceM')">Distance</th>
-      <th onclick="sort('walks','pace')">Pace</th>
-      <th onclick="sort('walks','avgHR')">Avg HR</th>
-      <th onclick="sort('walks','maxHR')">Max HR</th>
-      <th onclick="sort('walks','elevGain')">Elev ↑</th>
-      <th onclick="sort('walks','elevLoss')">Elev ↓</th>
-      <th onclick="sort('walks','durationSec')">Duration</th>
-      <th onclick="sort('walks','steps')">Steps</th>
-      <th onclick="sort('walks','strideLen')">Stride</th>
-      <th onclick="sort('walks','load')">Load</th>
-      <th onclick="sort('walks','bodyBatDrain')">BB drain</th>
-      <th onclick="sort('walks','calories')">kcal</th>
-      <th>HR zones</th>
-      <th onclick="sort('walks','label')">Effect</th>
-    </tr></thead>
-    <tbody id="tbody-walks"></tbody>
-  </table></div>
-</div>
-
-<div id="panel-all" class="panel">
-  <div class="filters">
-    <select id="filter-type" onchange="renderAll()">
-      <option value="">All types</option>
-      <option value="running">Runs</option>
-      <option value="cycling">Bikes</option>
-      <option value="walking">Walks</option>
-    </select>
-    <input type="text" id="filter-search" placeholder="Search name..." oninput="renderAll()" style="width:160px">
+<div class="nav">
+  <div class="nav-inner">
+    <button class="nav-tab active" onclick="showNav('activities',this)">Activities</button>
+    <button class="nav-tab" onclick="showNav('health',this)">Health</button>
   </div>
-  <div class="tbl-wrap"><div class="loading" id="loading-all">Loading...</div><table id="tbl-all" style="display:none">
-    <thead><tr>
-      <th>Date</th><th>Type</th><th>Name</th><th>Dist</th><th>Duration</th><th>Pace / Speed</th>
-      <th>Avg HR</th><th>Max HR</th><th>Elev ↑</th><th>Load</th><th>VO₂max</th><th>kcal</th><th>BB drain</th><th>Effect</th>
-    </tr></thead>
-    <tbody id="tbody-all"></tbody>
-  </table></div>
+</div>
+
+<div class="content">
+
+  <!-- ACTIVITIES PANEL -->
+  <div id="nav-activities" class="panel active">
+    <div class="subtabs">
+      <button class="subtab active" onclick="showSub('runs',this)">Runs</button>
+      <button class="subtab" onclick="showSub('bikes',this)">Bikes</button>
+      <button class="subtab" onclick="showSub('walks',this)">Walks</button>
+      <button class="subtab" onclick="showSub('all',this)">All</button>
+    </div>
+
+    <div id="sub-runs" class="subpanel">
+      <div class="tbl-wrap"><table>
+        <thead><tr>
+          <th onclick="sort('runs','date')">Date</th>
+          <th onclick="sort('runs','distanceM')">Dist</th>
+          <th onclick="sort('runs','pace')">Pace</th>
+          <th onclick="sort('runs','avgHR')">Avg HR</th>
+          <th onclick="sort('runs','maxHR')">Max HR</th>
+          <th onclick="sort('runs','elevGain')">Elev ↑</th>
+          <th onclick="sort('runs','elevLoss')">Elev ↓</th>
+          <th onclick="sort('runs','cadence')">Cadence</th>
+          <th onclick="sort('runs','strideLen')">Stride</th>
+          <th onclick="sort('runs','gct')">GCT</th>
+          <th onclick="sort('runs','avgPower')">Avg W</th>
+          <th onclick="sort('runs','normPower')">NP</th>
+          <th onclick="sort('runs','fastest1k')">Best 1km</th>
+          <th onclick="sort('runs','fastest5k')">Best 5km</th>
+          <th onclick="sort('runs','vo2max')">VO₂max</th>
+          <th onclick="sort('runs','load')">Load</th>
+          <th onclick="sort('runs','bodyBatDrain')">BB ↓</th>
+          <th onclick="sort('runs','calories')">kcal</th>
+          <th>Zones</th>
+          <th onclick="sort('runs','label')">Effect</th>
+        </tr></thead>
+        <tbody id="tbody-runs"></tbody>
+      </table></div>
+    </div>
+
+    <div id="sub-bikes" class="subpanel" style="display:none">
+      <div class="tbl-wrap"><table>
+        <thead><tr>
+          <th onclick="sort('bikes','date')">Date</th>
+          <th onclick="sort('bikes','distanceM')">Dist</th>
+          <th onclick="sort('bikes','speed')">Speed</th>
+          <th onclick="sort('bikes','avgHR')">Avg HR</th>
+          <th onclick="sort('bikes','maxHR')">Max HR</th>
+          <th onclick="sort('bikes','elevGain')">Elev ↑</th>
+          <th onclick="sort('bikes','elevLoss')">Elev ↓</th>
+          <th onclick="sort('bikes','durationSec')">Duration</th>
+          <th onclick="sort('bikes','load')">Load</th>
+          <th onclick="sort('bikes','bodyBatDrain')">BB ↓</th>
+          <th onclick="sort('bikes','calories')">kcal</th>
+          <th>Zones</th>
+          <th onclick="sort('bikes','label')">Effect</th>
+        </tr></thead>
+        <tbody id="tbody-bikes"></tbody>
+      </table></div>
+    </div>
+
+    <div id="sub-walks" class="subpanel" style="display:none">
+      <div class="tbl-wrap"><table>
+        <thead><tr>
+          <th onclick="sort('walks','date')">Date</th>
+          <th onclick="sort('walks','distanceM')">Dist</th>
+          <th onclick="sort('walks','pace')">Pace</th>
+          <th onclick="sort('walks','avgHR')">Avg HR</th>
+          <th onclick="sort('walks','maxHR')">Max HR</th>
+          <th onclick="sort('walks','elevGain')">Elev ↑</th>
+          <th onclick="sort('walks','elevLoss')">Elev ↓</th>
+          <th onclick="sort('walks','durationSec')">Duration</th>
+          <th onclick="sort('walks','steps')">Steps</th>
+          <th onclick="sort('walks','strideLen')">Stride</th>
+          <th onclick="sort('walks','load')">Load</th>
+          <th onclick="sort('walks','bodyBatDrain')">BB ↓</th>
+          <th onclick="sort('walks','calories')">kcal</th>
+          <th>Zones</th>
+          <th onclick="sort('walks','label')">Effect</th>
+        </tr></thead>
+        <tbody id="tbody-walks"></tbody>
+      </table></div>
+    </div>
+
+    <div id="sub-all" class="subpanel" style="display:none">
+      <div class="filters">
+        <select id="filter-type" onchange="renderAll()">
+          <option value="">All types</option>
+          <option value="running">Runs</option>
+          <option value="cycling">Bikes</option>
+          <option value="walking">Walks</option>
+        </select>
+        <input id="filter-search" type="text" placeholder="Search..." oninput="renderAll()" style="width:140px">
+      </div>
+      <div class="tbl-wrap"><table>
+        <thead><tr>
+          <th>Date</th><th>Type</th><th>Name</th><th>Dist</th><th>Duration</th>
+          <th>Pace/Speed</th><th>Avg HR</th><th>Max HR</th><th>Elev ↑</th>
+          <th>Load</th><th>VO₂max</th><th>kcal</th><th>BB ↓</th><th>Effect</th>
+        </tr></thead>
+        <tbody id="tbody-all"></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- HEALTH PANEL -->
+  <div id="nav-health" class="panel">
+    <div class="period-tabs">
+      <button class="period-tab active" onclick="setPeriod('today',this)">Today</button>
+      <button class="period-tab" onclick="setPeriod('7d',this)">7D</button>
+      <button class="period-tab" onclick="setPeriod('14d',this)">14D</button>
+      <button class="period-tab" onclick="setPeriod('4w',this)">4W</button>
+      <button class="period-tab" onclick="setPeriod('3m',this)">3M</button>
+      <button class="period-tab" onclick="setPeriod('6m',this)">6M</button>
+      <button class="period-tab" onclick="setPeriod('12m',this)">12M</button>
+      <button class="period-tab" onclick="setPeriod('all',this)">All</button>
+    </div>
+    <div id="health-content"></div>
+  </div>
+
 </div>
 
 <script>
-const DATA_URL = 'https://raw.githubusercontent.com/snxz-y/Workouts-tracked/main/activities.json';
-let data = [];
-const ss = {runs:{col:'date',asc:false},bikes:{col:'date',asc:false},walks:{col:'date',asc:false}};
+const ACT_URL    = 'https://raw.githubusercontent.com/snxz-y/Workouts-tracked/main/activities.json';
+const HEALTH_URL = 'https://raw.githubusercontent.com/snxz-y/Workouts-tracked/main/health.json';
+let activities=[], healthData=[], currentPeriod='today';
+const ss={runs:{col:'date',asc:false},bikes:{col:'date',asc:false},walks:{col:'date',asc:false}};
 
-const fmt = s => { const m=Math.floor(s/60),sc=Math.round(s%60); return m+':'+(sc<10?'0':'')+sc; };
-const fmtD = m => (m/1000).toFixed(2)+'km';
-const fmtSpd = mps => (mps*3.6).toFixed(1)+'km/h';
-const pace = (d,s) => fmt(s/(d/1000))+'/km';
-const n = (v,dec=0,suf='') => v==null?'—':(dec?v.toFixed(dec):Math.round(v))+suf;
-const hrCls = hr => hr>175?'hi':'';
-const zbar = a => {
-  const t=a.z1+a.z2+a.z3+a.z4+a.z5;
+const fmt=s=>{const m=Math.floor(s/60),sc=Math.round(s%60);return m+':'+(sc<10?'0':'')+sc};
+const fmtD=m=>(m/1000).toFixed(2)+'km';
+const fmtSpd=mps=>((mps*3.6).toFixed(1))+'km/h';
+const pace=(d,s)=>fmt(s/(d/1000))+'/km';
+const n=(v,dec=0,suf='')=>v==null?'—':(dec?parseFloat(v).toFixed(dec):Math.round(v))+suf;
+const hrCls=hr=>hr>175?'hi':hr>160?'warn':'';
+const zbar=a=>{
+  const t=(a.z1||0)+(a.z2||0)+(a.z3||0)+(a.z4||0)+(a.z5||0);
   if(!t)return'—';
-  const p=v=>Math.round(v/t*100);
-  return`<div class="zbar"><div style="width:${p(a.z1)}%;background:#86efac"></div><div style="width:${p(a.z2)}%;background:#60a5fa"></div><div style="width:${p(a.z3)}%;background:#fcd34d"></div><div style="width:${p(a.z4)}%;background:#f87171"></div><div style="width:${p(a.z5)}%;background:#991b1b"></div></div>`;
+  const p=v=>Math.round((v||0)/t*100);
+  return`<div class="zbar"><div style="width:${p(a.z1)}%;background:#3af58a"></div><div style="width:${p(a.z2)}%;background:#60a5fa"></div><div style="width:${p(a.z3)}%;background:#fcd34d"></div><div style="width:${p(a.z4)}%;background:#f87171"></div><div style="width:${p(a.z5)}%;background:#991b1b"></div></div>`;
+};
+const effectColor=l=>{
+  if(!l)return'muted-cell';
+  if(l.includes('Lactate')||l.includes('Tempo'))return'ok';
+  if(l.includes('Recovery'))return'muted-cell';
+  return'';
 };
 
 function getSorted(arr,tab){
@@ -174,100 +292,404 @@ function getSorted(arr,tab){
     return asc?av-bv:bv-av;
   });
 }
-
 function sort(tab,col){
   if(ss[tab].col===col)ss[tab].asc=!ss[tab].asc;else{ss[tab].col=col;ss[tab].asc=false;}
-  render();
-}
-
-function showLoaded(tab){
-  const l=document.getElementById('loading-'+tab);
-  const t=document.getElementById('tbl-'+tab);
-  if(l)l.style.display='none';
-  if(t)t.style.display='';
+  renderActivities();
 }
 
 function renderRuns(){
-  const rows=getSorted(data.filter(a=>a.type==='running'),'runs');
+  const rows=getSorted(activities.filter(a=>a.type==='running'),'runs');
   document.getElementById('tbody-runs').innerHTML=rows.map(r=>`<tr>
-    <td>${r.date}</td><td>${fmtD(r.distanceM)}</td><td>${pace(r.distanceM,r.durationSec)}</td>
-    <td class="${hrCls(r.avgHR)}">${r.avgHR}</td><td class="${hrCls(r.maxHR)}">${r.maxHR}</td>
-    <td>${n(r.elevGain)}m</td><td>${n(r.elevLoss)}m</td>
-    <td>${n(r.cadence)} spm</td><td>${n(r.strideLen,1)}cm</td><td>${n(r.gct)}ms</td>
-    <td>${n(r.vo,2)}cm</td><td>${n(r.vertRatio,2)}%</td>
-    <td>${n(r.avgPower)}W</td><td>${n(r.normPower)}W</td>
-    <td>${r.avgResp?n(r.avgResp,1)+' brpm':'—'}</td>
-    <td>${r.fastest1k?fmt(r.fastest1k):'—'}</td><td>${r.fastest5k?fmt(r.fastest5k):'—'}</td>
-    <td>${n(r.vo2max)}</td><td>${n(r.load,1)}</td><td>-${n(r.bodyBatDrain)}</td><td>${n(r.calories)}</td>
-    <td>${zbar(r)}</td><td class="muted">${r.label||'—'}</td>
+    <td>${r.date}</td>
+    <td>${fmtD(r.distanceM)}</td>
+    <td style="font-weight:600">${pace(r.distanceM,r.durationSec)}</td>
+    <td class="${hrCls(r.avgHR)}">${r.avgHR}</td>
+    <td class="${hrCls(r.maxHR)}">${r.maxHR}</td>
+    <td>${n(r.elevGain)}m</td>
+    <td class="muted-cell">${n(r.elevLoss)}m</td>
+    <td>${n(r.cadence)} spm</td>
+    <td>${n(r.strideLen,1)}cm</td>
+    <td>${n(r.gct)}ms</td>
+    <td>${n(r.avgPower)}W</td>
+    <td>${n(r.normPower)}W</td>
+    <td>${r.fastest1k?fmt(r.fastest1k):'—'}</td>
+    <td>${r.fastest5k?fmt(r.fastest5k):'—'}</td>
+    <td class="${r.vo2max>=47?'ok':''}">${n(r.vo2max)}</td>
+    <td>${n(r.load,1)}</td>
+    <td class="muted-cell">-${n(r.bodyBatDrain)}</td>
+    <td>${n(r.calories)}</td>
+    <td>${zbar(r)}</td>
+    <td class="${effectColor(r.label)} muted-cell" style="font-size:11px">${r.label||'—'}</td>
   </tr>`).join('');
-  showLoaded('runs');
 }
 
 function renderBikes(){
-  const rows=getSorted(data.filter(a=>a.type==='cycling'),'bikes');
+  const rows=getSorted(activities.filter(a=>a.type==='cycling'),'bikes');
   document.getElementById('tbody-bikes').innerHTML=rows.map(b=>`<tr>
-    <td>${b.date}</td><td>${fmtD(b.distanceM)}</td><td>${fmtSpd(b.distanceM/b.durationSec)}</td>
-    <td class="${hrCls(b.avgHR)}">${b.avgHR}</td><td class="${hrCls(b.maxHR)}">${b.maxHR}</td>
-    <td>${n(b.elevGain)}m</td><td>${n(b.elevLoss)}m</td><td>${fmt(b.durationSec)}</td>
-    <td>${n(b.load,1)}</td><td>-${n(b.bodyBatDrain)}</td><td>${n(b.calories)}</td>
-    <td>${zbar(b)}</td><td class="muted">${b.label||'—'}</td>
+    <td>${b.date}</td>
+    <td>${fmtD(b.distanceM)}</td>
+    <td style="font-weight:600">${fmtSpd(b.distanceM/b.durationSec)}</td>
+    <td class="${hrCls(b.avgHR)}">${b.avgHR}</td>
+    <td class="${hrCls(b.maxHR)}">${b.maxHR}</td>
+    <td>${n(b.elevGain)}m</td>
+    <td class="muted-cell">${n(b.elevLoss)}m</td>
+    <td>${fmt(b.durationSec)}</td>
+    <td>${n(b.load,1)}</td>
+    <td class="muted-cell">-${n(b.bodyBatDrain)}</td>
+    <td>${n(b.calories)}</td>
+    <td>${zbar(b)}</td>
+    <td class="muted-cell" style="font-size:11px">${b.label||'—'}</td>
   </tr>`).join('');
-  showLoaded('bikes');
 }
 
 function renderWalks(){
-  const rows=getSorted(data.filter(a=>a.type==='walking'),'walks');
+  const rows=getSorted(activities.filter(a=>a.type==='walking'),'walks');
   document.getElementById('tbody-walks').innerHTML=rows.map(w=>`<tr>
-    <td>${w.date}</td><td>${fmtD(w.distanceM)}</td><td>${pace(w.distanceM,w.durationSec)}</td>
-    <td>${w.avgHR}</td><td>${w.maxHR}</td>
-    <td>${n(w.elevGain)}m</td><td>${n(w.elevLoss)}m</td><td>${fmt(w.durationSec)}</td>
-    <td>${n(w.steps)}</td><td>${n(w.strideLen,1)}cm</td>
-    <td>${n(w.load,1)}</td><td>-${n(w.bodyBatDrain)}</td><td>${n(w.calories)}</td>
-    <td>${zbar(w)}</td><td class="muted">${w.label||'—'}</td>
+    <td>${w.date}</td>
+    <td>${fmtD(w.distanceM)}</td>
+    <td>${pace(w.distanceM,w.durationSec)}</td>
+    <td>${w.avgHR}</td>
+    <td>${w.maxHR}</td>
+    <td>${n(w.elevGain)}m</td>
+    <td class="muted-cell">${n(w.elevLoss)}m</td>
+    <td>${fmt(w.durationSec)}</td>
+    <td>${n(w.steps)}</td>
+    <td>${n(w.strideLen,1)}cm</td>
+    <td>${n(w.load,1)}</td>
+    <td class="muted-cell">-${n(w.bodyBatDrain)}</td>
+    <td>${n(w.calories)}</td>
+    <td>${zbar(w)}</td>
+    <td class="muted-cell" style="font-size:11px">${w.label||'—'}</td>
   </tr>`).join('');
-  showLoaded('walks');
 }
 
 function renderAll(){
   const tf=document.getElementById('filter-type')?.value||'';
   const s=(document.getElementById('filter-search')?.value||'').toLowerCase();
-  const rows=data.filter(a=>{
+  const rows=activities.filter(a=>{
     if(tf&&a.type!==tf)return false;
     if(s&&!a.name.toLowerCase().includes(s))return false;
     return true;
   }).sort((a,b)=>b.date.localeCompare(a.date));
-  const badge=t=>t==='running'?'<span class="badge r">Run</span>':t==='cycling'?'<span class="badge b">Bike</span>':'<span class="badge w">Walk</span>';
+  const tbadge=t=>t==='running'?'<span class="type-badge tb-run">RUN</span>':t==='cycling'?'<span class="type-badge tb-bike">BIKE</span>':'<span class="type-badge tb-walk">WALK</span>';
   document.getElementById('tbody-all').innerHTML=rows.map(a=>`<tr>
-    <td>${a.date}</td><td>${badge(a.type)}</td>
-    <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis">${a.name}</td>
-    <td>${fmtD(a.distanceM)}</td><td>${fmt(a.durationSec)}</td>
-    <td>${a.type==='cycling'?fmtSpd(a.distanceM/a.durationSec):pace(a.distanceM,a.durationSec)}</td>
-    <td class="${hrCls(a.avgHR)}">${a.avgHR}</td><td class="${hrCls(a.maxHR)}">${a.maxHR}</td>
-    <td>${n(a.elevGain)}m</td><td>${n(a.load,1)}</td><td>${a.vo2max||'—'}</td>
-    <td>${n(a.calories)}</td><td>-${n(a.bodyBatDrain)}</td><td class="muted">${a.label||'—'}</td>
+    <td>${a.date}</td>
+    <td>${tbadge(a.type)}</td>
+    <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis">${a.name}</td>
+    <td>${fmtD(a.distanceM)}</td>
+    <td>${fmt(a.durationSec)}</td>
+    <td style="font-weight:600">${a.type==='cycling'?fmtSpd(a.distanceM/a.durationSec):pace(a.distanceM,a.durationSec)}</td>
+    <td class="${hrCls(a.avgHR)}">${a.avgHR}</td>
+    <td class="${hrCls(a.maxHR)}">${a.maxHR}</td>
+    <td>${n(a.elevGain)}m</td>
+    <td>${n(a.load,1)}</td>
+    <td class="${a.vo2max>=47?'ok':''}">${a.vo2max||'—'}</td>
+    <td>${n(a.calories)}</td>
+    <td class="muted-cell">-${n(a.bodyBatDrain)}</td>
+    <td class="muted-cell" style="font-size:11px">${a.label||'—'}</td>
   </tr>`).join('');
-  showLoaded('all');
 }
 
-function render(){renderRuns();renderBikes();renderWalks();renderAll();}
+function renderActivities(){renderRuns();renderBikes();renderWalks();renderAll();}
 
-function showTab(id,el){
+// ── HEALTH ──────────────────────────────────────────────────────────────────
+
+function getFilteredHealth(){
+  if(!healthData.length)return[];
+  const sorted=[...healthData].sort((a,b)=>b.date.localeCompare(a.date));
+  const latest=sorted[0].date;
+  const cutoff=d=>{
+    const ref=new Date(latest);
+    if(d==='today')return latest;
+    if(d==='7d'){ref.setDate(ref.getDate()-7);}
+    else if(d==='14d'){ref.setDate(ref.getDate()-14);}
+    else if(d==='4w'){ref.setDate(ref.getDate()-28);}
+    else if(d==='3m'){ref.setMonth(ref.getMonth()-3);}
+    else if(d==='6m'){ref.setMonth(ref.getMonth()-6);}
+    else if(d==='12m'){ref.setFullYear(ref.getFullYear()-1);}
+    else return null;
+    return ref.toISOString().slice(0,10);
+  };
+  const c=cutoff(currentPeriod);
+  if(!c)return sorted;
+  if(currentPeriod==='today')return sorted.filter(h=>h.date===c);
+  return sorted.filter(h=>h.date>=c);
+}
+
+function avg(arr,key){
+  const vals=arr.map(d=>d[key]).filter(v=>v!=null);
+  return vals.length?Math.round(vals.reduce((a,b)=>a+b,0)/vals.length):null;
+}
+function latest(arr,key){
+  for(const d of arr){if(d[key]!=null)return d[key];}
+  return null;
+}
+
+function statusBadge(val,good,warn,invert=false){
+  if(val==null)return'';
+  const isGood=invert?(val<=good):(val>=good);
+  const isWarn=invert?(val<=warn):(val>=warn);
+  if(isGood)return'badge-good';
+  if(isWarn)return'badge-warn';
+  return'badge-bad';
+}
+
+function renderHealth(){
+  const rows=getFilteredHealth();
+  if(!rows.length){
+    document.getElementById('health-content').innerHTML='<div class="loading" style="color:var(--muted)">No health data for this period yet.</div>';
+    return;
+  }
+  const isToday=currentPeriod==='today';
+  const d=rows[0];
+
+  // Compute averages for multi-day periods
+  const A=(k,dec=0)=>{
+    if(isToday)return n(d[k],dec);
+    const v=avg(rows,k);
+    return v!=null?n(v,dec):'—';
+  };
+  const L=(k,dec=0)=>{
+    const v=latest(rows,k);
+    return v!=null?n(v,dec):'—';
+  };
+
+  const sleepH=isToday&&d.sleepSec?`${Math.floor(d.sleepSec/3600)}h ${Math.round((d.sleepSec%3600)/60)}m`:'—';
+  const deepPct=isToday&&d.sleepSec?Math.round(d.deepSec/d.sleepSec*100):null;
+  const remPct=isToday&&d.sleepSec?Math.round(d.remSec/d.sleepSec*100):null;
+  const lightPct=isToday&&d.sleepSec?Math.round(d.lightSec/d.sleepSec*100):null;
+
+  const readinessColor=v=>v>=70?'badge-good':v>=40?'badge-warn':'badge-bad';
+  const stressColor=v=>v<=25?'badge-good':v<=50?'badge-warn':'badge-bad';
+  const hrvColor=s=>s==='BALANCED'?'badge-good':s==='UNBALANCED'?'badge-warn':'badge-bad';
+
+  const periodLabel=isToday?`Latest: ${d.date}`:`Avg over ${rows.length} day${rows.length>1?'s':''} · ${rows[rows.length-1].date} → ${rows[0].date}`;
+
+  document.getElementById('health-content').innerHTML=`
+    <div style="font-size:11px;color:var(--muted);margin-bottom:1.25rem">${periodLabel}</div>
+
+    <div class="section-head">Recovery & Readiness</div>
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-label">Training Readiness</div>
+        <div class="stat-value" style="color:${isToday&&d.trainingReadiness>=70?'var(--green)':isToday&&d.trainingReadiness>=40?'var(--amber)':'var(--red)'}">${isToday?n(d.trainingReadiness):A('trainingReadiness')}</div>
+        <div class="stat-sub">${isToday&&d.trainingReadinessLevel?d.trainingReadinessLevel.replace('_',' '):'—'}</div>
+        ${isToday&&d.trainingReadinessFeedback?`<div class="stat-badge ${readinessColor(d.trainingReadiness)}">${d.trainingReadinessFeedback.replace(/_/g,' ')}</div>`:''}
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">HRV Last Night</div>
+        <div class="stat-value" style="color:var(--accent2)">${isToday?n(d.hrvAvg):A('hrvAvg')}</div>
+        <div class="stat-sub">Weekly avg: ${isToday?n(d.hrvWeeklyAvg):A('hrvWeeklyAvg')}</div>
+        ${isToday&&d.hrvStatus?`<div class="stat-badge ${hrvColor(d.hrvStatus)}">${d.hrvStatus}</div>`:''}
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Body Battery</div>
+        <div class="stat-value" style="color:var(--accent)">${isToday?n(d.bbWake):A('bbWake')}<span style="font-size:14px;color:var(--muted)"> wake</span></div>
+        <div class="stat-sub">High ${isToday?n(d.bbHigh):A('bbHigh')} · Low ${isToday?n(d.bbLow):A('bbLow')}</div>
+        <div class="stat-sub" style="margin-top:2px">+${isToday?n(d.bbCharged):A('bbCharged')} charged · -${isToday?n(d.bbDrained):A('bbDrained')} drained</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Recovery Time</div>
+        <div class="stat-value">${isToday?n(d.recoveryTimeHrs):A('recoveryTimeHrs')}<span style="font-size:14px;color:var(--muted)">h</span></div>
+        <div class="stat-sub">Until next hard effort</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Avg Stress</div>
+        <div class="stat-value" style="color:${isToday&&d.avgStress<=25?'var(--green)':isToday&&d.avgStress<=50?'var(--amber)':'var(--red)'}">${isToday?n(d.avgStress):A('avgStress')}</div>
+        <div class="stat-sub">Max: ${isToday?n(d.maxStress):A('maxStress')}</div>
+        ${isToday&&d.avgStress?`<div class="stat-badge ${stressColor(d.avgStress)}">${d.avgStress<=25?'LOW':d.avgStress<=50?'MODERATE':'HIGH'}</div>`:''}
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Resting HR</div>
+        <div class="stat-value" style="color:var(--accent2)">${isToday?n(d.rhr):A('rhr')}<span style="font-size:14px;color:var(--muted)"> bpm</span></div>
+        <div class="stat-sub">Min: ${isToday?n(d.minHR):A('minHR')} bpm</div>
+      </div>
+    </div>
+
+    ${isToday&&d.sleepSec?`
+    <div class="section-head">Sleep</div>
+    <div class="sleep-bar-wrap">
+      <div class="sleep-bar-label">
+        <span>Sleep breakdown · ${sleepH} total</span>
+        <span>Score <strong style="color:${d.sleepScore>=80?'var(--green)':d.sleepScore>=60?'var(--amber)':'var(--red)'}">${d.sleepScore}</strong></span>
+      </div>
+      <div class="sleep-bar">
+        <div class="sleep-seg" style="width:${deepPct}%;background:#7c6dfa" title="Deep ${deepPct}%"></div>
+        <div class="sleep-seg" style="width:${remPct}%;background:#3af58a" title="REM ${remPct}%"></div>
+        <div class="sleep-seg" style="width:${lightPct}%;background:#60a5fa" title="Light ${lightPct}%"></div>
+      </div>
+      <div class="sleep-bar-label" style="margin-top:8px">
+        <span style="color:#7c6dfa">■ Deep ${deepPct}%</span>
+        <span style="color:#3af58a">■ REM ${remPct}%</span>
+        <span style="color:#60a5fa">■ Light ${lightPct}%</span>
+        <span style="color:var(--muted)">SpO₂ avg ${n(d.avgSpO2)}% · Resp ${n(d.avgResp)} brpm</span>
+      </div>
+    </div>` : `
+    <div class="section-head">Sleep</div>
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-label">Sleep Score (avg)</div>
+        <div class="stat-value">${A('sleepScore')}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Sleep Duration (avg)</div>
+        <div class="stat-value" style="font-size:18px">${(()=>{const v=avg(rows,'sleepSec');return v?`${Math.floor(v/3600)}h ${Math.round((v%3600)/60)}m`:'—'})()}</div>
+      </div>
+    </div>`}
+
+    <div class="section-head">Activity & Load</div>
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-label">Steps</div>
+        <div class="stat-value" style="font-size:20px">${isToday?n(d.steps):A('steps')}</div>
+        <div class="stat-sub">Goal: ~9,590</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Floors</div>
+        <div class="stat-value">${isToday?n(d.floors):A('floors')}</div>
+        <div class="stat-sub">Goal: 10</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Active kcal</div>
+        <div class="stat-value" style="font-size:20px">${isToday?n(d.activeKcal):A('activeKcal')}</div>
+        <div class="stat-sub">Total: ${isToday?n(d.totalKcal):A('totalKcal')}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Intensity Minutes</div>
+        <div class="stat-value">${isToday?n(d.modIntensityMin)+'/'+n(d.vigIntensityMin):A('modIntensityMin')+'/'+A('vigIntensityMin')}</div>
+        <div class="stat-sub">Mod / Vig · Weekly ${isToday?n(d.weeklyIntensityTotal):A('weeklyIntensityTotal')}/${isToday?n(d.weeklyIntensityGoal):A('weeklyIntensityGoal')}</div>
+      </div>
+    </div>
+
+    <div class="section-head">Training Status</div>
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-label">Training Status</div>
+        <div class="stat-value" style="font-size:16px;color:var(--green)">${isToday&&d.trainingStatus?d.trainingStatus:'—'}</div>
+        <div class="stat-sub">Since ${isToday?'Jun 4':'—'}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">VO₂ Max</div>
+        <div class="stat-value" style="color:var(--accent2)">${L('vo2max')}</div>
+        <div class="stat-sub">Precise: ${L('vo2maxPrecise',1)}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Endurance Score</div>
+        <div class="stat-value" style="font-size:20px">${L('enduranceScore')}</div>
+        <div class="stat-sub">${L('enduranceClass')}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Fitness Age</div>
+        <div class="stat-value" style="color:var(--green)">${L('fitnessAge',1)}</div>
+        <div class="stat-sub">Achievable: ${L('achievableFitnessAge',1)}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Acute Load (ACWR)</div>
+        <div class="stat-value" style="font-size:20px;color:${isToday&&d.acwr>1.5?'var(--red)':isToday&&d.acwr>1.2?'var(--amber)':'var(--text)'}">${isToday?n(d.acwr,2):A('acwr',2)}</div>
+        <div class="stat-sub">Acute ${isToday?n(d.acuteLoad):A('acuteLoad')} · Chronic ${isToday?n(d.chronicLoad):A('chronicLoad')}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Lactate Threshold HR</div>
+        <div class="stat-value">${L('lactateHR')}<span style="font-size:14px;color:var(--muted)"> bpm</span></div>
+        <div class="stat-sub">Pace: ${L('lactatePace')}s/km</div>
+      </div>
+    </div>
+
+    <div class="section-head">Training Load Focus</div>
+    <div class="load-bar-wrap" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:1.5rem">
+      ${(()=>{
+        const aL=isToday?d.aerobicLowLoad:avg(rows,'aerobicLowLoad');
+        const aH=isToday?d.aerobicHighLoad:avg(rows,'aerobicHighLoad');
+        const an=isToday?d.anaerobicLoad:avg(rows,'anaerobicLoad');
+        const maxV=600;
+        return`
+        <div class="load-row"><span class="lbl">Aerobic Low</span><div class="load-track"><div class="load-fill" style="width:${Math.min(100,Math.round((aL||0)/maxV*100))}%;background:#60a5fa"></div></div><span class="load-val">${n(aL)} <span style="color:var(--muted)">(130–342)</span></span></div>
+        <div class="load-row" style="margin-top:6px"><span class="lbl">Aerobic High</span><div class="load-track"><div class="load-fill" style="width:${Math.min(100,Math.round((aH||0)/maxV*100))}%;background:#c8f53a"></div></div><span class="load-val">${n(aH)} <span style="color:var(--muted)">(256–467)</span></span></div>
+        <div class="load-row" style="margin-top:6px"><span class="lbl">Anaerobic</span><div class="load-track"><div class="load-fill" style="width:${Math.min(100,Math.round((an||0)/maxV*100))}%;background:#f87171"></div></div><span class="load-val">${n(an)} <span style="color:var(--muted)">(0–211)</span></span></div>
+        <div style="margin-top:10px;font-size:11px;color:var(--amber)">Focus: ${isToday&&d.loadFocus?d.loadFocus.replace(/_/g,' '):'—'}</div>`;
+      })()}
+    </div>
+
+    <div class="section-head">Body Composition</div>
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-label">Weight</div>
+        <div class="stat-value" style="font-size:20px">${L('weight',1)}<span style="font-size:14px;color:var(--muted)">kg</span></div>
+        <div class="stat-sub">Goal: 65kg</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Body Fat</div>
+        <div class="stat-value" style="color:var(--amber)">${L('bodyFat',1)}<span style="font-size:14px;color:var(--muted)">%</span></div>
+        <div class="stat-sub">Goal: &lt;20%</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">SpO₂</div>
+        <div class="stat-value">${isToday?n(d.avgSpO2):A('avgSpO2')}<span style="font-size:14px;color:var(--muted)">%</span></div>
+        <div class="stat-sub">Blood oxygen</div>
+      </div>
+    </div>
+
+    ${rows.length>1?`
+    <div class="section-head">Daily History</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>Date</th><th>Readiness</th><th>Sleep</th><th>HRV</th><th>RHR</th>
+          <th>Stress</th><th>Steps</th><th>BB wake</th><th>VO₂max</th><th>Weight</th>
+        </tr></thead>
+        <tbody>${rows.map(h=>`<tr>
+          <td>${h.date}</td>
+          <td class="${h.trainingReadiness>=70?'ok':h.trainingReadiness>=40?'warn':'hi'}">${n(h.trainingReadiness)}</td>
+          <td class="${h.sleepScore>=80?'ok':h.sleepScore>=60?'warn':'hi'}">${n(h.sleepScore)}</td>
+          <td style="color:var(--accent2)">${n(h.hrvAvg)}</td>
+          <td>${n(h.rhr)}</td>
+          <td class="${h.avgStress<=25?'ok':h.avgStress<=50?'warn':'hi'}">${n(h.avgStress)}</td>
+          <td>${n(h.steps)}</td>
+          <td style="color:var(--accent)">${n(h.bbWake)}</td>
+          <td class="${h.vo2max>=47?'ok':''}">${n(h.vo2max)}</td>
+          <td>${n(h.weight,1)}</td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>`:''}
+  `;
+}
+
+// ── NAV & SUBS ──────────────────────────────────────────────────────────────
+
+function showNav(id,el){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('panel-'+id).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('nav-'+id).classList.add('active');
   el.classList.add('active');
 }
 
-fetch(DATA_URL+'?nocache='+Date.now())
-  .then(r=>{ if(!r.ok)throw new Error(r.status); return r.json(); })
-  .then(d=>{ data=d; render(); })
-  .catch(e=>{
-    ['runs','bikes','walks','all'].forEach(tab=>{
-      const l=document.getElementById('loading-'+tab);
-      if(l)l.innerHTML='<span style="color:#dc2626">Could not load data. Check that activities.json exists in the repo and GitHub Pages is enabled.</span>';
-    });
-  });
+function showSub(id,el){
+  document.querySelectorAll('.subpanel').forEach(p=>p.style.display='none');
+  document.querySelectorAll('.subtab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('sub-'+id).style.display='block';
+  el.classList.add('active');
+}
+
+function setPeriod(p,el){
+  currentPeriod=p;
+  document.querySelectorAll('.period-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderHealth();
+}
+
+// ── FETCH ────────────────────────────────────────────────────────────────────
+
+Promise.all([
+  fetch(ACT_URL+'?nc='+Date.now()).then(r=>r.json()).catch(()=>[]),
+  fetch(HEALTH_URL+'?nc='+Date.now()).then(r=>r.json()).catch(()=>[])
+]).then(([acts,health])=>{
+  activities=acts;
+  healthData=health;
+  const lastDate=health.length?[...health].sort((a,b)=>b.date.localeCompare(a.date))[0].date:'—';
+  document.getElementById('last-updated').textContent='Health updated: '+lastDate;
+  renderActivities();
+  renderHealth();
+});
 </script>
 </body>
 </html>
