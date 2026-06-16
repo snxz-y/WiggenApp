@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Jørgen — Training Hub</title>
+<title>JÃ¸rgen â€” Training Hub</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
 :root{--bg:#0a0a0c;--surface:#111115;--surface2:#18181f;--border:#222230;--accent:#c8f53a;--accent2:#7c6dfa;--red:#ff4d4d;--amber:#ffb020;--green:#3af58a;--text:#f0f0f5;--muted:#6b6b80;--muted2:#9090a8}
@@ -89,8 +89,8 @@ tr:hover td{background:var(--surface2)}
 .load-row:last-child{margin-bottom:0}
 .load-lbl{font-size:11px;color:var(--muted)}
 .load-track{height:8px;background:var(--surface2);border-radius:4px;position:relative}
-.load-fill{height:100%;border-radius:4px;position:absolute;top:0;left:0}
-.load-range{position:absolute;top:0;height:100%;background:rgba(255,255,255,.18);border-left:2px solid rgba(255,255,255,.5);border-right:2px solid rgba(255,255,255,.5)}
+.load-fill{height:100%;border-radius:4px;position:absolute;top:0}
+.load-range{position:absolute;top:0;height:100%;background:rgba(255,255,255,.12);border-left:2px solid rgba(255,255,255,.7);border-right:2px solid rgba(255,255,255,.7)}
 .load-val{font-size:12px;font-weight:600;text-align:right}
 .load-focus-label{font-size:11px;color:var(--amber);margin-top:10px}
 
@@ -102,7 +102,7 @@ tr:hover td{background:var(--surface2)}
 <body>
 <div class="header">
   <div class="header-inner">
-    <div class="logo">Jørgen <span>/ Training Hub</span></div>
+    <div class="logo">JÃ¸rgen <span>/ Training Hub</span></div>
     <div class="last-updated" id="last-updated">Loading...</div>
   </div>
 </div>
@@ -125,11 +125,11 @@ tr:hover td{background:var(--surface2)}
 
     <div id="sub-runs" class="subpanel">
       <div class="zone-legend">
-        <span><span class="zone-dot" style="background:#3af58a"></span>Z1 — Easy / Rest</span>
-        <span><span class="zone-dot" style="background:#60a5fa"></span>Z2 — Aerobic base</span>
-        <span><span class="zone-dot" style="background:#fcd34d"></span>Z3 — Tempo</span>
-        <span><span class="zone-dot" style="background:#f87171"></span>Z4 — Threshold</span>
-        <span><span class="zone-dot" style="background:#991b1b"></span>Z5 — Max</span>
+        <span><span class="zone-dot" style="background:#3af58a"></span>Z1 â€” Easy / Rest</span>
+        <span><span class="zone-dot" style="background:#60a5fa"></span>Z2 â€” Aerobic base</span>
+        <span><span class="zone-dot" style="background:#fcd34d"></span>Z3 â€” Tempo</span>
+        <span><span class="zone-dot" style="background:#f87171"></span>Z4 â€” Threshold</span>
+        <span><span class="zone-dot" style="background:#991b1b"></span>Z5 â€” Max</span>
         <span style="margin-left:6px;color:var(--red)">Red HR = avg &gt;175 or max &gt;185</span>
       </div>
       <div class="tbl-wrap"><table>
@@ -139,8 +139,8 @@ tr:hover td{background:var(--surface2)}
           <th onclick="sort('runs','pace')">Pace</th>
           <th onclick="sort('runs','avgHR')">Avg HR</th>
           <th onclick="sort('runs','maxHR')">Max HR</th>
-          <th onclick="sort('runs','elevGain')">Elev ↑</th>
-          <th onclick="sort('runs','elevLoss')">Elev ↓</th>
+          <th onclick="sort('runs','elevGain')">Elev â†‘</th>
+          <th onclick="sort('runs','elevLoss')">Elev â†“</th>
           <th onclick="sort('runs','cadence')">Cadence</th>
           <th onclick="sort('runs','strideLen')">Stride</th>
           <th onclick="sort('runs','gct')">GCT</th>
@@ -148,9 +148,9 @@ tr:hover td{background:var(--surface2)}
           <th onclick="sort('runs','normPower')">NP</th>
           <th onclick="sort('runs','fastest1k')">Best 1km</th>
           <th onclick="sort('runs','fastest5k')">Best 5km</th>
-          <th onclick="sort('runs','vo2max')">VO₂max</th>
+          <th onclick="sort('runs','vo2max')">VOâ‚‚max</th>
           <th onclick="sort('runs','load')">Load</th>
-          <th onclick="sort('runs','bodyBatDrain')">BB ↓</th>
+          <th onclick="sort('runs','bodyBatDrain')">BB â†“</th>
           <th onclick="sort('runs','calories')">kcal</th>
           <th>Zones</th>
           <th onclick="sort('runs','label')">Effect</th>
@@ -174,11 +174,11 @@ tr:hover td{background:var(--surface2)}
           <th onclick="sort('bikes','speed')">Speed</th>
           <th onclick="sort('bikes','avgHR')">Avg HR</th>
           <th onclick="sort('bikes','maxHR')">Max HR</th>
-          <th onclick="sort('bikes','elevGain')">Elev ↑</th>
-          <th onclick="sort('bikes','elevLoss')">Elev ↓</th>
+          <th onclick="sort('bikes','elevGain')">Elev â†‘</th>
+          <th onclick="sort('bikes','elevLoss')">Elev â†“</th>
           <th onclick="sort('bikes','durationSec')">Duration</th>
           <th onclick="sort('bikes','load')">Load</th>
-          <th onclick="sort('bikes','bodyBatDrain')">BB ↓</th>
+          <th onclick="sort('bikes','bodyBatDrain')">BB â†“</th>
           <th onclick="sort('bikes','calories')">kcal</th>
           <th>Zones</th>
           <th onclick="sort('bikes','label')">Effect</th>
@@ -201,13 +201,13 @@ tr:hover td{background:var(--surface2)}
           <th onclick="sort('walks','pace')">Pace</th>
           <th onclick="sort('walks','avgHR')">Avg HR</th>
           <th onclick="sort('walks','maxHR')">Max HR</th>
-          <th onclick="sort('walks','elevGain')">Elev ↑</th>
-          <th onclick="sort('walks','elevLoss')">Elev ↓</th>
+          <th onclick="sort('walks','elevGain')">Elev â†‘</th>
+          <th onclick="sort('walks','elevLoss')">Elev â†“</th>
           <th onclick="sort('walks','durationSec')">Duration</th>
           <th onclick="sort('walks','steps')">Steps</th>
           <th onclick="sort('walks','strideLen')">Stride</th>
           <th onclick="sort('walks','load')">Load</th>
-          <th onclick="sort('walks','bodyBatDrain')">BB ↓</th>
+          <th onclick="sort('walks','bodyBatDrain')">BB â†“</th>
           <th onclick="sort('walks','calories')">kcal</th>
           <th>Zones</th>
           <th onclick="sort('walks','label')">Effect</th>
@@ -222,7 +222,7 @@ tr:hover td{background:var(--surface2)}
         <input id="filter-search" type="text" placeholder="Search..." oninput="renderAll()" style="width:140px">
       </div>
       <div class="tbl-wrap"><table>
-        <thead><tr><th>Date</th><th>Type</th><th>Name</th><th>Dist</th><th>Duration</th><th>Pace/Speed</th><th>Avg HR</th><th>Max HR</th><th>Elev ↑</th><th>Load</th><th>VO₂max</th><th>kcal</th><th>BB ↓</th><th>Effect</th></tr></thead>
+        <thead><tr><th>Date</th><th>Type</th><th>Name</th><th>Dist</th><th>Duration</th><th>Pace/Speed</th><th>Avg HR</th><th>Max HR</th><th>Elev â†‘</th><th>Load</th><th>VOâ‚‚max</th><th>kcal</th><th>BB â†“</th><th>Effect</th></tr></thead>
         <tbody id="tbody-all"></tbody>
       </table></div>
     </div>
@@ -255,11 +255,11 @@ const fmt=s=>{const m=Math.floor(s/60),sc=Math.round(s%60);return m+':'+(sc<10?'
 const fmtD=m=>(m/1000).toFixed(2)+'km';
 const fmtSpd=mps=>((mps*3.6).toFixed(1))+'km/h';
 const pace=(d,s)=>fmt(s/(d/1000))+'/km';
-const n=(v,dec=0,suf='')=>v==null?'—':(dec?parseFloat(v).toFixed(dec):Math.round(v))+suf;
+const n=(v,dec=0,suf='')=>v==null?'â€”':(dec?parseFloat(v).toFixed(dec):Math.round(v))+suf;
 const hrCls=hr=>hr>175?'hi':hr>160?'warn':'';
 const zbar=a=>{
   const t=(a.z1||0)+(a.z2||0)+(a.z3||0)+(a.z4||0)+(a.z5||0);
-  if(!t)return'—';
+  if(!t)return'â€”';
   const p=v=>Math.round((v||0)/t*100);
   return`<div class="zbar"><div style="width:${p(a.z1)}%;background:#3af58a"></div><div style="width:${p(a.z2)}%;background:#60a5fa"></div><div style="width:${p(a.z3)}%;background:#fcd34d"></div><div style="width:${p(a.z4)}%;background:#f87171"></div><div style="width:${p(a.z5)}%;background:#991b1b"></div></div>`;
 };
@@ -286,10 +286,10 @@ function renderRuns(){
     <td>${n(r.elevGain)}m</td><td class="muted-cell">${n(r.elevLoss)}m</td>
     <td>${n(r.cadence)} spm</td><td>${n(r.strideLen,1)}cm</td><td>${n(r.gct)}ms</td>
     <td>${n(r.avgPower)}W</td><td>${n(r.normPower)}W</td>
-    <td>${r.fastest1k?fmt(r.fastest1k):'—'}</td><td>${r.fastest5k?fmt(r.fastest5k):'—'}</td>
+    <td>${r.fastest1k?fmt(r.fastest1k):'â€”'}</td><td>${r.fastest5k?fmt(r.fastest5k):'â€”'}</td>
     <td class="${r.vo2max>=47?'ok':''}">${n(r.vo2max)}</td>
     <td>${n(r.load,1)}</td><td class="muted-cell">-${n(r.bodyBatDrain)}</td><td>${n(r.calories)}</td>
-    <td>${zbar(r)}</td><td class="muted-cell" style="font-size:11px">${r.label||'—'}</td>
+    <td>${zbar(r)}</td><td class="muted-cell" style="font-size:11px">${r.label||'â€”'}</td>
   </tr>`).join('');
 }
 function renderBikes(){
@@ -299,7 +299,7 @@ function renderBikes(){
     <td class="${hrCls(b.avgHR)}">${b.avgHR}</td><td class="${hrCls(b.maxHR)}">${b.maxHR}</td>
     <td>${n(b.elevGain)}m</td><td class="muted-cell">${n(b.elevLoss)}m</td>
     <td>${fmt(b.durationSec)}</td><td>${n(b.load,1)}</td><td class="muted-cell">-${n(b.bodyBatDrain)}</td><td>${n(b.calories)}</td>
-    <td>${zbar(b)}</td><td class="muted-cell" style="font-size:11px">${b.label||'—'}</td>
+    <td>${zbar(b)}</td><td class="muted-cell" style="font-size:11px">${b.label||'â€”'}</td>
   </tr>`).join('');
 }
 function renderWalks(){
@@ -310,7 +310,7 @@ function renderWalks(){
     <td>${n(w.elevGain)}m</td><td class="muted-cell">${n(w.elevLoss)}m</td>
     <td>${fmt(w.durationSec)}</td><td>${n(w.steps)}</td><td>${n(w.strideLen,1)}cm</td>
     <td>${n(w.load,1)}</td><td class="muted-cell">-${n(w.bodyBatDrain)}</td><td>${n(w.calories)}</td>
-    <td>${zbar(w)}</td><td class="muted-cell" style="font-size:11px">${w.label||'—'}</td>
+    <td>${zbar(w)}</td><td class="muted-cell" style="font-size:11px">${w.label||'â€”'}</td>
   </tr>`).join('');
 }
 function renderAll(){
@@ -325,14 +325,14 @@ function renderAll(){
     <td style="font-weight:600">${a.type==='cycling'?fmtSpd(a.distanceM/a.durationSec):pace(a.distanceM,a.durationSec)}</td>
     <td class="${hrCls(a.avgHR)}">${a.avgHR}</td><td class="${hrCls(a.maxHR)}">${a.maxHR}</td>
     <td>${n(a.elevGain)}m</td><td>${n(a.load,1)}</td>
-    <td class="${a.vo2max>=47?'ok':''}">${a.vo2max||'—'}</td>
+    <td class="${a.vo2max>=47?'ok':''}">${a.vo2max||'â€”'}</td>
     <td>${n(a.calories)}</td><td class="muted-cell">-${n(a.bodyBatDrain)}</td>
-    <td class="muted-cell" style="font-size:11px">${a.label||'—'}</td>
+    <td class="muted-cell" style="font-size:11px">${a.label||'â€”'}</td>
   </tr>`).join('');
 }
 function renderActivities(){renderRuns();renderBikes();renderWalks();renderAll();}
 
-// ── HEALTH ────────────────────────────────────────────────────────────────────
+// â”€â”€ HEALTH â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function getFilteredHealth(){
   if(!healthData.length)return[];
   const sorted=[...healthData].sort((a,b)=>b.date.localeCompare(a.date));
@@ -372,10 +372,10 @@ function renderHealth(){
   if(!hrows.length){document.getElementById('health-content').innerHTML='<div style="padding:3rem;text-align:center;color:var(--muted)">No health data for this period yet.</div>';return;}
   const isToday=currentPeriod==='today';
   const d=hrows[0];
-  const A=(k,dec=0)=>{if(isToday)return n(d[k],dec);const v=avgg(hrows,k);return v!=null?n(v,dec):'—';};
-  const L=(k,dec=0)=>{const v=latestt(hrows,k);return v!=null?n(v,dec):'—';};
+  const A=(k,dec=0)=>{if(isToday)return n(d[k],dec);const v=avgg(hrows,k);return v!=null?n(v,dec):'â€”';};
+  const L=(k,dec=0)=>{const v=latestt(hrows,k);return v!=null?n(v,dec):'â€”';};
 
-  const sleepH=isToday&&d.sleepSec?`${Math.floor(d.sleepSec/3600)}h ${Math.round((d.sleepSec%3600)/60)}m`:'—';
+  const sleepH=isToday&&d.sleepSec?`${Math.floor(d.sleepSec/3600)}h ${Math.round((d.sleepSec%3600)/60)}m`:'â€”';
   const deepPct=isToday&&d.sleepSec?Math.round(d.deepSec/d.sleepSec*100):0;
   const remPct=isToday&&d.sleepSec?Math.round(d.remSec/d.sleepSec*100):0;
   const lightPct=isToday&&d.sleepSec?Math.round(d.lightSec/d.sleepSec*100):0;
@@ -401,7 +401,7 @@ function renderHealth(){
   const imWeekly=isToday?d.weeklyIntensityTotal:null;
   const imPct=imGoal?Math.min(100,Math.round((imWeekly||imTotal)/imGoal*100)):0;
 
-  const periodLabel=isToday?`Latest data: ${d.date}`:`${hrows.length} day${hrows.length>1?'s':''} · ${hrows[hrows.length-1].date} → ${hrows[0].date}`;
+  const periodLabel=isToday?`Latest data: ${d.date}`:`${hrows.length} day${hrows.length>1?'s':''} Â· ${hrows[hrows.length-1].date} â†’ ${hrows[0].date}`;
 
   const stepsGoal=d.stepsGoal||9590;
   const stepsVal=isToday?d.steps:Math.round(avgg(hrows,'steps'));
@@ -436,7 +436,7 @@ function renderHealth(){
         <div class="stat-label">Body Battery</div>
         <div class="stat-value" style="color:var(--accent)">${A('bbHigh')}<span style="font-size:16px;color:var(--muted)"> / ${A('bbLow')}</span></div>
         <div class="stat-sub">High / Low</div>
-        <div class="stat-sub" style="margin-top:4px">+${A('bbCharged')} charged · -${A('bbDrained')} drained</div>
+        <div class="stat-sub" style="margin-top:4px">+${A('bbCharged')} charged Â· -${A('bbDrained')} drained</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Recovery Time</div>
@@ -494,20 +494,20 @@ function renderHealth(){
     </div>`:`
     <div class="stat-grid">
       <div class="stat-card"><div class="stat-label">Sleep Score (avg)</div><div class="stat-value">${A('sleepScore')}</div></div>
-      <div class="stat-card"><div class="stat-label">Sleep Duration (avg)</div><div class="stat-value" style="font-size:18px">${(()=>{const v=avgg(hrows,'sleepSec');return v?`${Math.floor(v/3600)}h ${Math.round((v%3600)/60)}m`:'—'})()}</div></div>
+      <div class="stat-card"><div class="stat-label">Sleep Duration (avg)</div><div class="stat-value" style="font-size:18px">${(()=>{const v=avgg(hrows,'sleepSec');return v?`${Math.floor(v/3600)}h ${Math.round((v%3600)/60)}m`:'â€”'})()}</div></div>
     </div>`}
 
     <div class="section-head">Activity & Load</div>
     <div class="stat-grid" style="grid-template-columns:repeat(auto-fill,minmax(155px,1fr))">
       <div class="stat-card">
         <div class="stat-label">Steps</div>
-        <div class="stat-value" style="color:${stepsOk?'var(--green)':'var(--text)'}">${stepsVal!=null?stepsVal.toLocaleString():'—'}</div>
-        <div class="stat-sub">Goal: ${stepsGoal.toLocaleString()} ${stepsOk?'✓':''}</div>
+        <div class="stat-value" style="color:${stepsOk?'var(--green)':'var(--text)'}">${stepsVal!=null?stepsVal.toLocaleString():'â€”'}</div>
+        <div class="stat-sub">Goal: ${stepsGoal.toLocaleString()} ${stepsOk?'âœ“':''}</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Floors</div>
         <div class="stat-value" style="color:${floorsOk?'var(--green)':'var(--text)'}">${n(floorsVal)}</div>
-        <div class="stat-sub">Goal: ${floorsGoal} ${floorsOk?'✓':''}</div>
+        <div class="stat-sub">Goal: ${floorsGoal} ${floorsOk?'âœ“':''}</div>
       </div>
       <div class="kcal-card" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px">
         <div class="stat-label">Calories</div>
@@ -517,11 +517,11 @@ function renderHealth(){
           </div>
           <div style="display:flex;gap:20px">
             <div>
-              <div style="font-size:22px;font-weight:700;letter-spacing:-.5px;color:var(--accent)">${activeKcal!=null?activeKcal.toLocaleString():'—'}</div>
+              <div style="font-size:22px;font-weight:700;letter-spacing:-.5px;color:var(--accent)">${activeKcal!=null?activeKcal.toLocaleString():'â€”'}</div>
               <div style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:.06em;text-transform:uppercase">Active kcal</div>
             </div>
             <div>
-              <div style="font-size:22px;font-weight:700;letter-spacing:-.5px;color:#378ADD">${totalKcal!=null?totalKcal.toLocaleString():'—'}</div>
+              <div style="font-size:22px;font-weight:700;letter-spacing:-.5px;color:#378ADD">${totalKcal!=null?totalKcal.toLocaleString():'â€”'}</div>
               <div style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:.06em;text-transform:uppercase">Total kcal</div>
               ${activePct!=null?`<div style="font-size:13px;font-weight:700;color:var(--accent);margin-top:4px">${activePct}% <span style="font-size:10px;font-weight:400;color:var(--muted)">from activity</span></div>`:''}
             </div>
@@ -532,7 +532,7 @@ function renderHealth(){
         <div class="stat-label">Intensity Minutes</div>
         <div class="im-num" style="color:${imWeekly>=imGoal?'var(--green)':imWeekly>=(imGoal*0.6)?'var(--amber)':'var(--text)'}">${imWeekly!=null?imWeekly:imTotal}</div>
         <div class="im-bar-track"><div class="im-bar-fill" style="width:${imPct}%"></div></div>
-        <div style="font-size:11px;color:var(--muted)">${imWeekly!=null?`Weekly: ${imWeekly} / ${imGoal}`:`Today: ${imTotal}`} ${imPct>=100?'✓':''}</div>
+        <div style="font-size:11px;color:var(--muted)">${imWeekly!=null?`Weekly: ${imWeekly} / ${imGoal}`:`Today: ${imTotal}`} ${imPct>=100?'âœ“':''}</div>
       </div>
     </div>
 
@@ -540,11 +540,11 @@ function renderHealth(){
     <div class="stat-grid">
       <div class="stat-card">
         <div class="stat-label">Training Status</div>
-        <div class="stat-value" style="font-size:16px;color:var(--green)">${isToday&&d.trainingStatus?d.trainingStatus:'—'}</div>
+        <div class="stat-value" style="font-size:16px;color:var(--green)">${isToday&&d.trainingStatus?d.trainingStatus:'â€”'}</div>
         <div class="stat-sub">Sport: Running</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">VO₂ Max</div>
+        <div class="stat-label">VOâ‚‚ Max</div>
         <div class="stat-value" style="color:var(--accent2)">${L('vo2max')}</div>
         <div class="stat-sub">ml/kg/min</div>
       </div>
@@ -562,8 +562,8 @@ function renderHealth(){
       <div class="stat-card">
         <div class="stat-label">ACWR</div>
         <div class="stat-value" style="color:${isToday&&d.acwr>1.5?'var(--red)':isToday&&d.acwr>1.3?'var(--amber)':'var(--text)'}">${isToday?n(d.acwr,2):n(avgg(hrows,'acwr'),2)}</div>
-        <div class="stat-sub">Acute ${A('acuteLoad')} · Chronic ${A('chronicLoad')}</div>
-        <div class="acwr-explain">&lt;0.8 undertraining · 0.8–1.3 optimal · &gt;1.5 injury risk</div>
+        <div class="stat-sub">Acute ${A('acuteLoad')} Â· Chronic ${A('chronicLoad')}</div>
+        <div class="acwr-explain">&lt;0.8 undertraining Â· 0.8â€“1.3 optimal Â· &gt;1.5 injury risk</div>
       </div>
       <div class="stat-card" style="grid-column:span 2">
         <div class="stat-label">Lactate Threshold</div>
@@ -604,8 +604,11 @@ function renderHealth(){
           const rangeHigh=Math.min(100,Math.round((v.max||100)/cap*100));
           const inRange=vv!=null&&vv>=v.min&&vv<=v.max;
           const valColor=inRange?v.color:'#ff4d4d';
-          return '<div class="load-row"><span class="load-lbl">'+v.lbl+'</span><div class="load-track"><div class="load-range" style="left:'+rangeLow+'%;width:'+(rangeHigh-rangeLow)+'%"></div><div class="load-fill" style="width:'+fillPct+'%;background:'+v.color+';opacity:'+(inRange?1:.5)+'"></div></div><span class="load-val" style="color:'+valColor+'">'+(vv!=null?vv:'—')+' <span style="color:#555;font-size:10px">('+v.min+'–'+v.max+')</span></span></div>';
-        }).join('')+'<div class="load-focus-label">Focus: '+(isToday&&d.loadFocus?d.loadFocus.replace(/_/g,' '):'—')+'</div>';
+          const barLeft=Math.round((v.min||0)/cap*100);
+          const barWidth=vv!=null?Math.max(0,Math.min(100,fillPct)-barLeft):0;
+          const overMin=vv!=null&&vv>v.min;
+          return '<div class="load-row"><span class="load-lbl">'+v.lbl+'</span><div class="load-track"><div class="load-range" style="left:'+rangeLow+'%;width:'+(rangeHigh-rangeLow)+'%"></div><div class="load-fill" style="left:'+(overMin?barLeft:0)+'%;width:'+(overMin?barWidth:fillPct)+'%;background:'+v.color+';opacity:'+(inRange?1:.5)+'"></div></div><span class="load-val" style="color:'+valColor+'">'+(vv!=null?vv:'â€”')+' <span style="color:#666;font-size:10px">('+v.min+'â€“'+v.max+')</span></span></div>';
+        }).join('')+'<div class="load-focus-label">Focus: '+(isToday&&d.loadFocus?d.loadFocus.replace(/_/g,' '):'â€”')+'</div>';
       })()}
     </div>
 
@@ -619,7 +622,7 @@ function renderHealth(){
       <div class="stat-card">
         <div class="stat-label">BMI</div>
         <div class="stat-value" style="font-size:22px">${L('bmi',1)}</div>
-        <div class="stat-sub">Normal: 18.5–24.9</div>
+        <div class="stat-sub">Normal: 18.5â€“24.9</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Body Fat</div>
@@ -667,7 +670,7 @@ function renderHealth(){
     ${hrows.length>1?`
     <div class="section-head" style="margin-top:1.5rem">Daily History</div>
     <div class="tbl-wrap"><table>
-      <thead><tr><th>Date</th><th>Readiness</th><th>Sleep</th><th>HRV</th><th>RHR</th><th>Stress</th><th>Steps</th><th>BB wake</th><th>VO₂max</th><th>Weight</th><th>Fat%</th></tr></thead>
+      <thead><tr><th>Date</th><th>Readiness</th><th>Sleep</th><th>HRV</th><th>RHR</th><th>Stress</th><th>Steps</th><th>BB wake</th><th>VOâ‚‚max</th><th>Weight</th><th>Fat%</th></tr></thead>
       <tbody>${hrows.map(h=>`<tr>
         <td>${h.date}</td>
         <td class="${h.trainingReadiness>=70?'ok':h.trainingReadiness>=40?'warn':'hi'}">${n(h.trainingReadiness)}</td>
@@ -675,7 +678,7 @@ function renderHealth(){
         <td style="color:var(--accent2)">${n(h.hrvAvg)}</td>
         <td>${n(h.rhr)}</td>
         <td class="${h.avgStress<=25?'ok':h.avgStress<=50?'warn':'hi'}">${n(h.avgStress)}</td>
-        <td class="${h.steps>=h.stepsGoal?'ok':''}">${h.steps?h.steps.toLocaleString():'—'}</td>
+        <td class="${h.steps>=h.stepsGoal?'ok':''}">${h.steps?h.steps.toLocaleString():'â€”'}</td>
         <td style="color:var(--accent)">${n(h.bbWake)}</td>
         <td class="${h.vo2max>=47?'ok':''}">${n(h.vo2max)}</td>
         <td>${n(h.weight,1)}</td>
@@ -734,7 +737,7 @@ Promise.all([
 ]).then(([acts,health])=>{
   activities=acts;
   healthData=health;
-  const lastDate=health.length?[...health].sort((a,b)=>b.date.localeCompare(a.date))[0].date:'—';
+  const lastDate=health.length?[...health].sort((a,b)=>b.date.localeCompare(a.date))[0].date:'â€”';
   document.getElementById('last-updated').textContent='Health: '+lastDate;
   try{renderActivities();}catch(e){console.error('renderActivities error:',e);}
   try{renderHealth();}catch(e){
