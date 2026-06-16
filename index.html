@@ -120,6 +120,19 @@ tr:hover td{background:var(--surface2)}
 .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:1rem}
 .chart-card canvas{display:block}
 .acwr-explain{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5}
+
+.date-picker{position:absolute;top:calc(100% + 4px);left:0;z-index:1000;background:#1a1a24;border:1px solid var(--border);border-radius:10px;padding:12px;width:240px;box-shadow:0 8px 32px rgba(0,0,0,.5)}
+.date-picker-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.date-picker-header button{background:none;border:none;color:var(--text);cursor:pointer;font-size:16px;padding:2px 8px;border-radius:4px}
+.date-picker-header button:hover{background:var(--surface2)}
+.date-picker-header span{font-size:13px;font-weight:600}
+.date-picker-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center}
+.date-picker-day-label{font-size:10px;color:var(--muted);font-weight:600;padding:3px 0}
+.date-picker-day{font-size:12px;padding:5px 2px;border-radius:4px;cursor:pointer;color:var(--text)}
+.date-picker-day:hover{background:var(--surface2)}
+.date-picker-day.selected{background:var(--accent);color:#000;font-weight:700}
+.date-picker-day.empty{cursor:default}
+.date-picker-day.today{border:1px solid var(--accent2)}
 </style>
 </head>
 <body>
@@ -256,7 +269,7 @@ tr:hover td{background:var(--surface2)}
   <!-- HEALTH -->
   <div id="nav-health" class="panel">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:1.5rem;flex-wrap:wrap">
-      <input type="date" id="health-date" style="font-size:12px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);color-scheme:dark">
+      <div style="position:relative;display:inline-block"><input type="text" id="health-date" readonly placeholder="DD/MM/YYYY" onclick="togglePicker('health-picker','health-date')" style="font-size:12px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);width:120px;cursor:pointer"><div id="health-picker" class="date-picker" style="display:none"></div></div>
       <button onclick="applyHealthRange()" style="padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;border:none;border-radius:6px;background:var(--accent2);color:#fff">Apply</button>
     </div>
     <div id="health-content"></div>
@@ -265,7 +278,7 @@ tr:hover td{background:var(--surface2)}
   <!-- NUTRITION -->
   <div id="nav-nutrition" class="panel">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:1.5rem;flex-wrap:wrap">
-      <input type="date" id="nutr-date" style="font-size:12px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);color-scheme:dark">
+      <div style="position:relative;display:inline-block"><input type="text" id="nutr-date" readonly placeholder="DD/MM/YYYY" onclick="togglePicker('nutr-picker','nutr-date')" style="font-size:12px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);width:120px;cursor:pointer"><div id="nutr-picker" class="date-picker" style="display:none"></div></div>
       <button onclick="applyNutrRange()" style="padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;border:none;border-radius:6px;background:var(--accent2);color:#fff">Apply</button>
     </div>
     <div id="nutrition-content"></div>
@@ -276,9 +289,9 @@ tr:hover td{background:var(--surface2)}
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;flex-wrap:wrap">
       <div style="display:flex;align-items:center;gap:8px">
         <span style="font-size:12px;color:var(--muted)">From</span>
-        <input type="date" id="review-start" style="font-size:12px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);color-scheme:dark;width:140px">
+        <div style="position:relative;display:inline-block"><input type="text" id="review-start" readonly placeholder="DD/MM/YYYY" onclick="togglePicker('review-start-picker','review-start')" style="font-size:12px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);width:120px;cursor:pointer"><div id="review-start-picker" class="date-picker" style="display:none"></div></div>
         <span style="font-size:12px;color:var(--muted)">to</span>
-        <input type="date" id="review-end" style="font-size:12px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);color-scheme:dark;width:140px">
+        <div style="position:relative;display:inline-block"><input type="text" id="review-end" readonly placeholder="DD/MM/YYYY" onclick="togglePicker('review-end-picker','review-end')" style="font-size:12px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);width:120px;cursor:pointer"><div id="review-end-picker" class="date-picker" style="display:none"></div></div>
       </div>
       <button onclick="generateReview()" id="review-btn" style="padding:8px 20px;font-size:13px;font-weight:600;cursor:pointer;border:none;border-radius:6px;background:var(--accent);color:#000;letter-spacing:.02em">
         Generate Sunday Review
@@ -432,12 +445,12 @@ function initHealthDates(){
   healthStartDate=yesterday;
   healthSingleDay=true;
   const el=document.getElementById('health-date');
-  if(el)el.value=yesterday;
+  if(el)el.value=toDisplay(yesterday);
   try{renderHealth();}catch(e){console.error('renderHealth:',e);}
 }
 
 function applyHealthRange(){
-  const d=document.getElementById('health-date').value;
+  const d=parseDate(document.getElementById('health-date').value);
   if(!d)return;
   healthStartDate=d;
   healthEndDate=d;
@@ -887,12 +900,12 @@ function initNutrDates() {
   nutrStartDate = yesterday;
   nutrSingleDay = true;
   const el = document.getElementById('nutr-date');
-  if(el) el.value = yesterday;
+  if(el) el.value = toDisplay(yesterday);
   try{renderNutrition();}catch(e){console.error('renderNutrition:',e);}
 }
 
 function applyNutrRange() {
-  const d = document.getElementById('nutr-date').value;
+  const d = parseDate(document.getElementById('nutr-date').value);
   if (!d) return;
   nutrStartDate = d;
   nutrEndDate = d;
@@ -1068,6 +1081,86 @@ ${JSON.stringify(weekSummary, null, 2)}`
   btn.disabled = false;
   btn.textContent = 'Generate Sunday Review';
 }
+
+
+// ── CUSTOM DATE PICKER ─────────────────────────────────────────────────────
+let _pickerState = {};
+
+function togglePicker(pickerId, inputId) {
+  const picker = document.getElementById(pickerId);
+  if (!picker) return;
+  const isOpen = picker.style.display !== 'none';
+  // Close all pickers
+  document.querySelectorAll('.date-picker').forEach(p => p.style.display = 'none');
+  if (!isOpen) {
+    const input = document.getElementById(inputId);
+    const current = parseDate(input.value);
+    const d = current ? new Date(current) : new Date();
+    _pickerState[pickerId] = { year: d.getFullYear(), month: d.getMonth(), inputId };
+    renderPicker(pickerId);
+    picker.style.display = 'block';
+  }
+}
+
+function renderPicker(pickerId) {
+  const picker = document.getElementById(pickerId);
+  const { year, month, inputId } = _pickerState[pickerId];
+  const today = new Date();
+  const todayStr = [today.getFullYear(), String(today.getMonth()+1).padStart(2,'0'), String(today.getDate()).padStart(2,'0')].join('-');
+  const input = document.getElementById(inputId);
+  const selectedStr = parseDate(input.value);
+  
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const startOffset = (firstDay + 6) % 7; // Monday first
+  
+  let days = '';
+  ['Mo','Tu','We','Th','Fr','Sa','Su'].forEach(d => {
+    days += `<div class="date-picker-day-label">${d}</div>`;
+  });
+  for (let i = 0; i < startOffset; i++) days += `<div class="date-picker-day empty"></div>`;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = year + '-' + String(month+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+    const isSelected = dateStr === selectedStr;
+    const isToday = dateStr === todayStr;
+    days += `<div class="date-picker-day${isSelected?' selected':''}${isToday?' today':''}" onclick="selectDate('${pickerId}','${dateStr}')">${d}</div>`;
+  }
+  
+  picker.innerHTML = `
+    <div class="date-picker-header">
+      <button onclick="shiftMonth('${pickerId}',-1)">&#8249;</button>
+      <span>${monthNames[month]} ${year}</span>
+      <button onclick="shiftMonth('${pickerId}',1)">&#8250;</button>
+    </div>
+    <div class="date-picker-grid">${days}</div>
+  `;
+}
+
+function shiftMonth(pickerId, delta) {
+  const s = _pickerState[pickerId];
+  s.month += delta;
+  if (s.month > 11) { s.month = 0; s.year++; }
+  if (s.month < 0) { s.month = 11; s.year--; }
+  renderPicker(pickerId);
+}
+
+function selectDate(pickerId, dateStr) {
+  const { inputId } = _pickerState[pickerId];
+  const input = document.getElementById(inputId);
+  input.value = toDisplay(dateStr);
+  document.getElementById(pickerId).style.display = 'none';
+  // Trigger apply for health/nutr
+  if (inputId === 'health-date') applyHealthRange();
+  if (inputId === 'nutr-date') applyNutrRange();
+}
+
+// Close picker when clicking outside
+document.addEventListener('click', e => {
+  if (!e.target.closest('.date-picker') && !e.target.closest('input[onclick*="Picker"]')) {
+    document.querySelectorAll('.date-picker').forEach(p => p.style.display = 'none');
+  }
+});
 
 // ── NUTRITION ─────────────────────────────────────────────────────────────────
 const NUTR_URL = 'https://raw.githubusercontent.com/snxz-y/WiggenApp/main/nutrition.json';
