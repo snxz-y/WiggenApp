@@ -963,7 +963,7 @@ function renderReviewHistory() {
           <div style="font-size:12px;font-weight:600;color:var(--accent)">${r.period}</div>
           <div style="font-size:11px;color:var(--muted)">${fmtDate(r.date)}</div>
         </div>
-        <div style="font-size:13px;line-height:1.7;color:var(--text);white-space:pre-wrap">${r.content}</div>
+        <div style="font-size:13px;line-height:1.7;color:var(--text);white-space:pre-wrap">${r.content.replace(/([\u{1F300}-\u{1F9FF}])/gu,"\n\n$1").trim()}</div>
       </div>`).join('');
 }
 
@@ -1066,7 +1066,12 @@ async function generateReview() {
 
     // Display
     const output = document.getElementById('review-output');
-    output.textContent = reviewText;
+    // Format: add line breaks before emoji headers and between paragraphs
+    const formatted = reviewText
+      .replace(/([\u{1F300}-\u{1F9FF}])/gu, '\n\n$1')
+      .replace(/([.!?]) ([A-Z\u{1F300}-\u{1F9FF}])/gu, '$1\n\n$2')
+      .trim();
+    output.textContent = formatted;
     output.style.display = 'block';
 
     // Save to GitHub
