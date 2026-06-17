@@ -952,6 +952,14 @@ function setNutrPreset(p, el) {
   renderNutrition();
 }
 
+function toggleReview(i) {
+  const body = document.getElementById('review-body-' + i);
+  const chevron = document.getElementById('review-chevron-' + i);
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
+}
+
 function renderReviewHistory() {
   const el = document.getElementById('review-history');
   if (!reviewsData.length) { el.innerHTML = ''; return; }
