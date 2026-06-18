@@ -585,9 +585,9 @@ function renderHealth(){
     <div class="stat-grid">
       <div class="stat-card">
         <div class="stat-label">Training Readiness</div>
-        <div class="stat-value" style="color:${isToday?scoreColor(d.trainingReadiness):'var(--text)'}">${A('trainingReadiness')}</div>
-        <div class="stat-sub">${isToday&&d.trainingReadinessLevel?d.trainingReadinessLevel:''}</div>
-        ${isToday&&d.trainingReadiness?`<div class="stat-badge ${readBadge(d.trainingReadiness)}">${readinessFeedback(d.trainingReadinessFeedback)}</div>`:''}
+        <div class="stat-value" style="color:${scoreColor(d.trainingReadiness)}">${A('trainingReadiness')}</div>
+        <div class="stat-sub">${d.trainingReadinessLevel?d.trainingReadinessLevel:''}</div>
+        ${d.trainingReadiness?`<div class="stat-badge ${readBadge(d.trainingReadiness)}">${readinessFeedback(d.trainingReadinessFeedback)}</div>`:''}
       </div>
       <div class="stat-card">
         <div class="stat-label">HRV Last Night</div>
@@ -703,7 +703,7 @@ function renderHealth(){
     <div class="stat-grid">
       <div class="stat-card">
         <div class="stat-label">Training Status</div>
-        <div class="stat-value" style="font-size:16px;color:var(--green)">${isToday&&d.trainingStatus?(typeof d.trainingStatus==='object'?d.trainingStatus.trainingStatusKey||'—':d.trainingStatus):'—'}</div>
+        <div class="stat-value" style="font-size:16px;color:var(--green)">${d.trainingStatus?(typeof d.trainingStatus==='object'?d.trainingStatus.trainingStatusKey||'—':d.trainingStatus):'—'}</div>
         <div class="stat-sub">Sport: Running</div>
       </div>
       <div class="stat-card">
@@ -777,7 +777,7 @@ function renderHealth(){
             '<div style="position:absolute;top:-2px;bottom:-2px;left:'+rangeLow+'%;width:3px;background:#fff;z-index:10;border-radius:2px;opacity:.95"></div>'+
             '<div style="position:absolute;top:-2px;bottom:-2px;left:'+rangeHigh+'%;width:3px;background:#fff;z-index:10;border-radius:2px;opacity:.6"></div>'+
             '</div><span class="load-val" style="color:'+valColor+'">'+(vv!=null?vv:'—')+' <span style="color:#666;font-size:10px">('+v.min+'-'+v.max+')</span></span></div>';
-        }).join('')+'<div class="load-focus-label">Focus: '+(isToday&&d.loadFocus?d.loadFocus.replace(/_/g,' '):'—')+'</div>';
+        }).join('')+'<div class="load-focus-label">Focus: '+(d.loadFocus?d.loadFocus.replace(/_/g,' '):'—')+'</div>';
       })()}
     </div>
 
