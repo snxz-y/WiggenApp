@@ -439,7 +439,7 @@ function renderAll(){
 function renderActSummary(){
   const runs=activities.filter(a=>a.type==='running').sort((a,b)=>a.date.localeCompare(b.date));
   if(!runs.length)return;
-  const isInterval=r=>/interval|tempo|fartlek|speedwork/i.test(r.activityName||r.name||'');
+  const isInterval=r=>/interval|tempo|fartlek|speedwork/i.test(r.name||'');
   const steadyRuns=runs.filter(r=>!isInterval(r));
   // Weekly volume — last 12 weeks (all runs, intervals in different color)
   const weeks={};const iweeks={};
@@ -1691,12 +1691,6 @@ function renderNutrition() {
         const bLabels = allDates.map(d => { const p=d.split('-'); return p[2]+'/'+p[1]; });
         const eatData = allDates.map(d => { const r=chartRows.find(r=>r.date===d); return r ? r.calories : null; });
         const burnData = allDates.map(d => { const h=hRange.find(h=>h.date===d); return h ? h.totalKcal : null; });
-        chartInstances['balanceChart'] = new Chart(bEl, {
-          type: 'bar',
-          data: { labels: bLabels, datasets: [
-            { label: 'Eaten', data: eatData, backgroundColor: '#c4907860', borderColor: '#c49078', borderWidth: 1, borderRadius: 4 },
-            { label: 'Burned', data: burnData, backgroundColor: '#8b9cc460', borderColor: '#8b9cc4', borderWidth: 1, borderRadius: 4 }
-          ]},
         chartInstances['balanceChart'] = new Chart(bEl, {
           type: 'bar',
           data: { labels: bLabels, datasets: [
