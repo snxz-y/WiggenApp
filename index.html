@@ -114,6 +114,17 @@ tr:hover td{background:var(--surface2)}
 .date-picker-day.selected{background:var(--accent);color:#000;font-weight:700}
 .date-picker-day.empty{cursor:default}
 .date-picker-day.today{border:1px solid var(--accent2)}
+.streak-banner{background:linear-gradient(135deg,rgba(122,171,136,.08),rgba(122,171,136,.04));border:1px solid rgba(122,171,136,.2);border-radius:12px;padding:14px 18px;margin-bottom:1.25rem;display:flex;align-items:center;gap:14px}
+.streak-num{font-size:36px;font-weight:700;letter-spacing:-2px;line-height:1;color:var(--green)}
+.delta-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-bottom:1.25rem}
+.delta-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.delta-val{font-size:20px;font-weight:700;letter-spacing:-.5px}
+.delta-chg{font-size:10px;font-weight:600;margin-top:4px}
+.pr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-bottom:1.25rem}
+.pr-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;position:relative}
+.pr-crown{position:absolute;top:8px;right:10px;font-size:13px}
+.pr-val{font-size:22px;font-weight:700;letter-spacing:-.5px;color:var(--accent)}
+
 </style>
 </head>
 <body>
@@ -135,6 +146,7 @@ tr:hover td{background:var(--surface2)}
 
   <!-- ACTIVITIES -->
   <div id="nav-activities" class="panel active">
+    <div id="act-summary"></div>
     <div class="subtabs">
       <button class="subtab active" onclick="showSub('runs',this)">Runs</button>
       <button class="subtab" onclick="showSub('bikes',this)">Bikes</button>
@@ -423,7 +435,63 @@ function renderAll(){
     <td class="muted-cell" style="font-size:11px">${a.label||'—'}</td><td>${gcLinks(a.activityId)}</td>
   </tr>`).join('');
 }
-function renderActivities(){renderRuns();renderBikes();renderWalks();renderAll();}
+
+function renderActSummary(){
+  const runs=activities.filter(a=>a.type==='running').sort((a,b)=>a.date.localeCompare(b.date));
+  if(!runs.length)return;
+  // Weekly volume — last 12 weeks
+  const weeks={};
+  runs.forEach(r=>{
+    const d=new Date(r.date);
+    const mon=new Date(d);mon.setDate(d.getDate()-((d.getDay()+6)%7));
+    const wk=mon.toISOString().slice(0,10);
+    weeks[wk]=(weeks[wk]||0)+(r.distanceM||0)/1000;
+  });
+  const wkKeys=Object.keys(weeks).sort().slice(-12);
+  const wkLabels=wkKeys.map(k=>{const d=new Date(k);return d.getDate()+'/'+(d.getMonth()+1);});
+  const wkData=wkKeys.map(k=>+weeks[k].toFixed(1));
+  // This week km
+  const now=new Date();const mon=new Date(now);mon.setDate(now.getDate()-((now.getDay()+6)%7));mon.setHours(0,0,0,0);
+  const thisWkKm=runs.filter(r=>new Date(r.date)>=mon).reduce((s,r)=>s+(r.distanceM||0)/1000,0);
+  const totalKm=runs.reduce((s,r)=>s+(r.distanceM||0)/1000,0);
+  // PRs
+  const maxDist=runs.reduce((b,r)=>r.distanceM>(b?.distanceM||0)?r:b,null);
+  const fastPace=runs.filter(r=>r.distanceM>=1000).reduce((b,r)=>{const p=r.durationSec/r.distanceM*1000;return b===null||p<b.p?{r,p}:b;},null);
+  const best5k=runs.filter(r=>r.fastest5k).reduce((b,r)=>!b||r.fastest5k<b.fastest5k?r:b,null);
+  const mostElev=runs.reduce((b,r)=>(r.elevGain||0)>(b?.elevGain||0)?r:b,null);
+  const bestVO2=runs.filter(r=>r.vo2max).reduce((b,r)=>(r.vo2max||0)>(b?.vo2max||0)?r:b,null);
+  const el=document.getElementById('act-summary');if(!el)return;
+  el.innerHTML=`
+    <div class="section-head" style="margin-top:0">Overview</div>
+    <div class="stat-grid" style="margin-bottom:1.25rem">
+      <div class="stat-card"><div class="stat-label">This Week</div><div class="stat-value">${thisWkKm.toFixed(1)}<span style="font-size:14px;color:var(--muted)"> km</span></div></div>
+      <div class="stat-card"><div class="stat-label">All-Time km</div><div class="stat-value">${totalKm.toFixed(0)}<span style="font-size:14px;color:var(--muted)"> km</span></div></div>
+      <div class="stat-card"><div class="stat-label">Total Runs</div><div class="stat-value">${runs.length}</div></div>
+    </div>
+    <div class="section-head">Weekly Run Volume</div>
+    <div class="chart-card"><canvas id="weeklyKmChart" height="150"></canvas></div>
+    <div class="section-head">Personal Records</div>
+    <div class="pr-grid">
+      ${maxDist?`<div class="pr-card"><div class="pr-crown">🏅</div><div class="stat-label">Longest Run</div><div class="pr-val">${(maxDist.distanceM/1000).toFixed(2)} km</div><div style="font-size:11px;color:var(--muted);margin-top:3px">${fmtDate(maxDist.date)}</div></div>`:''}
+      ${fastPace?`<div class="pr-card"><div class="pr-crown">⚡</div><div class="stat-label">Best Pace</div><div class="pr-val">${pace(1000,fastPace.p)}/km</div><div style="font-size:11px;color:var(--muted);margin-top:3px">${fmtDate(fastPace.r.date)}</div></div>`:''}
+      ${best5k?`<div class="pr-card"><div class="pr-crown">🏃</div><div class="stat-label">Best 5km</div><div class="pr-val">${fmt(best5k.fastest5k)}</div><div style="font-size:11px;color:var(--muted);margin-top:3px">${fmtDate(best5k.date)}</div></div>`:''}
+      ${mostElev?`<div class="pr-card"><div class="pr-crown">⛰️</div><div class="stat-label">Most Elevation</div><div class="pr-val">${mostElev.elevGain}m</div><div style="font-size:11px;color:var(--muted);margin-top:3px">${fmtDate(mostElev.date)}</div></div>`:''}
+      ${bestVO2?`<div class="pr-card"><div class="pr-crown">💪</div><div class="stat-label">Best VO₂max</div><div class="pr-val">${bestVO2.vo2max}</div><div style="font-size:11px;color:var(--muted);margin-top:3px">${fmtDate(bestVO2.date)}</div></div>`:''}
+    </div>
+  `;
+  destroyChartById('weeklyKmChart');
+  const ctx=document.getElementById('weeklyKmChart');
+  if(ctx&&wkKeys.length){
+    chartInstances['weeklyKmChart']=new Chart(ctx,{
+      type:'bar',data:{labels:wkLabels,datasets:[{label:'km',data:wkData,backgroundColor:'#c4907860',borderColor:'#c49078',borderWidth:1,borderRadius:4}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+        scales:{x:{ticks:{color:'#7a6e64',font:{size:10}},grid:{color:'rgba(255,255,255,.03)'}},
+          y:{ticks:{color:'#7a6e64',font:{size:10}},grid:{color:'rgba(255,255,255,.03)'},beginAtZero:true}}}
+    });
+  }
+}
+
+function renderActivities(){renderActSummary();renderRuns();renderBikes();renderWalks();renderAll();}
 
 // ── HEALTH ────────────────────────────────────────────────────────────────────
 let healthStartDate = null;
@@ -634,7 +702,30 @@ function renderHealth(){
     return` <span style="font-size:11px;color:${diff<0?'var(--green)':'var(--red)'}">(${sign}${n(diff,dec)})</span>`;
   };
 
-  document.getElementById('health-content').innerHTML=`
+    const ZYN_QUIT=new Date('2026-06-05');
+    const zynDays=Math.max(0,Math.floor((new Date()-ZYN_QUIT)/(1000*60*60*24)));
+    // Week-over-week deltas
+    const now2=new Date();
+    const wkStart=(d,off)=>{const m=new Date(d);m.setDate(d.getDate()-((d.getDay()+6)%7)-off*7);m.setHours(0,0,0,0);return m;};
+    const thisMonday=wkStart(now2,0);const lastMonday=wkStart(now2,1);
+    const thisSunday=new Date(thisMonday);thisSunday.setDate(thisMonday.getDate()+6);
+    const lastSunday=new Date(lastMonday);lastSunday.setDate(lastMonday.getDate()+6);
+    const fmt2=d=>d.toISOString().slice(0,10);
+    const thisWkH=healthData.filter(h=>h.date>=fmt2(thisMonday)&&h.date<=fmt2(thisSunday));
+    const lastWkH=healthData.filter(h=>h.date>=fmt2(lastMonday)&&h.date<=fmt2(lastSunday));
+    const wavg=(rows,k)=>{const v=rows.filter(r=>r[k]!=null);return v.length?+(v.reduce((s,r)=>s+r[k],0)/v.length).toFixed(1):null;};
+    const deltaHtml=(k,label,unit='',inv=false)=>{
+      const cur=wavg(thisWkH,k),prev=wavg(lastWkH,k);
+      if(cur==null)return'';
+      const diff=prev!=null?+(cur-prev).toFixed(1):null;
+      const better=inv?diff<0:diff>0;
+      const clr=diff===null||diff===0?'var(--muted)':better?'var(--green)':'var(--red)';
+      const sign=diff>0?'+':'';
+      return`<div class="delta-card"><div class="stat-label">${label}</div><div class="delta-val">${cur}${unit}</div>${diff!==null&&diff!==0?`<div class="delta-chg" style="color:${clr}">${sign}${diff}${unit} vs last wk</div>`:'<div class="delta-chg" style="color:var(--muted)">No prev data</div>'}</div>`;
+    };
+    const zynHtml=`<div class="streak-banner"><div class="streak-num">${zynDays}</div><div><div style="font-size:15px;font-weight:700;color:var(--green)">Days Zyn-Free 🚭</div><div style="font-size:11px;color:var(--muted);margin-top:2px">Since June 5, 2026 — keep it up!</div></div></div>`;
+    const deltaHtmlBlock=`<div class="section-head">This Week vs Last Week</div><div class="delta-grid">${deltaHtml('rhr','Resting HR','',true)}${deltaHtml('hrvAvg','HRV','')}${deltaHtml('sleepScore','Sleep Score','')}${deltaHtml('steps','Steps','')}${deltaHtml('bbHigh','Body Batt High','')}${deltaHtml('avgStress','Avg Stress','',true)}</div>`;
+  document.getElementById('health-content').innerHTML=zynHtml+deltaHtmlBlock+`
     <div style="font-size:11px;color:var(--muted);margin-bottom:1.25rem"><div class="section-head">Recovery & Readiness</div>
     <div class="stat-grid">
       <div class="stat-card">
