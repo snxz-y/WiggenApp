@@ -312,21 +312,23 @@ const ss={runs:{col:'date',asc:false},bikes:{col:'date',asc:false},walks:{col:'d
 let chartInstances={};
 
 const fmtEffect=t=>{
-  if(!t)return'—';
+  if(!t||t==='—'||t==='NONE')return'—';
+  if(!t.includes('_'))return t;
   const map={
     'IMPACTING_TEMPO':'Tempo',
-    'IMPACTING_BASE':'Base',
-    'IMPACTING_THRESHOLD':'Threshold',
+    'IMPACTING_BASE':'Aerobic base',
+    'IMPACTING_THRESHOLD':'Lactate threshold',
     'IMPACTING_VO2MAX':'VO2 Max',
     'IMPACTING_ANAEROBIC':'Anaerobic',
     'IMPACTING_SPRINT':'Sprint',
     'MAINTAINING_TEMPO':'Maintaining Tempo',
-    'MAINTAINING_BASE':'Maintaining Base',
-    'MAINTAINING_THRESHOLD':'Maintaining Threshold',
+    'MAINTAINING_BASE':'Maintaining base',
+    'MAINTAINING_THRESHOLD':'Maintaining threshold',
     'NO_IMPACT':'Recovery',
-    'NONE':'—',
+    'RECOVERY':'Recovery',
   };
-  return map[t.toUpperCase()]||t.replace(/_/g,' ').replace(/\w/g,c=>c.toUpperCase());
+  const key=t.toUpperCase().replace(/_\d+$/,'').replace(/^HIGHLY_/,'');
+  return map[key]||t.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
 };
 const fmtDate=d=>{
   if(!d)return'—';
