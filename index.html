@@ -602,6 +602,51 @@ function renderHeatmap(){
 // ═══════════════════════════════════════════════
 // HEALTH TRENDS (sleep, HRV, weight, body fat)
 // ═══════════════════════════════════════════════
+function renderHealthComp(){
+  const el=document.getElementById('health-comp-content');if(!el)return;
+  const rows=getCompRows();
+  if(!rows.length){el.innerHTML='<div style="padding:3rem;text-align:center;color:var(--muted)">No body composition data yet.</div>';return;}
+  const last=rows[rows.length-1];const first=rows[0];
+  const labels=rows.map(r=>{const p=r.date.split('-');return p[2]+'/'+p[1];});
+  const cV=(k,dec=1)=>last&&last[k]!=null?(+last[k]).toFixed(dec):'—';
+  const cD=(k,dec=1)=>{if(!first||first===last||first[k]==null||last[k]==null)return'';const d=+(last[k]-first[k]).toFixed(dec);if(d===0)return'';return` <span style="font-size:11px;color:${d<0?'var(--green)':'var(--red)'}">(${d>0?'+':''}${d})</span>`;};
+  el.innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
+      <div class="section-head" style="margin:0">Body Composition</div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)">
+        <div style="position:relative;display:inline-block"><input type="text" id="comp-start" readonly placeholder="DD/MM/YYYY" onclick="togglePicker('comp-start-picker','comp-start')" value="${toDisplay(compStartDate||'')}" style="font-size:11px;padding:4px 10px;border:1px solid var(--border);border-radius:20px;background:var(--surface2);color:var(--text);width:110px;cursor:pointer;text-align:center"><div id="comp-start-picker" class="date-picker" style="display:none"></div></div>
+        <span>→</span>
+        <div style="position:relative;display:inline-block"><input type="text" id="comp-end" readonly placeholder="DD/MM/YYYY" onclick="togglePicker('comp-end-picker','comp-end')" value="${toDisplay(compEndDate||'')}" style="font-size:11px;padding:4px 10px;border:1px solid var(--border);border-radius:20px;background:var(--surface2);color:var(--text);width:110px;cursor:pointer;text-align:center"><div id="comp-end-picker" class="date-picker" style="display:none"></div></div>
+      </div>
+    </div>
+    <div class="stat-grid" style="margin-bottom:1.25rem">
+      <div class="stat-card"><div class="stat-label">Weight</div><div class="stat-value" style="font-size:22px">${cV('weight',1)}${cD('weight',1)}<span style="font-size:14px;color:var(--muted)">kg</span></div><div class="stat-sub">Goal: 65kg</div></div>
+      <div class="stat-card"><div class="stat-label">BMI</div><div class="stat-value" style="font-size:22px">${cV('bmi',1)}${cD('bmi',1)}</div><div class="stat-sub">Normal: 18.5–24.9</div></div>
+      <div class="stat-card"><div class="stat-label">Body Fat</div><div class="stat-value" style="color:var(--amber);font-size:22px">${cV('bodyFat',1)}${cD('bodyFat',1)}<span style="font-size:14px;color:var(--muted)">%</span></div><div class="stat-sub">Goal: &lt;20%</div></div>
+      <div class="stat-card"><div class="stat-label">Muscle Mass</div><div class="stat-value" style="font-size:22px;color:var(--green)">${cV('muscleMass',1)}${cD('muscleMass',1)}<span style="font-size:14px;color:var(--muted)">kg</span></div></div>
+      <div class="stat-card"><div class="stat-label">Bone Mass</div><div class="stat-value" style="font-size:22px">${cV('boneMass',2)}<span style="font-size:14px;color:var(--muted)">kg</span></div></div>
+      <div class="stat-card"><div class="stat-label">Body Water</div><div class="stat-value" style="font-size:22px;color:var(--accent2)">${cV('bodyWater',1)}<span style="font-size:14px;color:var(--muted)">%</span></div></div>
+    </div>`;
+  if(rows.length>1){
+    const mk=(id,data,color,label)=>{destroyChartById(id);const el2=document.getElementById(id);if(!el2)return;chartInstances[id]=new Chart(el2,{type:'line',data:{labels,datasets:[{data,borderColor:color,backgroundColor:color+'22',borderWidth:2,fill:true,tension:.3,pointRadius:2,pointBackgroundColor:color}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#7a6e64',font:{size:9},maxTicksLimit:8},grid:{color:'rgba(255,255,255,.03)'}},y:{ticks:{color:'#7a6e64',font:{size:9}},grid:{color:'rgba(255,255,255,.03)'}}}}});};
+    el.innerHTML+=`
+    <div class="chart-card"><div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px">Weight (kg)</div><div style="height:160px;position:relative"><canvas id="compChartW" height="160"></canvas></div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+      <div class="chart-card"><div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">Body Fat (%)</div><div style="height:120px;position:relative"><canvas id="compChartF" height="120"></canvas></div></div>
+      <div class="chart-card"><div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">Muscle Mass (kg)</div><div style="height:120px;position:relative"><canvas id="compChartM" height="120"></canvas></div></div>
+      <div class="chart-card"><div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">Body Water (%)</div><div style="height:120px;position:relative"><canvas id="compChartBW" height="120"></canvas></div></div>
+      <div class="chart-card"><div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">BMI</div><div style="height:120px;position:relative"><canvas id="compChartBMI" height="120"></canvas></div></div>
+    </div>`;
+    setTimeout(()=>{
+      mk('compChartW',rows.map(r=>r.weight),'#c49078','Weight');
+      mk('compChartF',rows.map(r=>r.bodyFat),'#c9a84c','Body Fat');
+      mk('compChartM',rows.map(r=>r.muscleMass),'#7aab88','Muscle');
+      mk('compChartBW',rows.map(r=>r.bodyWater),'#60a5fa','Water');
+      mk('compChartBMI',rows.map(r=>r.bmi),'#a89ef8','BMI');
+    },50);
+  }
+}
+
 function renderHealthTrends(){
   const sorted=[...healthData].sort((a,b)=>a.date.localeCompare(b.date));
   if(sorted.length<3)return;
@@ -776,9 +821,9 @@ function renderNutritionExtras(){
   el.innerHTML=`
     <div class="section-head">Protein per kg</div>
     <div class="stat-grid" style="margin-bottom:1.25rem">
-      <div class="stat-card"><div class="stat-label">7d avg protein</div><div class="stat-value">${Math.round(avgProtein)}g</div></div>
-      <div class="stat-card"><div class="stat-label">per kg bodyweight</div><div class="stat-value" style="color:${+proteinPerKg>=protTarget?'var(--green)':'var(--red)'}">${proteinPerKg}g/kg</div><div class="stat-sub">target ${protTarget}g/kg</div></div>
-      <div class="stat-card"><div class="stat-label">bodyweight used</div><div class="stat-value">${lastWeight}kg</div></div>
+      <div class="stat-card"><div class="stat-label">7d avg protein</div><div class="stat-value">${Math.round(avgProtein)}g</div><div class="stat-sub">${Math.round(avgProtein)}g ÷ ${lastWeight}kg = ${proteinPerKg}g/kg</div></div>
+      <div class="stat-card"><div class="stat-label">protein per kg</div><div class="stat-value" style="color:${+proteinPerKg>=protTarget?'var(--green)':'var(--red)'}">${proteinPerKg}g/kg</div><div class="stat-sub">target ${protTarget}g/kg · need ${Math.round(protTarget*lastWeight)}g/day</div></div>
+      <div class="stat-card"><div class="stat-label">bodyweight</div><div class="stat-value">${lastWeight}kg</div></div>
     </div>
     <div class="section-head">Cumulative Calorie Deficit</div>
     <div class="chart-card"><canvas id="deficit-chart" height="140"></canvas></div>
@@ -1093,6 +1138,9 @@ function renderHealth(){
   const d=hrows[0];
   const A=(k,dec=0)=>{if(isToday)return n(d[k],dec);const v=avgg(hrows,k);return v!=null?n(v,dec):'—';};
   const L=(k,dec=0)=>{const v=latestt(hrows,k);return v!=null?n(v,dec):'—';};
+  const _gS=[...healthData].sort((a,b)=>b.date.localeCompare(a.date));
+  const GL=(k,dec=0)=>{const v=latestt(_gS,k);return v!=null?n(v,dec):'—';};
+  const gLatest=(k)=>{for(const r of _gS){if(r[k]!=null)return r[k];}return null;};
 
   const sleepH=isToday&&d.sleepSec?`${Math.floor(d.sleepSec/3600)}h ${Math.round((d.sleepSec%3600)/60)}m`:'—';
   const deepPct=isToday&&d.sleepSec?Math.round(d.deepSec/d.sleepSec*100):0;
@@ -1148,11 +1196,13 @@ function renderHealth(){
   const bmrKcal=totalKcal&&activeKcal?totalKcal-activeKcal:null;
   const activePct=totalKcal&&activeKcal?Math.round(activeKcal/totalKcal*100):null;
 
-  // intensity minutes
-  const imTotal=(isToday?(d.modIntensityMin||0)+(d.vigIntensityMin||0):Math.round((avgg(hrows,'modIntensityMin')||0)+(avgg(hrows,'vigIntensityMin')||0)));
-  const imGoal=isToday?d.weeklyIntensityGoal:150;
-  const imWeekly=isToday?d.weeklyIntensityTotal:null;
-  const imPct=imGoal?Math.min(100,Math.round((imWeekly||imTotal)/imGoal*100)):0;
+  // intensity minutes — weekly total from current-week entries (updated a few times a week)
+  const _imMon=(()=>{const m=new Date();m.setDate(m.getDate()-((m.getDay()+6)%7));m.setHours(0,0,0,0);return m.toISOString().slice(0,10);})();
+  const _thisWk=healthData.filter(h=>h.date>=_imMon);
+  const imWeekly=[..._thisWk].sort((a,b)=>b.date.localeCompare(a.date)).find(h=>h.weeklyIntensityTotal!=null)?.weeklyIntensityTotal||null;
+  const imToday_=(isToday?(d.modIntensityMin||0)+(d.vigIntensityMin||0):Math.round((avgg(hrows,'modIntensityMin')||0)+(avgg(hrows,'vigIntensityMin')||0)));
+  const imGoal=d.weeklyIntensityGoal||150;
+  const imPct=imGoal?Math.min(100,Math.round((imWeekly!=null?imWeekly:imToday_)/imGoal*100)):0;
 
   const periodLabel=isToday?`Currently showing: ${fmtDate(d.date)}`:`${hrows.length} day${hrows.length>1?'s':''}  /  ${hrows[hrows.length-1].date} to ${fmtDate(hrows[0].date)}`;
 
@@ -1207,7 +1257,9 @@ function renderHealth(){
     renderHealthTrends();
     renderNutritionExtras();
   },50);
-  document.getElementById('health-content').innerHTML=zynHtml+deltaHtmlBlock+`
+  // Build sleep compact for top
+  const sleepTopHtml=isToday&&d.sleepScore?`<div style="display:flex;align-items:center;gap:16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:1.25rem"><div><div style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase">Sleep Score</div><div style="font-size:32px;font-weight:700;color:${scoreColor(d.sleepScore)};line-height:1">${d.sleepScore}</div></div><div><div style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase">Duration</div><div style="font-size:18px;font-weight:700">${sleepH}</div></div><div><div style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase">Bedtime → Wake</div><div style="font-size:14px;font-weight:600;color:var(--accent2)">${d.bedTime||'?'} → ${d.wakeTime||'?'}</div></div></div>`:''
+  document.getElementById('health-content').innerHTML=zynHtml+sleepTopHtml+`
     <div style="font-size:11px;color:var(--muted);margin-bottom:1.25rem"><div class="section-head">Recovery & Readiness</div>
     <div class="stat-grid">
       <div class="stat-card">
@@ -1320,9 +1372,10 @@ function renderHealth(){
       </div>
       <div class="intensity-card">
         <div class="stat-label">Intensity Minutes</div>
-        <div class="im-num" style="color:${imWeekly>=imGoal?'var(--green)':imWeekly>=(imGoal*0.6)?'var(--amber)':'var(--text)'}">${imWeekly!=null?imWeekly:imTotal}</div>
+        <div class="im-num" style="color:${(imWeekly||0)>=imGoal?'var(--green)':(imWeekly||0)>=(imGoal*0.6)?'var(--amber)':'var(--text)'}">${imWeekly!=null?imWeekly:imToday_}</div>
         <div class="im-bar-track"><div class="im-bar-fill" style="width:${imPct}%"></div></div>
-        <div style="font-size:11px;color:var(--muted)">${imWeekly!=null?`Weekly: ${imWeekly} / ${imGoal}`:`Today: ${imTotal}`} ${imPct>=100?'✓':''}</div>
+        <div style="font-size:11px;color:var(--muted)">Weekly: ${imWeekly!=null?imWeekly:'—'} / ${imGoal} ${imPct>=100?'✓':''}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Today: ${imToday_} min</div>
       </div>
     </div>
 
@@ -1330,23 +1383,23 @@ function renderHealth(){
     <div class="stat-grid">
       <div class="stat-card">
         <div class="stat-label">Training Status</div>
-        <div class="stat-value" style="font-size:16px;color:var(--green)">${isToday&&d.trainingStatus?(typeof d.trainingStatus==='object'?d.trainingStatus.trainingStatusKey||'—':d.trainingStatus):'—'}</div>
+        <div class="stat-value" style="font-size:16px;color:var(--green)">${(()=>{const ts=d.trainingStatus||gLatest('trainingStatus');if(!ts)return'—';return typeof ts==='object'?ts.trainingStatusKey||'—':ts;})()}</div>
         <div class="stat-sub">Sport: Running</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">VO₂ Max</div>
-        <div class="stat-value" style="color:var(--accent2)">${L('vo2max')}</div>
+        <div class="stat-value" style="color:var(--accent2)">${GL('vo2max')}</div>
         <div class="stat-sub">ml/kg/min</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Endurance Score</div>
-        <div class="stat-value" style="font-size:20px">${L('enduranceScore')}</div>
+        <div class="stat-value" style="font-size:20px">${GL('enduranceScore')}</div>
         <div class="stat-sub" style="color:var(--accent2);font-weight:600">${endClass}</div>
 
       </div>
       <div class="stat-card">
         <div class="stat-label">Fitness Age</div>
-        <div class="stat-value" style="color:var(--green)">${L('fitnessAge',1)}</div>
+        <div class="stat-value" style="color:var(--green)">${GL('fitnessAge',1)}</div>
         <div class="stat-sub">Biological age (chronological: 28)</div>
       </div>
       <div class="stat-card">
@@ -1382,9 +1435,9 @@ function renderHealth(){
     <div class="load-section">
       ${(()=>{
         const vals=[
-          {lbl:'Aerobic Low',val:isToday?d.aerobicLowLoad:avgg(hrows,'aerobicLowLoad'),min:130,max:342,color:'#60a5fa'},
-          {lbl:'Aerobic High',val:isToday?d.aerobicHighLoad:avgg(hrows,'aerobicHighLoad'),min:256,max:467,color:'#c49078'},
-          {lbl:'Anaerobic',val:isToday?d.anaerobicLoad:avgg(hrows,'anaerobicLoad'),min:0,max:211,color:'#f87171'}
+          {lbl:'Aerobic Low',val:(d.aerobicLowLoad??gLatest('aerobicLowLoad')??avgg(hrows,'aerobicLowLoad')),min:130,max:342,color:'#60a5fa'},
+          {lbl:'Aerobic High',val:(d.aerobicHighLoad??gLatest('aerobicHighLoad')??avgg(hrows,'aerobicHighLoad')),min:256,max:467,color:'#c49078'},
+          {lbl:'Anaerobic',val:(d.anaerobicLoad??gLatest('anaerobicLoad')??avgg(hrows,'anaerobicLoad')),min:0,max:211,color:'#f87171'}
         ];
         const cap=700;
         return vals.map(v=>{
@@ -1470,6 +1523,7 @@ function renderHealth(){
       </div>
     </div>`:''}
 
+    `+deltaHtmlBlock+`
     ${!isToday&&hrows.length>1?`
     <div class="section-head" style="margin-top:1.5rem">Wellness Trends</div>
     <div class="chart-card" style="margin-bottom:10px">
@@ -1584,6 +1638,7 @@ function showSubTab(sect, tab, el) {
   }
   // Trigger trend rendering
   if(sect==='health'&&tab==='trends'){renderHealthTrends();}
+  if(sect==='health'&&tab==='composition'){renderHealthComp();}
 }
 
 function showNav(id,el){
@@ -2274,19 +2329,4 @@ function renderNutrition() {
       fetch(SHIFTS_URL + nc).then(r => r.json()).catch(() => [])
     ]);
     activities = acts || [];
-    healthData = health || [];
-    nutritionData = nutr || [];
-    reviewsData = reviews || [];
-    shiftsData = shifts || [];
-  } catch(e) {
-    console.error('Init load failed:', e);
-  }
-  initCompDates();
-  initHealthDates();
-  initNutrDates();
-  renderActivities();
-  renderReviewHistory();
-})();
-</script>
-</body>
-</html>
+    healthData = 
