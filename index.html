@@ -559,24 +559,14 @@ function renderTrainingLoad(){
 // ═══════════════════════════════════════════════
 function renderRacePreds(){
   const el=document.getElementById('race-preds');if(!el)return;
-  const withVO2=activities.filter(a=>a.vo2max&&a.type==='running').sort((a,b)=>b.date.localeCompare(a.date));
-  if(!withVO2.length){el.innerHTML='<p style="color:var(--muted);font-size:12px">No VO₂max data yet</p>';return;}
-  const vo2=withVO2[0].vo2max;
-  // Jack Daniels VDOT tables approximation
-  // vVo2max (m/min) ≈ (vo2max × 29.54 + 5.000663 - 0.007546×vo2max²) / (0.000104×vo2max² + 0.1894393×vo2max + 29.381) × 100/4
-  // Simpler: pace at VO2max ≈ vo2max / 3.5 km/h → convert to seconds
-  // Use standard formula: time(d) = a × d^b where b=1.06, a from known 5k time
-  // Better: from VO2max, estimate 5k time using Daniels VDOT
-  // VDOT 45→5k=22:36, 50→20:03, 55→18:05, 60→16:31, 65→15:13
-  const vdot=vo2;
-  // Polynomial fit for VDOT→5k seconds
-  const p5k=Math.round((-0.0062*vdot*vdot + 0.1985*vdot*60 + 2340) / (0.005*vdot+0.76));
-  const riegel=(d,base_d,base_t)=>Math.round(base_t*Math.pow(d/base_d,1.06));
+  // Use Garmin's own race predictions stored in health data
+  const entry=[...healthData].filter(h=>h.race5kSec).sort((a,b)=>b.date.localeCompare(a.date))[0];
+  if(!entry){el.innerHTML='<p style="color:var(--muted);font-size:12px">No race prediction data yet</p>';return;}
   const preds=[
-    {dist:'5 km',sec:p5k},
-    {dist:'10 km',sec:riegel(10000,5000,p5k)},
-    {dist:'Half',sec:riegel(21097,5000,p5k)},
-    {dist:'Marathon',sec:riegel(42195,5000,p5k)}
+    {dist:'5 km',sec:entry.race5kSec},
+    {dist:'10 km',sec:entry.race10kSec},
+    {dist:'Half',sec:entry.raceHalfSec},
+    {dist:'Marathon',sec:entry.raceMarathonSec}
   ];
   el.innerHTML=preds.map(p=>`<div class="race-card"><div class="race-dist">${p.dist}</div><div class="race-time">${fmt(p.sec)}</div></div>`).join('');
 }
