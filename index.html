@@ -1652,11 +1652,12 @@ function renderHealth(){
 
     ${(()=>{
       // Find the most recent weigh-in on or before the selected date
+      const _sd=healthEndDate||d.date;
       const bcEntry=[...healthData]
-        .filter(h=>h.weight!=null&&h.date<=selDate)
+        .filter(h=>h.weight!=null&&h.date<=_sd)
         .sort((a,b)=>b.date.localeCompare(a.date))[0]||null;
       if(!bcEntry)return'';
-      const bcStale=bcEntry.date!==selDate;
+      const bcStale=bcEntry.date!==_sd;
       const bcDateLbl=bcEntry.date.split('-').reverse().slice(0,2).join('/');
       const bv=(k,dec=1)=>bcEntry[k]!=null?(+bcEntry[k]).toFixed(dec):'—';
       return`
