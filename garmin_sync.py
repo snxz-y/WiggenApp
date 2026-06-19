@@ -149,6 +149,7 @@ def sync_health(hdrs, dn):
     endurance= gget(f"{BASE}/metrics-service/metrics/endurancescore", hdrs, {"calendarDate": TARGET}) or {}
     fitness  = gget(f"{BASE}/fitnessage-service/fitnessage/{TARGET}", hdrs) or {}
     im       = gget(f"{BASE}/wellness-service/wellness/daily/im/{TARGET}", hdrs) or {}
+    race_raw = gget(f"{BASE}/metrics-service/metrics/racepredictions/latest", hdrs) or {}
 
     sleep_dto = sleep.get("dailySleepDTO", {}) or {}
     scores = sleep_dto.get("sleepScores", {}) or {}
@@ -287,6 +288,10 @@ def sync_health(hdrs, dn):
         "muscleMass": round(body_today["muscleMass"]/1000, 2) if body_today.get("muscleMass") and body_today["muscleMass"] > 500 else body_today.get("muscleMass"),
         "boneMass": round(body_today["boneMass"]/1000, 2) if body_today.get("boneMass") and body_today["boneMass"] > 100 else body_today.get("boneMass"),
         "bodyWater": body_today.get("bodyWater"),
+        "race5kSec": race_raw.get("time5K"),
+        "race10kSec": race_raw.get("time10K"),
+        "raceHalfSec": race_raw.get("timeHalfMarathon"),
+        "raceMarathonSec": race_raw.get("timeMarathon"),
     }
 
     print(f"  Steps:{entry.get('steps')} RHR:{entry.get('rhr')} BB:{entry.get('bbWake')} Sleep:{entry.get('sleepSec')}s")
