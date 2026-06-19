@@ -304,7 +304,6 @@ tr:hover td{background:var(--surface2)}
   </div>
 
   <!-- HEALTH -->
-    </div><!-- /act-sub-runs -->
   </div><!-- /nav-activities -->
   <div id="nav-health" class="panel">
     <div class="subnav" data-sect="health">
@@ -1044,10 +1043,8 @@ function getCompRows(){
 
 function initCompDates(){
   const d=new Date(); d.setDate(d.getDate()-1);
-  const yest=d.toISOString().slice(0,10);
-  compEndDate=yest;
-  d.setDate(d.getDate()-6);
-  compStartDate=d.toISOString().slice(0,10);
+  compEndDate=d.toISOString().slice(0,10);
+  compStartDate='2026-06-01';
 }
 
 function applyCompStart(){
