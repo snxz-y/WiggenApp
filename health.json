@@ -64,7 +64,11 @@
     "bodyFat": 25.2,
     "muscleMass": 32.26,
     "boneMass": 4.51,
-    "bodyWater": 54.6
+    "bodyWater": 54.6,
+    "race5kSec": 1510,
+    "race10kSec": 3300,
+    "raceHalfSec": 7625,
+    "raceMarathonSec": 17387
   },
   {
     "date": "2026-06-17",
