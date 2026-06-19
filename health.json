@@ -62,7 +62,11 @@
     "bodyFat": 25.2,
     "muscleMass": 32.26,
     "boneMass": 4.51,
-    "bodyWater": 54.6
+    "bodyWater": 54.6,
+    "race5kSec": 1510,
+    "race10kSec": 3300,
+    "raceHalfSec": 7625,
+    "raceMarathonSec": 17387
   },
   {
     "date": "2026-06-17",
@@ -127,7 +131,11 @@
     "bodyFat": 25.0,
     "muscleMass": 32.32,
     "boneMass": 4.55,
-    "bodyWater": 54.8
+    "bodyWater": 54.8,
+    "race5kSec": 1510,
+    "race10kSec": 3300,
+    "raceHalfSec": 7625,
+    "raceMarathonSec": 17387
   },
   {
     "date": "2026-06-16",
@@ -192,7 +200,11 @@
     "bodyFat": 24.4,
     "muscleMass": 32.45,
     "boneMass": 4.64,
-    "bodyWater": 55.2
+    "bodyWater": 55.2,
+    "race5kSec": 1510,
+    "race10kSec": 3300,
+    "raceHalfSec": 7625,
+    "raceMarathonSec": 17387
   },
   {
     "date": "2026-06-15",
@@ -257,7 +269,11 @@
     "bodyFat": 25.1,
     "muscleMass": 32.59,
     "boneMass": 4.63,
-    "bodyWater": 54.7
+    "bodyWater": 54.7,
+    "race5kSec": 1510,
+    "race10kSec": 3300,
+    "raceHalfSec": 7625,
+    "raceMarathonSec": 17387
   },
   {
     "date": "2026-06-14",
@@ -322,7 +338,11 @@
     "bodyFat": 24.6,
     "muscleMass": 32.53,
     "boneMass": 4.65,
-    "bodyWater": 55.1
+    "bodyWater": 55.1,
+    "race5kSec": 1510,
+    "race10kSec": 3300,
+    "raceHalfSec": 7625,
+    "raceMarathonSec": 17387
   },
   {
     "date": "2026-06-13",
@@ -389,7 +409,11 @@
     "bodyFat": 25.0,
     "muscleMass": 32.58,
     "boneMass": 4.63,
-    "bodyWater": 54.7
+    "bodyWater": 54.7,
+    "race5kSec": 1510,
+    "race10kSec": 3300,
+    "raceHalfSec": 7625,
+    "raceMarathonSec": 17387
   },
   {
     "date": "2026-06-12",
@@ -456,7 +480,11 @@
     "bodyFat": 24.2,
     "muscleMass": 32.34,
     "boneMass": 4.62,
-    "bodyWater": 55.3
+    "bodyWater": 55.3,
+    "race5kSec": 1510,
+    "race10kSec": 3300,
+    "raceHalfSec": 7625,
+    "raceMarathonSec": 17387
   },
   {
     "date": "2026-06-11",
@@ -523,7 +551,11 @@
     "bodyFat": 23.9,
     "muscleMass": 32.44,
     "boneMass": 4.68,
-    "bodyWater": 55.6
+    "bodyWater": 55.6,
+    "race5kSec": 1510,
+    "race10kSec": 3300,
+    "raceHalfSec": 7625,
+    "raceMarathonSec": 17387
   },
   {
     "date": "2026-06-10",
@@ -590,7 +622,11 @@
     "bodyFat": null,
     "muscleMass": null,
     "boneMass": null,
-    "bodyWater": null
+    "bodyWater": null,
+    "race5kSec": 1510,
+    "race10kSec": 3300,
+    "raceHalfSec": 7625,
+    "raceMarathonSec": 17387
   },
   {
     "date": "2026-06-09",
@@ -657,7 +693,11 @@
     "bodyFat": 25.8,
     "muscleMass": 32.48,
     "boneMass": 4.53,
-    "bodyWater": 54.2
+    "bodyWater": 54.2,
+    "race5kSec": 1510,
+    "race10kSec": 3300,
+    "raceHalfSec": 7625,
+    "raceMarathonSec": 17387
   },
   {
     "date": "2026-06-08",
@@ -724,7 +764,11 @@
     "bodyFat": 25.6,
     "muscleMass": 32.61,
     "boneMass": 4.59,
-    "bodyWater": 54.3
+    "bodyWater": 54.3,
+    "race5kSec": 1510,
+    "race10kSec": 3300,
+    "raceHalfSec": 7625,
+    "raceMarathonSec": 17387
   },
   {
     "date": "2026-06-07",
@@ -791,7 +835,11 @@
     "bodyFat": 25.6,
     "muscleMass": 32.58,
     "boneMass": 4.58,
-    "bodyWater": 54.3
+    "bodyWater": 54.3,
+    "race5kSec": 1510,
+    "race10kSec": 3300,
+    "raceHalfSec": 7625,
+    "raceMarathonSec": 17387
   },
   {
     "date": "2026-06-06",
@@ -858,7 +906,11 @@
     "bodyFat": 26.1,
     "muscleMass": 32.33,
     "boneMass": 4.45,
-    "bodyWater": 53.9
+    "bodyWater": 53.9,
+    "race5kSec": 1510,
+    "race10kSec": 3300,
+    "raceHalfSec": 7625,
+    "raceMarathonSec": 17387
   },
   {
     "date": "2026-06-05",
@@ -925,7 +977,11 @@
     "bodyFat": 26.1,
     "muscleMass": 32.32,
     "boneMass": 4.45,
-    "bodyWater": 53.9
+    "bodyWater": 53.9,
+    "race5kSec": 1510,
+    "race10kSec": 3300,
+    "raceHalfSec": 7625,
+    "raceMarathonSec": 17387
   },
   {
     "date": "2026-06-04",
@@ -992,7 +1048,11 @@
     "bodyFat": 25.2,
     "muscleMass": 32.27,
     "boneMass": 4.51,
-    "bodyWater": 54.6
+    "bodyWater": 54.6,
+    "race5kSec": 1510,
+    "race10kSec": 3300,
+    "raceHalfSec": 7625,
+    "raceMarathonSec": 17387
   },
   {
     "date": "2026-06-03",
@@ -1059,7 +1119,11 @@
     "bodyFat": 24.5,
     "muscleMass": 32.3,
     "boneMass": 4.57,
-    "bodyWater": 55.1
+    "bodyWater": 55.1,
+    "race5kSec": 1510,
+    "race10kSec": 3300,
+    "raceHalfSec": 7625,
+    "raceMarathonSec": 17387
   },
   {
     "date": "2026-06-02",
@@ -1126,7 +1190,11 @@
     "bodyFat": 25.0,
     "muscleMass": 32.32,
     "boneMass": 4.54,
-    "bodyWater": 54.8
+    "bodyWater": 54.8,
+    "race5kSec": 1510,
+    "race10kSec": 3300,
+    "raceHalfSec": 7625,
+    "raceMarathonSec": 17387
   },
   {
     "date": "2026-06-01",
@@ -1193,7 +1261,11 @@
     "bodyFat": 25.3,
     "muscleMass": 32.3,
     "boneMass": 4.51,
-    "bodyWater": 54.5
+    "bodyWater": 54.5,
+    "race5kSec": 1510,
+    "race10kSec": 3300,
+    "raceHalfSec": 7625,
+    "raceMarathonSec": 17387
   },
   {
     "date": "2026-05-31",
@@ -1202,7 +1274,11 @@
     "bodyFat": 25.1,
     "muscleMass": 32.38,
     "boneMass": 4.55,
-    "bodyWater": 54.7
+    "bodyWater": 54.7,
+    "race5kSec": 1510,
+    "race10kSec": 3300,
+    "raceHalfSec": 7625,
+    "raceMarathonSec": 17387
   },
   {
     "date": "2026-05-29",
@@ -1211,7 +1287,11 @@
     "bodyFat": 26.2,
     "muscleMass": 32.47,
     "boneMass": 4.49,
-    "bodyWater": 53.9
+    "bodyWater": 53.9,
+    "race5kSec": 1510,
+    "race10kSec": 3300,
+    "raceHalfSec": 7625,
+    "raceMarathonSec": 17387
   },
   {
     "date": "2026-05-24",
@@ -1220,7 +1300,11 @@
     "bodyFat": 25.8,
     "muscleMass": 32.88,
     "boneMass": 4.66,
-    "bodyWater": 54.1
+    "bodyWater": 54.1,
+    "race5kSec": 1510,
+    "race10kSec": 3300,
+    "raceHalfSec": 7625,
+    "raceMarathonSec": 17387
   },
   {
     "date": "2026-05-23",
@@ -1229,7 +1313,11 @@
     "bodyFat": 25.9,
     "muscleMass": 32.83,
     "boneMass": 4.64,
-    "bodyWater": 54.1
+    "bodyWater": 54.1,
+    "race5kSec": 1510,
+    "race10kSec": 3300,
+    "raceHalfSec": 7625,
+    "raceMarathonSec": 17387
   },
   {
     "date": "2026-05-18",
@@ -1238,7 +1326,11 @@
     "bodyFat": 26.1,
     "muscleMass": 32.82,
     "boneMass": 4.62,
-    "bodyWater": 54.0
+    "bodyWater": 54.0,
+    "race5kSec": 1510,
+    "race10kSec": 3300,
+    "raceHalfSec": 7625,
+    "raceMarathonSec": 17387
   },
   {
     "date": "2026-05-16",
@@ -1247,7 +1339,11 @@
     "bodyFat": 26.3,
     "muscleMass": 32.78,
     "boneMass": 4.58,
-    "bodyWater": 53.8
+    "bodyWater": 53.8,
+    "race5kSec": 1510,
+    "race10kSec": 3300,
+    "raceHalfSec": 7625,
+    "raceMarathonSec": 17387
   },
   {
     "date": "2026-05-15",
@@ -1256,7 +1352,11 @@
     "bodyFat": 25.7,
     "muscleMass": 32.71,
     "boneMass": 4.61,
-    "bodyWater": 54.3
+    "bodyWater": 54.3,
+    "race5kSec": 1510,
+    "race10kSec": 3300,
+    "raceHalfSec": 7625,
+    "raceMarathonSec": 17387
   },
   {
     "date": "2026-05-14",
@@ -1265,7 +1365,11 @@
     "bodyFat": 26.3,
     "muscleMass": 32.8,
     "boneMass": 4.59,
-    "bodyWater": 53.8
+    "bodyWater": 53.8,
+    "race5kSec": 1510,
+    "race10kSec": 3300,
+    "raceHalfSec": 7625,
+    "raceMarathonSec": 17387
   },
   {
     "date": "2026-05-13",
@@ -1274,6 +1378,10 @@
     "bodyFat": 26.5,
     "muscleMass": 32.75,
     "boneMass": 4.56,
-    "bodyWater": 53.7
+    "bodyWater": 53.7,
+    "race5kSec": 1510,
+    "race10kSec": 3300,
+    "raceHalfSec": 7625,
+    "raceMarathonSec": 17387
   }
 ]
