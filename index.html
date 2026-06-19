@@ -864,22 +864,28 @@ function renderWork(){
   const el=document.getElementById('work-content');if(!el)return;
   if(!shiftsData||!shiftsData.length){el.innerHTML='<p style="color:var(--muted)">No shift data loaded.</p>';return;}
 
+  // Only correlate shifts where health data exists (sleep score from same date = night before shift)
+  const hasHealth=date=>healthData.some(h=>h.date===date&&h.sleepScore!=null);
   const join=(date)=>{
     const h=healthData.find(h=>h.date===date)||{};
     const acts=activities.filter(a=>a.date===date);
-    const n=nutritionData&&nutritionData.find?nutritionData.find(n=>n.date===date):null;
-    return{...h,activities:acts,nutrition:n};
+    const nutr=nutritionData&&nutritionData.find?nutritionData.find(n=>n.date===date):null;
+    return{...h,activities:acts,nutrition:nutr};
   };
 
+  // Correlation: only shifts with health data
+  const corrShifts=shiftsData.filter(s=>hasHealth(s.date));
   const byType={day:[],evening:[],off:[]};
-  shiftsData.forEach(s=>{
+  corrShifts.forEach(s=>{
     const d=join(s.date);
     const type=s.shiftType||'off';
     if(byType[type])byType[type].push({shift:s,data:d});
   });
 
+  const corrDates=corrShifts.map(s=>s.date).sort();
+  const corrRange=corrDates.length?`${corrDates[0].split('-').reverse().slice(0,2).join('/')} – ${corrDates[corrDates.length-1].split('-').reverse().slice(0,2).join('/')}`:'no data';
+
   const metric=(rows,key)=>{const v=rows.map(r=>r.data[key]).filter(x=>x!=null);return v.length?+(v.reduce((s,x)=>s+x,0)/v.length).toFixed(1):null;};
-  const metricAct=(rows,fn)=>{const v=rows.map(r=>fn(r)).filter(x=>x!=null);return v.length?+(v.reduce((s,x)=>s+x,0)/v.length).toFixed(1):null;};
 
   const types=[
     {key:'day',label:'Day (07–15)',cls:'shift-day',emoji:'☀️'},
@@ -888,25 +894,53 @@ function renderWork(){
   ];
 
   const metrics=[
-    {key:'sleepScore',label:'Sleep Score',unit:''},
-    {key:'hrvAvg',label:'HRV avg',unit:''},
-    {key:'rhr',label:'Resting HR',unit:'bpm'},
+    {key:'sleepScore',label:'Sleep Score',unit:'',note:'night before shift'},
+    {key:'hrvAvg',label:'HRV',unit:''},
+    {key:'rhr',label:'Resting HR',unit:' bpm'},
     {key:'steps',label:'Steps',unit:''},
     {key:'bbHigh',label:'Body Battery',unit:''},
     {key:'avgStress',label:'Avg Stress',unit:''}
   ];
 
-  // Run frequency per shift type
-  const runFreq=(rows)=>rows.length?+(rows.filter(r=>r.data.activities.some(a=>a.type==='running')).length/rows.length*100).toFixed(0):0;
-  const avgCal=(rows)=>{const v=rows.filter(r=>r.data.nutrition&&r.data.nutrition.calories).map(r=>r.data.nutrition.calories);return v.length?Math.round(v.reduce((s,x)=>s+x,0)/v.length):null;};
+  // Transport %: ran/walked/biked on that day
+  const transportFreq=(rows)=>rows.length?+(rows.filter(r=>r.data.activities.some(a=>['running','walking','cycling'].includes(a.type))).length/rows.length*100).toFixed(0):0;
+
+  // Kcal eaten (nutrition) and burnt (totalKcal from health)
+  const avgEaten=(rows)=>{const v=rows.filter(r=>r.data.nutrition&&r.data.nutrition.calories).map(r=>r.data.nutrition.calories);return v.length?Math.round(v.reduce((s,x)=>s+x,0)/v.length):null;};
+  const avgBurnt=(rows)=>{const v=rows.map(r=>r.data.totalKcal).filter(x=>x!=null);return v.length?Math.round(v.reduce((s,x)=>s+x,0)/v.length):null;};
+
+  // Circular mean for times (handles midnight wraparound correctly)
+  const avgTime=(times)=>{
+    if(!times.length)return'—';
+    let sinS=0,cosS=0;
+    times.forEach(t=>{
+      const [h,m]=t.split(':').map(Number);
+      const angle=((h*60+m)/(24*60))*2*Math.PI;
+      sinS+=Math.sin(angle);cosS+=Math.cos(angle);
+    });
+    let angle=Math.atan2(sinS/times.length,cosS/times.length);
+    if(angle<0)angle+=2*Math.PI;
+    const mins=Math.round(angle/(2*Math.PI)*24*60)%1440;
+    return Math.floor(mins/60)+':'+String(mins%60).padStart(2,'0');
+  };
+  const avgSleepDur=(rows)=>{
+    const v=rows.map(r=>r.data.sleepSec).filter(x=>x!=null);
+    if(!v.length)return'—';
+    const avg=v.reduce((s,x)=>s+x,0)/v.length;
+    return`${Math.floor(avg/3600)}h ${Math.round((avg%3600)/60)}m`;
+  };
 
   let html=`
-    <div class="section-head" style="margin-top:0">Shift Overview</div>
+    <div class="section-head" style="margin-top:0">Shift Overview
+      <span style="font-size:11px;font-weight:400;color:var(--muted);margin-left:10px">Correlation based on ${corrShifts.length} shifts with health data (${corrRange})</span>
+    </div>
     <div class="stat-grid" style="margin-bottom:1.25rem">
       ${types.map(t=>`<div class="stat-card"><div class="stat-label">${t.emoji} ${t.label}</div><div class="stat-value">${byType[t.key].length}<span style="font-size:14px;color:var(--muted)"> shifts</span></div></div>`).join('')}
     </div>
 
-    <div class="section-head">Health Metrics by Shift Type</div>
+    <div class="section-head">Health Metrics by Shift Type
+      <span style="font-size:10px;font-weight:400;color:var(--muted);margin-left:8px">Sleep = night before shift</span>
+    </div>
     <div style="overflow-x:auto;margin-bottom:1.25rem">
     <table style="width:100%;border-collapse:collapse;font-size:12px">
       <thead><tr><th style="text-align:left;padding:6px 10px;color:var(--muted);font-weight:600">Metric</th>
@@ -915,52 +949,105 @@ function renderWork(){
       <tbody>
         ${metrics.map(m=>`<tr style="border-top:1px solid var(--border)">
           <td style="padding:7px 10px;color:var(--text)">${m.label}</td>
-          ${types.map(t=>{const v=metric(byType[t.key],m.key);return`<td style="text-align:right;padding:7px 10px;color:var(--accent)">${v!=null?v+''+m.unit:'—'}</td>`;}).join('')}
+          ${types.map(t=>{const v=metric(byType[t.key],m.key);return`<td style="text-align:right;padding:7px 10px;color:var(--accent)">${v!=null?v+m.unit:'—'}</td>`;}).join('')}
         </tr>`).join('')}
         <tr style="border-top:1px solid var(--border)">
-          <td style="padding:7px 10px;color:var(--text)">🏃 Run day %</td>
-          ${types.map(t=>`<td style="text-align:right;padding:7px 10px;color:var(--accent)">${runFreq(byType[t.key])}%</td>`).join('')}
+          <td style="padding:7px 10px;color:var(--text)">🚴 Transport %</td>
+          ${types.map(t=>`<td style="text-align:right;padding:7px 10px;color:var(--accent)">${transportFreq(byType[t.key])}%</td>`).join('')}
         </tr>
         <tr style="border-top:1px solid var(--border)">
-          <td style="padding:7px 10px;color:var(--text)">🍽 Avg kcal</td>
-          ${types.map(t=>{const v=avgCal(byType[t.key]);return`<td style="text-align:right;padding:7px 10px;color:var(--accent)">${v||'—'}</td>`;}).join('')}
+          <td style="padding:7px 10px;color:var(--text)">🍽 Avg kcal eaten</td>
+          ${types.map(t=>{const v=avgEaten(byType[t.key]);return`<td style="text-align:right;padding:7px 10px;color:var(--accent)">${v||'—'}</td>`;}).join('')}
+        </tr>
+        <tr style="border-top:1px solid var(--border)">
+          <td style="padding:7px 10px;color:var(--text)">🔥 Avg kcal burnt</td>
+          ${types.map(t=>{const v=avgBurnt(byType[t.key]);return`<td style="text-align:right;padding:7px 10px;color:var(--accent)">${v||'—'}</td>`;}).join('')}
         </tr>
       </tbody>
     </table>
     </div>
 
-    <div class="section-head">Bed/Wake Time by Shift Type</div>
-    <div class="corr-grid">
+    <div class="section-head">Sleep by Shift Type</div>
+    <div class="stat-grid" style="margin-bottom:1.25rem">
       ${types.map(t=>{
         const bedTimes=byType[t.key].filter(r=>r.data.bedTime).map(r=>r.data.bedTime);
         const wakeTimes=byType[t.key].filter(r=>r.data.wakeTime).map(r=>r.data.wakeTime);
-        const avgTime=(times)=>{
-          if(!times.length)return'—';
-          const mins=times.map(t=>{const[h,m]=t.split(':');return+h*60+(+m);});
-          const avg=mins.reduce((s,v)=>s+v,0)/mins.length;
-          return Math.floor(avg/60)+':'+String(Math.round(avg%60)).padStart(2,'0');
-        };
-        return`<div class="corr-card ${t.cls}"><div class="stat-label">${t.emoji} ${t.label}</div>
-          <div style="margin-top:8px;font-size:11px;color:var(--muted)">Avg bedtime</div>
-          <div style="font-size:18px;font-weight:700;color:var(--text)">${avgTime(bedTimes)}</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:6px">Avg wake</div>
-          <div style="font-size:18px;font-weight:700;color:var(--text)">${avgTime(wakeTimes)}</div>
+        return`<div class="stat-card ${t.cls}">
+          <div class="stat-label">${t.emoji} ${t.label}</div>
+          <div style="margin-top:10px;display:grid;gap:8px">
+            <div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em">Avg Bedtime</div><div style="font-size:20px;font-weight:700">${avgTime(bedTimes)}</div></div>
+            <div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em">Avg Wake</div><div style="font-size:20px;font-weight:700">${avgTime(wakeTimes)}</div></div>
+            <div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em">Avg Sleep</div><div style="font-size:18px;font-weight:700">${avgSleepDur(byType[t.key])}</div></div>
+          </div>
         </div>`;
       }).join('')}
-    </div>
-
-    <div class="section-head">Shift Schedule (recent)</div>
-    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:1rem">
-      ${[...shiftsData].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,30).map(s=>`
-        <div class="stat-card ${s.shiftType==='day'?'shift-day':s.shiftType==='evening'?'shift-eve':'shift-off'}" style="padding:6px 10px;min-width:unset">
-          <div style="font-size:10px;color:var(--muted)">${s.date.slice(5).replace('-','/')}</div>
-          <div style="font-size:12px;font-weight:600">${s.shiftType==='day'?'☀️ Day':s.shiftType==='evening'?'🌆 Eve':'😴 Off'}</div>
-          ${s.start?`<div style="font-size:10px;color:var(--muted)">${s.start}–${s.end}</div>`:''}
-        </div>`).join('')}
     </div>
   `;
 
   el.innerHTML=html;
+  renderWorkSchedule();
+}
+
+function renderWorkSchedule(){
+  const el=document.getElementById('work-schedule');if(!el)return;
+  if(!shiftsData||!shiftsData.length){el.innerHTML='<p style="color:var(--muted);padding:20px">No shift data.</p>';return;}
+
+  const sorted=[...shiftsData].sort((a,b)=>a.date.localeCompare(b.date));
+  const firstDate=new Date(sorted[0].date);
+  const lastDate=new Date(sorted[sorted.length-1].date);
+
+  // Find Monday of the first week
+  const start=new Date(firstDate);
+  start.setDate(start.getDate()-((start.getDay()+6)%7));
+
+  // Find Sunday of the last week
+  const end=new Date(lastDate);
+  end.setDate(end.getDate()+(6-((end.getDay()+6)%7)));
+
+  const shiftMap={};
+  sorted.forEach(s=>{shiftMap[s.date]=s;});
+
+  const dayNames=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const today=new Date().toISOString().slice(0,10);
+
+  let rows='';
+  const cur=new Date(start);
+  while(cur<=end){
+    const weekLabel=`${String(cur.getDate()).padStart(2,'0')}/${String(cur.getMonth()+1).padStart(2,'0')}`;
+    let cells=`<td style="font-size:10px;color:var(--muted);padding:4px 6px;white-space:nowrap;vertical-align:middle">${weekLabel}</td>`;
+    for(let d=0;d<7;d++){
+      const ds=cur.toISOString().slice(0,10);
+      const s=shiftMap[ds];
+      const isToday=ds===today;
+      const isFuture=ds>today;
+      const bg=s?s.shiftType==='day'?'rgba(212,176,100,.15)':s.shiftType==='evening'?'rgba(124,109,250,.15)':'rgba(122,171,136,.1)':'transparent';
+      const border=isToday?'2px solid var(--accent)':'1px solid var(--border)';
+      const dd=String(cur.getDate()).padStart(2,'0');
+      const label=s?(s.shiftType==='day'?'☀️ Day':s.shiftType==='evening'?'🌆 Eve':'😴 Off'):'';
+      const time=s&&s.start?`<div style="font-size:9px;color:var(--muted)">${s.start}–${s.end}</div>`:'';
+      cells+=`<td style="padding:0;width:${100/7}%"><div style="background:${bg};border:${border};border-radius:6px;padding:5px 6px;margin:2px;min-height:52px;opacity:${isFuture?'.6':'1'}">
+        <div style="font-size:10px;color:${isToday?'var(--accent)':'var(--muted)'};font-weight:${isToday?700:400}">${dd}</div>
+        <div style="font-size:11px;font-weight:600;margin-top:2px">${label}</div>
+        ${time}
+      </div></td>`;
+      cur.setDate(cur.getDate()+1);
+    }
+    rows+=`<tr>${cells}</tr>`;
+  }
+
+  el.innerHTML=`
+    <div class="section-head" style="margin-top:0">Shift Schedule</div>
+    <div style="display:flex;gap:12px;margin-bottom:12px;font-size:11px">
+      <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:rgba(212,176,100,.3);display:inline-block"></span>Day</span>
+      <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:rgba(124,109,250,.3);display:inline-block"></span>Evening</span>
+      <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:rgba(122,171,136,.2);display:inline-block"></span>Off</span>
+    </div>
+    <div style="overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse;table-layout:fixed">
+      <thead><tr><th style="width:45px"></th>${dayNames.map(d=>`<th style="font-size:11px;color:var(--muted);font-weight:600;padding:4px;text-align:center">${d}</th>`).join('')}</tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>
+  `;
 }
 
 
