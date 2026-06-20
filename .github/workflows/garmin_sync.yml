@@ -1,0 +1,26 @@
+name: Garmin Sync
+
+on:
+  schedule:
+    - cron: '*/15 4-22 * * *'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install deps
+        run: pip install requests
+      - name: Run sync
+        env:
+          GARMIN_OAUTH1_TOKEN: ${{ secrets.GARMIN_OAUTH1_TOKEN }}
+          GARMIN_OAUTH1_SECRET: ${{ secrets.GARMIN_OAUTH1_SECRET }}
+          GARMIN_DISPLAY_NAME: ${{ secrets.GARMIN_DISPLAY_NAME }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python garmin_sync.py
