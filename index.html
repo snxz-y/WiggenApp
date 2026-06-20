@@ -317,6 +317,7 @@ document.addEventListener('DOMContentLoaded',function(){var t=document.documentE
     <div class="logo">Wiggen <span>/ Health</span></div>
     <div style="display:flex;align-items:center;gap:14px">
       <div id="last-updated" style="display:none"></div>
+      <button onclick="location.href=location.pathname+'?v='+Date.now()" title="Force reload fresh version" style="background:none;border:1px solid var(--border);color:var(--muted);font-size:13px;padding:4px 10px;border-radius:6px;cursor:pointer;line-height:1" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">↺</button>
       <button id="theme-toggle" class="theme-toggle" onclick="toggleTheme()" title="Toggle light / dark" aria-label="Toggle theme">☾</button>
     </div>
   </div>
