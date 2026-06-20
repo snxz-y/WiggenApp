@@ -1,50 +1,5 @@
 [
   {
-    "activityId": 23316918539,
-    "date": "2026-06-20",
-    "type": "cycling",
-    "name": "Trondheim Sykling",
-    "distanceM": 6416.6,
-    "durationSec": 931,
-    "elevGain": 37.4,
-    "elevLoss": 120,
-    "avgHR": 141,
-    "maxHR": 177,
-    "calories": 146,
-    "load": 35.8,
-    "bodyBatDrain": 4,
-    "z1": 134,
-    "z2": 356,
-    "z3": 291,
-    "z4": 106,
-    "z5": 0,
-    "label": "Recovery",
-    "fastest10k": null,
-    "maxSpeed": 11.541999816894531,
-    "splits": [
-      {
-        "lap": 1,
-        "distanceM": 5000,
-        "durationSec": 664.401,
-        "avgHR": 136,
-        "maxHR": 177,
-        "avgSpeed": 7.526000022888184,
-        "elevGain": 24.08,
-        "calories": 96
-      },
-      {
-        "lap": 2,
-        "distanceM": 1416.58,
-        "durationSec": 266.964,
-        "avgHR": 152,
-        "maxHR": 169,
-        "avgSpeed": 5.306000232696533,
-        "elevGain": 13.32,
-        "calories": 49
-      }
-    ]
-  },
-  {
     "activityId": 23321695824,
     "date": "2026-06-20",
     "type": "cycling",
@@ -104,7 +59,54 @@
         "elevGain": 66.23,
         "calories": 88.0
       }
-    ]
+    ],
+    "startTime": "2026-06-20 22:35:02"
+  },
+  {
+    "activityId": 23316918539,
+    "date": "2026-06-20",
+    "type": "cycling",
+    "name": "Trondheim Sykling",
+    "distanceM": 6416.6,
+    "durationSec": 931,
+    "elevGain": 37.4,
+    "elevLoss": 120,
+    "avgHR": 141,
+    "maxHR": 177,
+    "calories": 146,
+    "load": 35.8,
+    "bodyBatDrain": 4,
+    "z1": 134,
+    "z2": 356,
+    "z3": 291,
+    "z4": 106,
+    "z5": 0,
+    "label": "Recovery",
+    "fastest10k": null,
+    "maxSpeed": 11.541999816894531,
+    "splits": [
+      {
+        "lap": 1,
+        "distanceM": 5000,
+        "durationSec": 664.401,
+        "avgHR": 136,
+        "maxHR": 177,
+        "avgSpeed": 7.526000022888184,
+        "elevGain": 24.08,
+        "calories": 96
+      },
+      {
+        "lap": 2,
+        "distanceM": 1416.58,
+        "durationSec": 266.964,
+        "avgHR": 152,
+        "maxHR": 169,
+        "avgSpeed": 5.306000232696533,
+        "elevGain": 13.32,
+        "calories": 49
+      }
+    ],
+    "startTime": "2026-06-20 14:25:46"
   },
   {
     "activityId": 23281632041,
