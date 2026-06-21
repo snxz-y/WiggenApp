@@ -13,6 +13,14 @@ async function ghGet(path, token) {
   return r.json();
 }
 
+// Decode a base64 blob as UTF-8 (plain atob() is Latin-1 and mangles non-ASCII
+// like →, é, etc. — which both breaks matching and re-garbles titles on save).
+function b64utf8(b64) {
+  const bin = atob((b64 || '').replace(/\s/g, ''));
+  const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
+  return new TextDecoder('utf-8').decode(bytes);
+}
+
 async function ghPut(path, content, sha, msg, token) {
   const r = await fetch(`${GH}/repos/${REPO}/contents/${path}`, {
     method: 'PUT',
@@ -189,7 +197,7 @@ export default {
       try {
         const body = await request.json();
         const existing = await ghGet('reviews.json', token);
-        const current = JSON.parse(atob(existing.content));
+        const current = JSON.parse(b64utf8(existing.content));
         current.unshift(body);
         await ghPut('reviews.json', JSON.stringify(current, null, 2), existing.sha, 'Save review', token);
         return new Response(JSON.stringify({ ok: true }), { headers: { ...cors, 'Content-Type': 'application/json' } });
@@ -203,7 +211,7 @@ export default {
       try {
         const { date, period, content } = await request.json();
         const existing = await ghGet('reviews.json', token);
-        const current = JSON.parse(atob(existing.content));
+        const current = JSON.parse(b64utf8(existing.content));
         // Remove only the first entry that matches exactly (handles duplicates).
         const idx = current.findIndex(r => r.date === date && r.period === period && r.content === content);
         if (idx === -1) {
