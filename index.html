@@ -2060,6 +2060,22 @@ function toggleReview(i) {
   chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
 }
 
+// Normalize a stored review period into a clean "DD/MM/YYYY → DD/MM/YYYY".
+// Handles both ISO (2026-06-14) and DD/MM/YYYY tokens, and ignores any
+// mojibake separator from older saves.
+function formatReviewPeriod(period) {
+  if (!period) return '';
+  const re = /(\d{4})-(\d{1,2})-(\d{1,2})|(\d{1,2})\/(\d{1,2})\/(\d{4})/g;
+  const out = []; let m;
+  while ((m = re.exec(period))) {
+    if (m[1]) out.push(`${m[3].padStart(2,'0')}/${m[2].padStart(2,'0')}/${m[1]}`);
+    else out.push(`${m[4].padStart(2,'0')}/${m[5].padStart(2,'0')}/${m[6]}`);
+  }
+  if (out.length >= 2) return `${out[0]} → ${out[1]}`;
+  if (out.length === 1) return out[0];
+  return period;
+}
+
 function renderReviewHistory() {
   const el = document.getElementById('review-history');
   if (!reviewsData.length) { el.innerHTML = ''; return; }
@@ -2069,7 +2085,7 @@ function renderReviewHistory() {
     sorted.map((r,i) => `
       <div style="border:1px solid var(--border);border-radius:10px;margin-bottom:8px;overflow:hidden">
         <div onclick="toggleReview(${i})" style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:var(--surface);cursor:pointer;user-select:none">
-          <div style="font-size:13px;font-weight:600">Weekly Review — ${r.period}</div>
+          <div style="font-size:13px;font-weight:600">Weekly Review — ${formatReviewPeriod(r.period)}</div>
           <div style="display:flex;align-items:center;gap:12px">
             <div style="font-size:11px;color:var(--muted)">${fmtDate(r.date)}</div>
             <div id="review-chevron-${i}" style="color:var(--muted);font-size:12px;transition:transform .2s">&#9660;</div>
@@ -2089,7 +2105,7 @@ function confirmDeleteReview(i) {
   ov.innerHTML = `
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px 24px;max-width:320px;width:100%;box-shadow:var(--shadow);text-align:center">
       <div style="font-size:15px;font-weight:600;margin-bottom:8px">Delete this review?</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:18px">Weekly Review — ${rev.period}<br>This can't be undone.</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:18px">Weekly Review — ${formatReviewPeriod(rev.period)}<br>This can't be undone.</div>
       <div style="display:flex;gap:10px;justify-content:center">
         <button onclick="closeDeleteReview()" style="padding:9px 18px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer;font-size:13px;font-weight:600">Cancel</button>
         <button id="del-review-confirm" style="padding:9px 18px;border-radius:20px;border:1px solid #c47878;background:#c47878;color:#fff;cursor:pointer;font-size:13px;font-weight:600">Delete</button>
@@ -2292,7 +2308,7 @@ async function generateReview() {
 
     const reviewObj = {
       date: new Date().toISOString().slice(0,10),
-      period: `${start} → ${end}`,
+      period: `${fmtDate(start)} → ${fmtDate(end)}`,
       content: reviewText
     };
 
