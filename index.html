@@ -2088,14 +2088,34 @@ async function triggerGarminSync() {
     });
     const data = await r.json();
     if (r.ok && data.ok) {
-      btn.textContent = '✓ Triggered!';
+      // Workflow dispatched. Count down while it runs (~45-60s), then reload data.
       btn.style.color = 'var(--accent)';
       btn.style.borderColor = 'var(--accent)';
       btn.style.opacity = '1';
-      setTimeout(() => {
-        btn.textContent = '⟳ Sync Garmin';
-        btn.disabled = false;
-      }, 4000);
+      let secs = 60;
+      btn.textContent = '⟳ Syncing ' + secs + 's';
+      const countdown = setInterval(() => {
+        secs -= 1;
+        if (secs > 0) btn.textContent = '⟳ Syncing ' + secs + 's';
+      }, 1000);
+      setTimeout(async () => {
+        clearInterval(countdown);
+        btn.textContent = '⟳ Refreshing…';
+        try {
+          await loadData();
+          renderAllViews();
+          btn.textContent = '✓ Updated!';
+        } catch (e) {
+          console.error('Refresh after sync failed:', e);
+          btn.textContent = '✓ Synced (reload)';
+        }
+        setTimeout(() => {
+          btn.textContent = '⟳ Sync Garmin';
+          btn.style.color = 'var(--accent)';
+          btn.style.borderColor = 'var(--accent)';
+          btn.disabled = false;
+        }, 4000);
+      }, 60000);
     } else {
       btn.textContent = '✗ Failed';
       btn.style.color = '#f55';
@@ -2640,21 +2660,34 @@ function renderNutrition() {
   }, 0); // end setTimeout
 } // end renderNutrition
 
+// ── DATA LOAD ────────────────────────────────────────────────────────────────
+// Fetches all data files (cache-busted) and assigns the globals.
+async function loadData() {
+  const nc = '?nc=' + Date.now();
+  const [acts, health, nutr, reviews, shifts] = await Promise.all([
+    fetch(ACT_URL + nc).then(r => r.json()),
+    fetch(HEALTH_URL + nc).then(r => r.json()),
+    fetch(NUTR_URL + nc).then(r => r.json()),
+    fetch(REVIEWS_URL + nc).then(r => r.json()),
+    fetch(SHIFTS_URL + nc).then(r => r.json()).catch(() => [])
+  ]);
+  activities = acts || []; healthData = health || [];
+  nutritionData = nutr || []; reviewsData = reviews || [];
+  shiftsData = shifts || [];
+}
+
+// Re-render every view from the current globals (used after a manual sync).
+function renderAllViews() {
+  try { renderActivities(); } catch(e) { console.error('renderActivities', e); }
+  try { renderReviewHistory(); } catch(e) { console.error('renderReviewHistory', e); }
+  try { renderHealth(); } catch(e) { console.error('renderHealth', e); }
+  try { renderNutrition(); } catch(e) { console.error('renderNutrition', e); }
+  try { renderWork(); } catch(e) {}
+}
+
 // ── INIT ─────────────────────────────────────────────────────────────────────
 (async () => {
-  const nc = '?nc=' + Date.now();
-  try {
-    const [acts, health, nutr, reviews, shifts] = await Promise.all([
-      fetch(ACT_URL + nc).then(r => r.json()),
-      fetch(HEALTH_URL + nc).then(r => r.json()),
-      fetch(NUTR_URL + nc).then(r => r.json()),
-      fetch(REVIEWS_URL + nc).then(r => r.json()),
-      fetch(SHIFTS_URL + nc).then(r => r.json()).catch(() => [])
-    ]);
-    activities = acts || []; healthData = health || [];
-    nutritionData = nutr || []; reviewsData = reviews || [];
-    shiftsData = shifts || [];
-  } catch(e) { console.error('Init load failed:', e); }
+  try { await loadData(); } catch(e) { console.error('Init load failed:', e); }
   initCompDates(); initHealthDates(); initNutrDates();
   renderActivities(); renderReviewHistory();
 })();
