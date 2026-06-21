@@ -43,12 +43,13 @@ function classifyShift(shift) {
 }
 
 // ── Build a shift-aware weekly review prompt ───────────────────────────────
-function buildReviewPrompt(weekLabel, health, activities, nutrition, shifts) {
-  const weekStart = weekLabel; // ISO date of Monday
+function buildReviewPrompt(weekStart, weekEnd, health, activities, nutrition, shifts) {
+  // weekStart / weekEnd are ISO dates (YYYY-MM-DD). Fall back to a 7-day window.
+  let endStr = weekEnd;
+  if (!endStr) { const e = new Date(weekStart); e.setDate(e.getDate() + 6); endStr = e.toISOString().slice(0, 10); }
 
-  // Filter data to this week
-  const endDate = new Date(weekStart); endDate.setDate(endDate.getDate() + 6);
-  const inWeek = d => d >= weekStart && d <= endDate.toISOString().slice(0, 10);
+  // Filter data to this period
+  const inWeek = d => d >= weekStart && d <= endStr;
 
   const weekHealth = health.filter(h => inWeek(h.date)).sort((a, b) => a.date.localeCompare(b.date));
   const weekActs = activities.filter(a => inWeek(a.date));
@@ -84,7 +85,7 @@ Days off: ${offDays.length}`;
 
   return `You are a data-driven health and performance coach analyzing a week of data for Jørgen (28, shift nurse in Trondheim, Norway, 171cm, ~${lastWeight?.weight ?? 76}kg, goal 65kg, quit Zyn June 5 2026, dairy allergy, Garmin Epix Pro Gen 2).
 
-WEEK: ${weekStart} to ${endDate.toISOString().slice(0, 10)}
+WEEK: ${weekStart} to ${endStr}
 
 == WORK SCHEDULE ==
 ${shiftSummary}
@@ -229,7 +230,11 @@ export default {
     if (url.pathname === '/generate-review' && request.method === 'POST') {
       try {
         const reqBody = await request.json();
-        const weekLabel = reqBody.week; // e.g. "2026-06-15" (Monday)
+        const start = reqBody.start || reqBody.week; // ISO start date
+        const end = reqBody.end;                     // ISO end date (optional)
+        if (!start) {
+          return new Response(JSON.stringify({ error: 'Missing start date' }), { status: 400, headers: { ...cors, 'Content-Type': 'application/json' } });
+        }
 
         // Fetch all data in parallel
         const [health, activities, nutrition, shifts] = await Promise.all([
@@ -240,7 +245,8 @@ export default {
         ]);
 
         const prompt = buildReviewPrompt(
-          weekLabel,
+          start,
+          end,
           health || [],
           activities || [],
           nutrition || [],
@@ -264,7 +270,7 @@ export default {
         const aiData = await aiResp.json();
         const reviewText = aiData.content?.[0]?.text || 'Failed to generate review.';
 
-        return new Response(JSON.stringify({ review: reviewText, week: weekLabel }), {
+        return new Response(JSON.stringify({ review: reviewText, week: start }), {
           headers: { ...cors, 'Content-Type': 'application/json' }
         });
       } catch (e) {
