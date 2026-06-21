@@ -2076,6 +2076,30 @@ function formatReviewPeriod(period) {
   return period;
 }
 
+// Lightweight Markdown → HTML for review text (headers, bold, bullets, rules).
+function mdToHtml(md) {
+  if (!md) return '';
+  let s = String(md).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const inline = t => t.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  const lines = s.split('\n');
+  let html = '', inList = false;
+  const closeList = () => { if (inList) { html += '</ul>'; inList = false; } };
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!line) { closeList(); continue; }
+    if (/^---+$/.test(line) || /^\*\*\*+$/.test(line)) { closeList(); html += '<hr style="border:none;border-top:1px solid var(--border);margin:14px 0">'; continue; }
+    let m;
+    if (m = line.match(/^###\s+(.*)/)) { closeList(); html += `<div style="font-weight:700;font-size:13px;margin:14px 0 5px">${inline(m[1])}</div>`; continue; }
+    if (m = line.match(/^##\s+(.*)/))  { closeList(); html += `<div style="font-weight:700;font-size:14.5px;color:var(--accent);margin:18px 0 8px">${inline(m[1])}</div>`; continue; }
+    if (m = line.match(/^#\s+(.*)/))   { closeList(); html += `<div style="font-family:var(--font-serif);font-size:18px;margin:4px 0 12px">${inline(m[1])}</div>`; continue; }
+    if (m = line.match(/^[-*]\s+(.*)/)) { if (!inList) { html += '<ul style="margin:6px 0 10px 20px;padding:0">'; inList = true; } html += `<li style="margin:4px 0">${inline(m[1])}</li>`; continue; }
+    closeList();
+    html += `<p style="margin:0 0 11px">${inline(line)}</p>`;
+  }
+  closeList();
+  return html;
+}
+
 function renderReviewHistory() {
   const el = document.getElementById('review-history');
   if (!reviewsData.length) { el.innerHTML = ''; return; }
@@ -2092,7 +2116,7 @@ function renderReviewHistory() {
             <div onclick="event.stopPropagation();confirmDeleteReview(${i})" title="Delete review" style="color:var(--muted);cursor:pointer;font-size:15px;line-height:1;padding:2px 5px;border-radius:6px;transition:color .15s,background .15s" onmouseover="this.style.color='#c47878';this.style.background='rgba(196,120,120,.12)'" onmouseout="this.style.color='var(--muted)';this.style.background='transparent'">&#10005;</div>
           </div>
         </div>
-        <div id="review-body-${i}" style="display:none;padding:16px;font-size:13px;line-height:1.8;color:var(--text);white-space:pre-wrap;border-top:1px solid var(--border)">${r.content.replace(/([\u{1F300}-\u{1F9FF}])/gu,"\n\n$1").trim()}</div>
+        <div id="review-body-${i}" style="display:none;padding:16px;font-size:13px;line-height:1.7;color:var(--text);border-top:1px solid var(--border)">${mdToHtml(r.content)}</div>
       </div>`).join('');
 }
 
@@ -2312,20 +2336,15 @@ async function generateReview() {
       content: reviewText
     };
 
-    // Display
+    // Display (render Markdown)
     const output = document.getElementById('review-output');
-    // Format: add line breaks before emoji headers and between paragraphs
-    const formatted = reviewText
-      .replace(/([\u{1F300}-\u{1F9FF}])/gu, '\n\n$1')
-      .replace(/([.!?]) ([A-Z\u{1F300}-\u{1F9FF}])/gu, '$1\n\n$2')
-      .trim();
-    output.textContent = formatted;
+    output.innerHTML = mdToHtml(reviewText);
     output.style.display = 'block';
 
     // Save to GitHub
     const saved = await pushReviewToGithub(reviewObj);
     if (saved) {
-      output.textContent += '\n\n✓ Saved to your review history.';
+      output.innerHTML += '<div style="margin-top:12px;color:var(--green);font-size:12px">✓ Saved to your review history.</div>';
       renderReviewHistory();
     }
 
