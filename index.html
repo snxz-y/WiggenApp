@@ -2300,11 +2300,11 @@ async function generateReview() {
     const response = await fetch('https://nutrition-reciever.margidowiggen.workers.dev/generate-review', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(weekSummary)
+      body: JSON.stringify({ start, end })
     });
 
     const data = await response.json();
-    const reviewText = data.text || data.error || 'Could not generate review.';
+    const reviewText = data.review || data.error || 'Could not generate review.';
 
     const reviewObj = {
       date: new Date().toISOString().slice(0,10),
