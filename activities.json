@@ -38,7 +38,7 @@
     "z3": 2506.564,
     "z4": 4484.105,
     "z5": 168.001,
-    "label": "Overreaching Tempo 24",
+    "label": "Tempo",
     "splits": [
       {
         "lap": 1,
@@ -140,7 +140,8 @@
         "elevGain": 100.67,
         "calories": 158.0
       }
-    ]
+    ],
+    "indoor": false
   },
   {
     "activityId": 23355886997,
