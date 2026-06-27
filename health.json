@@ -180,33 +180,7 @@
     "race5kSec": null,
     "race10kSec": null,
     "raceHalfSec": null,
-    "raceMarathonSec": null,
-    "bodyBatterySeries": [
-      {
-        "time": "02:09",
-        "level": 21
-      },
-      {
-        "time": "05:42",
-        "level": 50
-      },
-      {
-        "time": "05:45",
-        "level": 50
-      },
-      {
-        "time": "10:39",
-        "level": 94
-      },
-      {
-        "time": "11:30",
-        "level": 89
-      },
-      {
-        "time": "16:57",
-        "level": 69
-      }
-    ]
+    "raceMarathonSec": null
   },
   {
     "date": "2026-06-25",
