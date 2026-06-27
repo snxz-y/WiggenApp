@@ -108,6 +108,44 @@
     "trainingReadiness": 73,
     "trainingReadinessLevel": "MODERATE",
     "trainingReadinessFeedback": "MOD RT LOW SS MOD",
+    "trainingReadinessSeries": [
+      {
+        "time": "00:34",
+        "score": 82,
+        "level": "HIGH"
+      },
+      {
+        "time": "10:59",
+        "score": 73,
+        "level": "MODERATE"
+      }
+    ],
+    "bodyBatterySeries": [
+      {
+        "time": "02:09",
+        "level": 21
+      },
+      {
+        "time": "05:42",
+        "level": 50
+      },
+      {
+        "time": "05:45",
+        "level": 50
+      },
+      {
+        "time": "10:39",
+        "level": 94
+      },
+      {
+        "time": "11:30",
+        "level": 89
+      },
+      {
+        "time": "16:57",
+        "level": 69
+      }
+    ],
     "trainingStatus": "UNPRODUCTIVE",
     "acuteLoad": 105,
     "chronicLoad": 271,
