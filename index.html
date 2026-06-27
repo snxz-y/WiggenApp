@@ -1157,7 +1157,7 @@ function renderNutritionExtras(){
   let cumDef=0;const defLabels=[];const defData=[];
   sorted.forEach(d=>{
     const eaten=d.calories||0;
-    const burned=([...healthData].find(h=>h.date===d.date)||{}).totalKcal||1900;
+    const burned=([...healthData].find(h=>h.date===d.date)||{}).totalKcal||2100;
     const deficit=burned-eaten;
     cumDef+=deficit;
     const [,_m,_day]=d.date.split('-'); defLabels.push(_day+'/'+_m);
@@ -3129,20 +3129,24 @@ async function loadData() {
   activities = acts || []; healthData = health || [];
   nutritionData = nutr || []; reviewsData = reviews || [];
   shiftsData = shifts || [];
-  // Floor recorded daily burn to BURN_FLOOR. On days the watch is off for a
-  // long stretch, Garmin only accrues BMR over the hours it logged, so the
-  // total comes out artificially low (e.g. 1470 on a ~17h day). Bump any
-  // recorded total below the floor up to it, so deficit/projection/balance all
-  // use a realistic full-day burn. Only days that actually have a totalKcal
-  // value are touched — body-composition-only days are left as null.
+  // Floor daily RESTING burn to BURN_FLOOR. On days the watch is off for a long
+  // stretch (or recorded no burn at all), the total comes out artificially low
+  // (e.g. 1470 on a ~17h day). For those days, set resting burn to the floor and
+  // ADD any real recorded activity on top (a logged 300 kcal run -> 2100 + 300 =
+  // 2400). Days already at/above the floor are real full days and left untouched.
+  // Applied ONLY to days with calories-consumed (nutrition) data.
   const BURN_FLOOR = 2100;
+  const consumedDates = new Set(
+    (nutritionData || []).filter(n => n && n.calories > 0).map(n => n.date)
+  );
   healthData.forEach(h => {
-    if (h && h.totalKcal != null && h.totalKcal < BURN_FLOOR) {
-      const diff = BURN_FLOOR - h.totalKcal;
-      if (h.bmrKcal != null) h.bmrKcal += diff;   // keep activeKcal + bmrKcal = totalKcal
-      h.totalKcal = BURN_FLOOR;
-      h._burnFloored = true;                       // marker for possible UI flagging
-    }
+    if (!h || !consumedDates.has(h.date)) return;        // skip days with no food logged
+    if (h.totalKcal != null && h.totalKcal >= BURN_FLOOR) return; // already a full day
+    const act = h.activeKcal != null ? h.activeKcal : 0; // keep real activity burn
+    h.activeKcal = act;
+    h.bmrKcal = BURN_FLOOR;                              // full-day resting baseline
+    h.totalKcal = BURN_FLOOR + act;                      // baseline + activity on top
+    h._burnFloored = true;                              // marker for possible UI flagging
   });
 }
 
