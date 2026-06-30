@@ -1,28 +1,28 @@
 [
   {
     "date": "2026-06-30",
-    "rhr": 49,
-    "minHR": 55,
+    "rhr": 46,
+    "minHR": 43,
     "maxHR": 84,
-    "avgStress": 50,
+    "avgStress": 34,
     "maxStress": 82,
-    "steps": null,
+    "steps": 160,
     "stepsGoal": 5750,
     "floors": null,
     "floorsGoal": 10,
-    "activeKcal": 0.0,
-    "totalKcal": 151.0,
-    "bmrKcal": 151.0,
+    "activeKcal": 3.0,
+    "totalKcal": 558.0,
+    "bmrKcal": 555.0,
     "modIntensityMin": 0,
     "vigIntensityMin": 0,
     "weeklyIntensityTotal": 0,
     "weeklyIntensityGoal": 150,
-    "bbHigh": 25,
-    "bbLow": 18,
+    "bbHigh": 46,
+    "bbLow": 15,
     "bbWake": null,
-    "bbEnd": 18,
-    "bbCharged": 0,
-    "bbDrained": 7,
+    "bbEnd": 46,
+    "bbCharged": 31,
+    "bbDrained": 10,
     "sleepScore": null,
     "sleepSec": null,
     "deepSec": null,
@@ -45,24 +45,24 @@
         "level": 25
       },
       {
-        "time": "00:30",
-        "level": 23
+        "time": "02:09",
+        "level": 17
       },
       {
-        "time": "00:36",
-        "level": 23
+        "time": "02:51",
+        "level": 15
       },
       {
-        "time": "01:00",
+        "time": "04:21",
         "level": 21
       },
       {
-        "time": "01:12",
-        "level": 20
+        "time": "04:24",
+        "level": 21
       },
       {
-        "time": "01:45",
-        "level": 18
+        "time": "06:18",
+        "level": 46
       }
     ],
     "trainingStatus": null,
@@ -85,12 +85,12 @@
     "fitnessAge": 25.7,
     "recoveryTimeHrs": null,
     "lactateHR": 184,
-    "weight": null,
-    "bmi": null,
-    "bodyFat": null,
-    "muscleMass": null,
-    "boneMass": null,
-    "bodyWater": null,
+    "weight": 76.76,
+    "bmi": 26.299999237060547,
+    "bodyFat": 24.3,
+    "muscleMass": 32.53,
+    "boneMass": 4.67,
+    "bodyWater": 55.3,
     "race5kSec": null,
     "race10kSec": null,
     "raceHalfSec": null,
