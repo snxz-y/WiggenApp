@@ -76,25 +76,25 @@
     "rhr": 45,
     "minHR": 43,
     "maxHR": 104,
-    "avgStress": 29,
+    "avgStress": 30,
     "maxStress": 93,
     "steps": 1028,
     "stepsGoal": 6270,
     "floors": null,
     "floorsGoal": 10,
     "activeKcal": 28.0,
-    "totalKcal": 1894.0,
-    "bmrKcal": 1866.0,
+    "totalKcal": 2086.0,
+    "bmrKcal": 2058.0,
     "modIntensityMin": 0,
     "vigIntensityMin": 0,
     "weeklyIntensityTotal": 0,
     "weeklyIntensityGoal": 150,
     "bbHigh": 85,
-    "bbLow": 32,
+    "bbLow": 25,
     "bbWake": 84,
-    "bbEnd": 32,
+    "bbEnd": 25,
     "bbCharged": 50,
-    "bbDrained": 53,
+    "bbDrained": 60,
     "sleepScore": 77,
     "sleepSec": 24720,
     "deepSec": 6540,
@@ -132,20 +132,20 @@
         "level": 85
       },
       {
-        "time": "07:18",
-        "level": 82
+        "time": "08:00",
+        "level": 77
       },
       {
-        "time": "14:24",
-        "level": 50
+        "time": "15:45",
+        "level": 42
       },
       {
-        "time": "14:36",
-        "level": 49
+        "time": "16:00",
+        "level": 42
       },
       {
-        "time": "21:15",
-        "level": 32
+        "time": "23:45",
+        "level": 25
       }
     ],
     "trainingStatus": "RECOVERY",
