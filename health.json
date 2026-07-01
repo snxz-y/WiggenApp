@@ -11,8 +11,8 @@
     "floors": null,
     "floorsGoal": 10,
     "activeKcal": 9.0,
-    "totalKcal": 996.0,
-    "bmrKcal": 987.0,
+    "totalKcal": 1004.0,
+    "bmrKcal": 995.0,
     "modIntensityMin": 0,
     "vigIntensityMin": 0,
     "weeklyIntensityTotal": 0,
@@ -60,16 +60,16 @@
         "level": 26
       },
       {
-        "time": "03:51",
-        "level": 26
-      },
-      {
-        "time": "07:36",
-        "level": 46
+        "time": "03:54",
+        "level": 27
       },
       {
         "time": "07:42",
         "level": 47
+      },
+      {
+        "time": "07:48",
+        "level": 48
       },
       {
         "time": "10:21",
