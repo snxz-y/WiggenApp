@@ -1,5 +1,108 @@
 [
   {
+    "date": "2026-07-03",
+    "rhr": 43,
+    "minHR": 41,
+    "maxHR": 102,
+    "avgStress": 31,
+    "maxStress": 95,
+    "steps": 2273,
+    "stepsGoal": 4450,
+    "floors": 3.048,
+    "floorsGoal": 10,
+    "activeKcal": 32.0,
+    "totalKcal": 2098.0,
+    "bmrKcal": 2066.0,
+    "modIntensityMin": 0,
+    "vigIntensityMin": 0,
+    "weeklyIntensityTotal": 58,
+    "weeklyIntensityGoal": 150,
+    "bbHigh": 97,
+    "bbLow": 11,
+    "bbWake": 97,
+    "bbEnd": 33,
+    "bbCharged": 86,
+    "bbDrained": 75,
+    "sleepScore": 85,
+    "sleepSec": 30960,
+    "deepSec": 5940,
+    "remSec": 3120,
+    "lightSec": 21900,
+    "awakeSec": 840,
+    "bedTime": "04:48",
+    "wakeTime": "13:38",
+    "avgResp": 13.0,
+    "hrvAvg": 75,
+    "hrvWeeklyAvg": 73,
+    "hrvStatus": "BALANCED",
+    "trainingReadiness": 62,
+    "trainingReadinessLevel": "MODERATE",
+    "trainingReadinessFeedback": "MOD RT MOD OR LOW SS GOOD AWAKE NEG",
+    "trainingReadinessSeries": [
+      {
+        "time": "13:57",
+        "score": 62,
+        "level": "MODERATE"
+      }
+    ],
+    "bodyBatterySeries": [
+      {
+        "time": "04:18",
+        "level": 11
+      },
+      {
+        "time": "07:57",
+        "level": 49
+      },
+      {
+        "time": "08:00",
+        "level": 50
+      },
+      {
+        "time": "13:30",
+        "level": 97
+      },
+      {
+        "time": "16:00",
+        "level": 82
+      },
+      {
+        "time": "23:57",
+        "level": 33
+      }
+    ],
+    "trainingStatus": "RECOVERY",
+    "acuteLoad": 212,
+    "chronicLoad": 280,
+    "acwr": 0.7,
+    "loadFocus": "AEROBIC HIGH FOCUS",
+    "aerobicLowLoad": 371.66595,
+    "aerobicHighLoad": 705.9968,
+    "anaerobicLoad": 96.7583,
+    "aerobicLowMin": 130,
+    "aerobicLowMax": 342,
+    "aerobicHighMin": 256,
+    "aerobicHighMax": 467,
+    "anaerobicMin": 0,
+    "anaerobicMax": 211,
+    "vo2max": 46.0,
+    "enduranceScore": 5276,
+    "enduranceClass": "Intermediate",
+    "fitnessAge": 25.4,
+    "recoveryTimeHrs": 1,
+    "lactateHR": 184,
+    "weight": null,
+    "bmi": null,
+    "bodyFat": null,
+    "muscleMass": null,
+    "boneMass": null,
+    "bodyWater": null,
+    "race5kSec": null,
+    "race10kSec": null,
+    "raceHalfSec": null,
+    "raceMarathonSec": null
+  },
+  {
     "date": "2026-07-02",
     "rhr": 45,
     "minHR": 44,
