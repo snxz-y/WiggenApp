@@ -1,5 +1,113 @@
 [
   {
+    "date": "2026-07-04",
+    "rhr": 44,
+    "minHR": 42,
+    "maxHR": 103,
+    "avgStress": 21,
+    "maxStress": 85,
+    "steps": 288,
+    "stepsGoal": 4240,
+    "floors": null,
+    "floorsGoal": 10,
+    "activeKcal": 10.0,
+    "totalKcal": 950.0,
+    "bmrKcal": 940.0,
+    "modIntensityMin": 0,
+    "vigIntensityMin": 0,
+    "weeklyIntensityTotal": 58,
+    "weeklyIntensityGoal": 150,
+    "bbHigh": 88,
+    "bbLow": 29,
+    "bbWake": 87,
+    "bbEnd": 87,
+    "bbCharged": 60,
+    "bbDrained": 6,
+    "sleepScore": 55,
+    "sleepSec": 27240,
+    "deepSec": 2640,
+    "remSec": 480,
+    "lightSec": 24120,
+    "awakeSec": 2640,
+    "bedTime": "01:29",
+    "wakeTime": "09:47",
+    "avgResp": 14.0,
+    "hrvAvg": 70,
+    "hrvWeeklyAvg": 72,
+    "hrvStatus": "BALANCED",
+    "trainingReadiness": 54,
+    "trainingReadinessLevel": "MODERATE",
+    "trainingReadinessFeedback": "MOD RT MOD OR LOW SS POOR",
+    "trainingReadinessSeries": [
+      {
+        "time": "04:34",
+        "score": 79,
+        "level": "HIGH"
+      },
+      {
+        "time": "10:30",
+        "score": 54,
+        "level": "MODERATE"
+      }
+    ],
+    "bodyBatterySeries": [
+      {
+        "time": "01:12",
+        "level": 29
+      },
+      {
+        "time": "03:36",
+        "level": 35
+      },
+      {
+        "time": "03:39",
+        "level": 35
+      },
+      {
+        "time": "07:12",
+        "level": 69
+      },
+      {
+        "time": "07:18",
+        "level": 69
+      },
+      {
+        "time": "10:15",
+        "level": 88
+      }
+    ],
+    "trainingStatus": "UNPRODUCTIVE",
+    "acuteLoad": 168,
+    "chronicLoad": 269,
+    "acwr": 0.6,
+    "loadFocus": "AEROBIC HIGH FOCUS",
+    "aerobicLowLoad": 299.54327,
+    "aerobicHighLoad": 705.9968,
+    "anaerobicLoad": 82.94826,
+    "aerobicLowMin": 130,
+    "aerobicLowMax": 342,
+    "aerobicHighMin": 256,
+    "aerobicHighMax": 467,
+    "anaerobicMin": 0,
+    "anaerobicMax": 211,
+    "vo2max": 46.0,
+    "enduranceScore": 5275,
+    "enduranceClass": "Intermediate",
+    "fitnessAge": 25.4,
+    "recoveryTimeHrs": 1.2,
+    "lactateHR": 184,
+    "weight": 76.93,
+    "bmi": 26.299999237060547,
+    "bodyFat": 24.2,
+    "muscleMass": 32.57,
+    "boneMass": 4.69,
+    "bodyWater": 55.3,
+    "race5kSec": null,
+    "race10kSec": null,
+    "raceHalfSec": null,
+    "raceMarathonSec": null
+  },
+  {
     "date": "2026-07-03",
     "rhr": 43,
     "minHR": 41,
