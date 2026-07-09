@@ -76,15 +76,15 @@
     "rhr": 44,
     "minHR": 41,
     "maxHR": 93,
-    "avgStress": 22,
+    "avgStress": 26,
     "maxStress": 90,
-    "steps": 829,
+    "steps": 2043,
     "stepsGoal": 3000,
     "floors": null,
     "floorsGoal": 10,
-    "activeKcal": 5.0,
-    "totalKcal": 1496.0,
-    "bmrKcal": 1491.0,
+    "activeKcal": 17.0,
+    "totalKcal": 2106.0,
+    "bmrKcal": 2089.0,
     "modIntensityMin": 0,
     "vigIntensityMin": 0,
     "weeklyIntensityTotal": 0,
@@ -92,9 +92,9 @@
     "bbHigh": 89,
     "bbLow": 30,
     "bbWake": 88,
-    "bbEnd": 68,
+    "bbEnd": 38,
     "bbCharged": 60,
-    "bbDrained": 36,
+    "bbDrained": 66,
     "sleepScore": 63,
     "sleepSec": 21240,
     "deepSec": 6540,
@@ -119,28 +119,28 @@
     ],
     "bodyBatterySeries": [
       {
-        "time": "00:00",
-        "level": 44
-      },
-      {
         "time": "04:27",
         "level": 30
       },
       {
-        "time": "05:45",
-        "level": 35
+        "time": "07:57",
+        "level": 59
+      },
+      {
+        "time": "08:00",
+        "level": 60
       },
       {
         "time": "11:24",
         "level": 89
       },
       {
-        "time": "11:30",
-        "level": 89
+        "time": "16:00",
+        "level": 70
       },
       {
-        "time": "17:03",
-        "level": 68
+        "time": "23:39",
+        "level": 38
       }
     ],
     "trainingStatus": "UNPRODUCTIVE",
