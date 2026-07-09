@@ -1,5 +1,15 @@
 [
   {
+    "date": "2026-07-08",
+    "protein": 24.7,
+    "fat": 34.9,
+    "sugar": 262.2,
+    "calories": 2153.8,
+    "carbs": 416.1,
+    "fiber": 2.6,
+    "saturatedFat": 7.1
+  },
+  {
     "date": "2026-07-07",
     "fat": 88,
     "calories": 1635.5,
