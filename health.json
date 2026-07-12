@@ -3,16 +3,16 @@
     "date": "2026-07-12",
     "rhr": 49,
     "minHR": 49,
-    "maxHR": 93,
-    "avgStress": 35,
+    "maxHR": 94,
+    "avgStress": 36,
     "maxStress": 91,
-    "steps": 1992,
+    "steps": 2223,
     "stepsGoal": 2710,
     "floors": 2.114,
     "floorsGoal": 10,
-    "activeKcal": 26.0,
-    "totalKcal": 1723.0,
-    "bmrKcal": 1697.0,
+    "activeKcal": 29.0,
+    "totalKcal": 2028.0,
+    "bmrKcal": 1999.0,
     "modIntensityMin": 0,
     "vigIntensityMin": 0,
     "weeklyIntensityTotal": 0,
@@ -52,28 +52,28 @@
     ],
     "bodyBatterySeries": [
       {
-        "time": "00:00",
-        "level": 34
-      },
-      {
         "time": "03:48",
         "level": 22
       },
       {
-        "time": "06:30",
-        "level": 33
+        "time": "07:39",
+        "level": 43
+      },
+      {
+        "time": "07:42",
+        "level": 43
       },
       {
         "time": "10:21",
         "level": 59
       },
       {
-        "time": "13:00",
-        "level": 51
+        "time": "15:24",
+        "level": 44
       },
       {
-        "time": "19:15",
-        "level": 33
+        "time": "22:48",
+        "level": 21
       }
     ],
     "trainingStatus": "OVERREACHING",
