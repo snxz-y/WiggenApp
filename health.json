@@ -35,9 +35,9 @@
     "hrvAvg": 77,
     "hrvWeeklyAvg": 72,
     "hrvStatus": "BALANCED",
-    "trainingReadiness": 48,
-    "trainingReadinessLevel": "LOW",
-    "trainingReadinessFeedback": "LOW RT MOD OR LOW SS POOR",
+    "trainingReadiness": 50,
+    "trainingReadinessLevel": "MODERATE",
+    "trainingReadinessFeedback": "MOD RT MOD OR LOW SS POOR ACWR POS",
     "trainingReadinessSeries": [
       {
         "time": "00:22",
@@ -53,6 +53,11 @@
         "time": "16:08",
         "score": 48,
         "level": "LOW"
+      },
+      {
+        "time": "19:22",
+        "score": 50,
+        "level": "MODERATE"
       }
     ],
     "bodyBatterySeries": [
