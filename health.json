@@ -3,41 +3,41 @@
     "date": "2026-07-15",
     "rhr": 51,
     "minHR": 47,
-    "maxHR": 94,
-    "avgStress": 30,
-    "maxStress": 91,
-    "steps": 589,
+    "maxHR": 98,
+    "avgStress": 32,
+    "maxStress": 96,
+    "steps": 1867,
     "stepsGoal": 3800,
-    "floors": null,
+    "floors": 12.35,
     "floorsGoal": 10,
-    "activeKcal": 15.0,
-    "totalKcal": 1209.0,
-    "bmrKcal": 1194.0,
+    "activeKcal": 36.0,
+    "totalKcal": 1445.0,
+    "bmrKcal": 1409.0,
     "modIntensityMin": 0,
     "vigIntensityMin": 0,
     "weeklyIntensityTotal": 2,
     "weeklyIntensityGoal": 150,
     "bbHigh": 68,
     "bbLow": 32,
-    "bbWake": null,
-    "bbEnd": 68,
+    "bbWake": 68,
+    "bbEnd": 57,
     "bbCharged": 47,
-    "bbDrained": 17,
-    "sleepScore": 62,
-    "sleepSec": 14220,
-    "deepSec": 5280,
-    "remSec": 1980,
-    "lightSec": 6960,
-    "awakeSec": 840,
-    "bedTime": "19:45",
-    "wakeTime": "23:56",
-    "avgResp": null,
-    "hrvAvg": null,
-    "hrvWeeklyAvg": 71,
+    "bbDrained": 28,
+    "sleepScore": 47,
+    "sleepSec": 16080,
+    "deepSec": 3060,
+    "remSec": 0,
+    "lightSec": 13020,
+    "awakeSec": 780,
+    "bedTime": "09:04",
+    "wakeTime": "13:45",
+    "avgResp": 15.0,
+    "hrvAvg": 77,
+    "hrvWeeklyAvg": 72,
     "hrvStatus": "BALANCED",
-    "trainingReadiness": 80,
-    "trainingReadinessLevel": "HIGH",
-    "trainingReadinessFeedback": "HIGH RT AVAILABLE SS UNKNOWN",
+    "trainingReadiness": 48,
+    "trainingReadinessLevel": "LOW",
+    "trainingReadinessFeedback": "LOW RT MOD OR LOW SS POOR",
     "trainingReadinessSeries": [
       {
         "time": "00:22",
@@ -48,6 +48,11 @@
         "time": "08:03",
         "score": 80,
         "level": "HIGH"
+      },
+      {
+        "time": "16:08",
+        "score": 48,
+        "level": "LOW"
       }
     ],
     "bodyBatterySeries": [
@@ -56,20 +61,20 @@
         "level": 46
       },
       {
-        "time": "04:24",
-        "level": 34
+        "time": "04:48",
+        "level": 33
       },
       {
         "time": "05:33",
         "level": 32
       },
       {
-        "time": "07:12",
-        "level": 37
+        "time": "10:45",
+        "level": 45
       },
       {
-        "time": "09:12",
-        "level": 37
+        "time": "10:48",
+        "level": 45
       },
       {
         "time": "13:36",
@@ -94,7 +99,7 @@
     "enduranceScore": 5252,
     "enduranceClass": "Intermediate",
     "fitnessAge": 26.5,
-    "recoveryTimeHrs": 1,
+    "recoveryTimeHrs": 3.1,
     "lactateHR": 184,
     "weight": null,
     "bmi": null,
