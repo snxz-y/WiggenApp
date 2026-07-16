@@ -1,89 +1,95 @@
 [
   {
     "date": "2026-07-16",
-    "rhr": 51,
-    "minHR": 51,
+    "rhr": 50,
+    "minHR": 46,
     "maxHR": 96,
-    "avgStress": 63,
+    "avgStress": 34,
     "maxStress": 92,
-    "steps": 175,
+    "steps": 354,
     "stepsGoal": 3710,
     "floors": null,
     "floorsGoal": 10,
-    "activeKcal": 8.0,
-    "totalKcal": 340.0,
-    "bmrKcal": 332.0,
+    "activeKcal": 11.0,
+    "totalKcal": 1253.0,
+    "bmrKcal": 1242.0,
     "modIntensityMin": 0,
     "vigIntensityMin": 0,
     "weeklyIntensityTotal": 2,
     "weeklyIntensityGoal": 150,
-    "bbHigh": 23,
+    "bbHigh": 67,
     "bbLow": 10,
-    "bbWake": null,
-    "bbEnd": 10,
-    "bbCharged": 0,
-    "bbDrained": 13,
-    "sleepScore": null,
-    "sleepSec": null,
-    "deepSec": null,
-    "remSec": null,
-    "lightSec": null,
-    "awakeSec": null,
-    "bedTime": null,
-    "wakeTime": null,
-    "avgResp": null,
-    "hrvAvg": null,
-    "hrvWeeklyAvg": null,
-    "hrvStatus": null,
-    "trainingReadiness": null,
-    "trainingReadinessLevel": null,
-    "trainingReadinessFeedback": null,
-    "trainingReadinessSeries": [],
+    "bbWake": 67,
+    "bbEnd": 64,
+    "bbCharged": 57,
+    "bbDrained": 16,
+    "sleepScore": 81,
+    "sleepSec": 31800,
+    "deepSec": 3720,
+    "remSec": 4560,
+    "lightSec": 23520,
+    "awakeSec": 60,
+    "bedTime": "04:30",
+    "wakeTime": "13:21",
+    "avgResp": 14.0,
+    "hrvAvg": 75,
+    "hrvWeeklyAvg": 72,
+    "hrvStatus": "BALANCED",
+    "trainingReadiness": 70,
+    "trainingReadinessLevel": "MODERATE",
+    "trainingReadinessFeedback": "MOD RT LOW SS GOOD",
+    "trainingReadinessSeries": [
+      {
+        "time": "14:13",
+        "score": 70,
+        "level": "MODERATE"
+      }
+    ],
     "bodyBatterySeries": [
       {
         "time": "00:00",
         "level": 23
       },
       {
-        "time": "01:12",
-        "level": 16
-      },
-      {
-        "time": "01:18",
-        "level": 16
-      },
-      {
-        "time": "02:12",
-        "level": 13
-      },
-      {
-        "time": "02:36",
-        "level": 12
-      },
-      {
         "time": "03:15",
         "level": 10
+      },
+      {
+        "time": "04:45",
+        "level": 10
+      },
+      {
+        "time": "09:21",
+        "level": 40
+      },
+      {
+        "time": "09:30",
+        "level": 40
+      },
+      {
+        "time": "13:15",
+        "level": 67
       }
     ],
-    "trainingStatus": null,
+    "trainingStatus": "OVERREACHING",
     "acuteLoad": null,
-    "chronicLoad": null,
+    "chronicLoad": 176,
     "acwr": null,
-    "loadFocus": null,
-    "aerobicLowLoad": null,
-    "aerobicHighLoad": null,
-    "anaerobicLoad": null,
+    "loadFocus": "AEROBIC HIGH SHORTAGE",
+    "aerobicLowLoad": 194.36649,
+    "aerobicHighLoad": 235.81577,
+    "anaerobicLoad": 49.31909,
     "aerobicLowMin": 130,
     "aerobicLowMax": 342,
     "aerobicHighMin": 256,
     "aerobicHighMax": 467,
     "anaerobicMin": 0,
     "anaerobicMax": 211,
-    "vo2max": null,
-    "enduranceScore": null,
+    "vo2max": 46.0,
+    "enduranceScore": 5252,
     "enduranceClass": "Intermediate",
     "fitnessAge": 26.5,
-    "recoveryTimeHrs": null,
+    "recoveryTimeHrs": 1,
     "lactateHR": 184,
     "weight": null,
     "bmi": null,
