@@ -35,16 +35,10 @@
     "hrvAvg": null,
     "hrvWeeklyAvg": null,
     "hrvStatus": null,
-    "trainingReadiness": 77,
-    "trainingReadinessLevel": "HIGH",
-    "trainingReadinessFeedback": "HIGH RT AVAILABLE SS UNKNOWN",
-    "trainingReadinessSeries": [
-      {
-        "time": "00:22",
-        "score": 77,
-        "level": "HIGH"
-      }
-    ],
+    "trainingReadiness": null,
+    "trainingReadinessLevel": null,
+    "trainingReadinessFeedback": null,
+    "trainingReadinessSeries": [],
     "bodyBatterySeries": [
       {
         "time": "00:00",
@@ -89,7 +83,7 @@
     "enduranceScore": null,
     "enduranceClass": "Intermediate",
     "fitnessAge": 26.5,
-    "recoveryTimeHrs": 2.9,
+    "recoveryTimeHrs": null,
     "lactateHR": 184,
     "weight": null,
     "bmi": null,
