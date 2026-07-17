@@ -1,28 +1,28 @@
 [
   {
     "date": "2026-07-17",
-    "rhr": null,
-    "minHR": null,
-    "maxHR": null,
-    "avgStress": null,
-    "maxStress": null,
-    "steps": null,
-    "stepsGoal": null,
+    "rhr": 53,
+    "minHR": 74,
+    "maxHR": 93,
+    "avgStress": 82,
+    "maxStress": 91,
+    "steps": 653,
+    "stepsGoal": 3760,
     "floors": null,
     "floorsGoal": 10,
-    "activeKcal": null,
-    "totalKcal": null,
-    "bmrKcal": null,
-    "modIntensityMin": null,
-    "vigIntensityMin": null,
+    "activeKcal": 22.0,
+    "totalKcal": 125.0,
+    "bmrKcal": 103.0,
+    "modIntensityMin": 0,
+    "vigIntensityMin": 0,
     "weeklyIntensityTotal": 89,
     "weeklyIntensityGoal": 150,
-    "bbHigh": null,
-    "bbLow": null,
+    "bbHigh": 12,
+    "bbLow": 11,
     "bbWake": null,
-    "bbEnd": null,
-    "bbCharged": null,
-    "bbDrained": null,
+    "bbEnd": 11,
+    "bbCharged": 0,
+    "bbDrained": 1,
     "sleepScore": null,
     "sleepSec": null,
     "deepSec": null,
@@ -35,11 +35,42 @@
     "hrvAvg": null,
     "hrvWeeklyAvg": null,
     "hrvStatus": null,
-    "trainingReadiness": null,
-    "trainingReadinessLevel": null,
-    "trainingReadinessFeedback": null,
-    "trainingReadinessSeries": [],
-    "bodyBatterySeries": [],
+    "trainingReadiness": 77,
+    "trainingReadinessLevel": "HIGH",
+    "trainingReadinessFeedback": "HIGH RT AVAILABLE SS UNKNOWN",
+    "trainingReadinessSeries": [
+      {
+        "time": "00:22",
+        "score": 77,
+        "level": "HIGH"
+      }
+    ],
+    "bodyBatterySeries": [
+      {
+        "time": "00:00",
+        "level": 12
+      },
+      {
+        "time": "00:00",
+        "level": 12
+      },
+      {
+        "time": "00:24",
+        "level": 12
+      },
+      {
+        "time": "00:39",
+        "level": 11
+      },
+      {
+        "time": "00:48",
+        "level": 11
+      },
+      {
+        "time": "00:48",
+        "level": 11
+      }
+    ],
     "trainingStatus": null,
     "acuteLoad": null,
     "chronicLoad": null,
@@ -58,7 +89,7 @@
     "enduranceScore": null,
     "enduranceClass": "Intermediate",
     "fitnessAge": 26.5,
-    "recoveryTimeHrs": null,
+    "recoveryTimeHrs": 2.9,
     "lactateHR": 184,
     "weight": null,
     "bmi": null,
