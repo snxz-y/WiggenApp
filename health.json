@@ -1,68 +1,74 @@
 [
   {
     "date": "2026-07-18",
-    "rhr": 53,
-    "minHR": 64,
+    "rhr": 50,
+    "minHR": 45,
     "maxHR": 108,
-    "avgStress": 68,
+    "avgStress": 35,
     "maxStress": 96,
-    "steps": 319,
+    "steps": 522,
     "stepsGoal": 3710,
     "floors": null,
     "floorsGoal": 10,
-    "activeKcal": 55.0,
-    "totalKcal": 389.0,
-    "bmrKcal": 334.0,
+    "activeKcal": 56.0,
+    "totalKcal": 1050.0,
+    "bmrKcal": 994.0,
     "modIntensityMin": 0,
     "vigIntensityMin": 0,
     "weeklyIntensityTotal": 89,
     "weeklyIntensityGoal": 150,
-    "bbHigh": 21,
+    "bbHigh": 60,
     "bbLow": 8,
-    "bbWake": null,
-    "bbEnd": 8,
-    "bbCharged": 0,
-    "bbDrained": 13,
-    "sleepScore": null,
-    "sleepSec": null,
-    "deepSec": null,
-    "remSec": null,
-    "lightSec": null,
-    "awakeSec": null,
-    "bedTime": null,
-    "wakeTime": null,
-    "avgResp": null,
-    "hrvAvg": null,
-    "hrvWeeklyAvg": null,
-    "hrvStatus": null,
-    "trainingReadiness": null,
-    "trainingReadinessLevel": null,
-    "trainingReadinessFeedback": null,
-    "trainingReadinessSeries": [],
+    "bbWake": 58,
+    "bbEnd": 58,
+    "bbCharged": 52,
+    "bbDrained": 15,
+    "sleepScore": 59,
+    "sleepSec": 25380,
+    "deepSec": 3480,
+    "remSec": 0,
+    "lightSec": 21900,
+    "awakeSec": 180,
+    "bedTime": "03:33",
+    "wakeTime": "10:39",
+    "avgResp": 15.0,
+    "hrvAvg": 82,
+    "hrvWeeklyAvg": 75,
+    "hrvStatus": "BALANCED",
+    "trainingReadiness": 71,
+    "trainingReadinessLevel": "MODERATE",
+    "trainingReadinessFeedback": "MOD RT MOD OR LOW SS POOR ACWR POS",
+    "trainingReadinessSeries": [
+      {
+        "time": "11:23",
+        "score": 71,
+        "level": "MODERATE"
+      }
+    ],
     "bodyBatterySeries": [
       {
         "time": "00:00",
         "level": 21
       },
       {
-        "time": "01:12",
-        "level": 16
-      },
-      {
-        "time": "01:18",
-        "level": 16
-      },
-      {
-        "time": "02:33",
-        "level": 11
-      },
-      {
-        "time": "02:36",
-        "level": 11
-      },
-      {
         "time": "03:09",
         "level": 8
+      },
+      {
+        "time": "03:48",
+        "level": 8
+      },
+      {
+        "time": "07:30",
+        "level": 30
+      },
+      {
+        "time": "07:36",
+        "level": 31
+      },
+      {
+        "time": "10:54",
+        "level": 60
       }
     ],
     "trainingStatus": "OVERREACHING",
@@ -83,7 +89,7 @@
     "enduranceScore": 5252,
     "enduranceClass": "Intermediate",
     "fitnessAge": 26.6,
-    "recoveryTimeHrs": null,
+    "recoveryTimeHrs": 15,
     "lactateHR": 184,
     "weight": null,
     "bmi": null,
