@@ -194,7 +194,7 @@
     "anaerobicMin": 0,
     "anaerobicMax": 211,
     "vo2max": 46.0,
-    "enduranceScore": 5252,
+    "enduranceScore": null,
     "enduranceClass": "Intermediate",
     "fitnessAge": 26.6,
     "recoveryTimeHrs": 15,
