@@ -35,9 +35,9 @@
     "hrvAvg": 79,
     "hrvWeeklyAvg": 76,
     "hrvStatus": "BALANCED",
-    "trainingReadiness": 74,
-    "trainingReadinessLevel": "MODERATE",
-    "trainingReadinessFeedback": "MOD RT LOW SS MOD",
+    "trainingReadiness": 75,
+    "trainingReadinessLevel": "HIGH",
+    "trainingReadinessFeedback": "HIGH RT HIGHEST SS AVAILABLE",
     "trainingReadinessSeries": [
       {
         "time": "13:28",
@@ -48,6 +48,11 @@
         "time": "22:22",
         "score": 74,
         "level": "MODERATE"
+      },
+      {
+        "time": "23:22",
+        "score": 75,
+        "level": "HIGH"
       }
     ],
     "bodyBatterySeries": [
