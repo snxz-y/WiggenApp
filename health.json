@@ -76,15 +76,15 @@
     "rhr": 50,
     "minHR": 45,
     "maxHR": 108,
-    "avgStress": 40,
+    "avgStress": 47,
     "maxStress": 96,
-    "steps": 3403,
+    "steps": 3761,
     "stepsGoal": 3710,
     "floors": 6.322,
     "floorsGoal": 10,
-    "activeKcal": 112.0,
-    "totalKcal": 1499.0,
-    "bmrKcal": 1387.0,
+    "activeKcal": 122.0,
+    "totalKcal": 2219.0,
+    "bmrKcal": 2097.0,
     "modIntensityMin": 0,
     "vigIntensityMin": 0,
     "weeklyIntensityTotal": 89,
@@ -92,9 +92,9 @@
     "bbHigh": 60,
     "bbLow": 8,
     "bbWake": 58,
-    "bbEnd": 39,
-    "bbCharged": 52,
-    "bbDrained": 34,
+    "bbEnd": 11,
+    "bbCharged": 55,
+    "bbDrained": 65,
     "sleepScore": 59,
     "sleepSec": 25380,
     "deepSec": 3480,
@@ -124,28 +124,28 @@
     ],
     "bodyBatterySeries": [
       {
-        "time": "00:00",
-        "level": 21
-      },
-      {
         "time": "03:09",
         "level": 8
       },
       {
-        "time": "05:18",
-        "level": 14
+        "time": "07:57",
+        "level": 34
       },
       {
-        "time": "10:33",
-        "level": 57
+        "time": "08:00",
+        "level": 35
       },
       {
         "time": "10:54",
         "level": 60
       },
       {
-        "time": "15:27",
-        "level": 39
+        "time": "16:00",
+        "level": 38
+      },
+      {
+        "time": "23:51",
+        "level": 11
       }
     ],
     "trainingStatus": "OVERREACHING",
