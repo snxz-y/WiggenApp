@@ -35,14 +35,19 @@
     "hrvAvg": 79,
     "hrvWeeklyAvg": 76,
     "hrvStatus": "BALANCED",
-    "trainingReadiness": 75,
-    "trainingReadinessLevel": "HIGH",
-    "trainingReadinessFeedback": "HIGH RT HIGHEST SS AVAILABLE",
+    "trainingReadiness": 74,
+    "trainingReadinessLevel": "MODERATE",
+    "trainingReadinessFeedback": "MOD RT LOW SS MOD",
     "trainingReadinessSeries": [
       {
         "time": "13:28",
         "score": 75,
         "level": "HIGH"
+      },
+      {
+        "time": "22:22",
+        "score": 74,
+        "level": "MODERATE"
       }
     ],
     "bodyBatterySeries": [
@@ -89,7 +94,7 @@
     "enduranceScore": 5236,
     "enduranceClass": "Intermediate",
     "fitnessAge": 26.6,
-    "recoveryTimeHrs": 1.1,
+    "recoveryTimeHrs": 1.2,
     "lactateHR": 184,
     "weight": null,
     "bmi": null,
