@@ -2,27 +2,27 @@
   {
     "date": "2026-07-20",
     "rhr": 53,
-    "minHR": 54,
+    "minHR": 52,
     "maxHR": 98,
-    "avgStress": 53,
+    "avgStress": 35,
     "maxStress": 95,
-    "steps": 112,
+    "steps": 217,
     "stepsGoal": 3590,
     "floors": null,
     "floorsGoal": 10,
-    "activeKcal": 7.0,
-    "totalKcal": 240.0,
-    "bmrKcal": 233.0,
+    "activeKcal": 12.0,
+    "totalKcal": 735.0,
+    "bmrKcal": 723.0,
     "modIntensityMin": 0,
     "vigIntensityMin": 0,
     "weeklyIntensityTotal": 0,
     "weeklyIntensityGoal": 150,
-    "bbHigh": 17,
-    "bbLow": 10,
+    "bbHigh": 32,
+    "bbLow": 9,
     "bbWake": null,
-    "bbEnd": 10,
-    "bbCharged": 0,
-    "bbDrained": 7,
+    "bbEnd": 32,
+    "bbCharged": 23,
+    "bbDrained": 8,
     "sleepScore": null,
     "sleepSec": null,
     "deepSec": null,
@@ -45,24 +45,24 @@
         "level": 17
       },
       {
-        "time": "00:51",
-        "level": 13
-      },
-      {
-        "time": "00:54",
-        "level": 13
-      },
-      {
-        "time": "01:45",
-        "level": 11
-      },
-      {
-        "time": "01:48",
-        "level": 11
-      },
-      {
         "time": "02:39",
         "level": 10
+      },
+      {
+        "time": "03:15",
+        "level": 9
+      },
+      {
+        "time": "05:33",
+        "level": 17
+      },
+      {
+        "time": "05:36",
+        "level": 17
+      },
+      {
+        "time": "08:15",
+        "level": 32
       }
     ],
     "trainingStatus": null,
