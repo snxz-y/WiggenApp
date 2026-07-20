@@ -3,26 +3,26 @@
     "date": "2026-07-20",
     "rhr": 51,
     "minHR": 48,
-    "maxHR": 99,
-    "avgStress": 32,
-    "maxStress": 95,
-    "steps": 568,
+    "maxHR": 181,
+    "avgStress": 34,
+    "maxStress": 99,
+    "steps": 6332,
     "stepsGoal": 3590,
-    "floors": null,
+    "floors": 68.612,
     "floorsGoal": 10,
-    "activeKcal": 21.0,
-    "totalKcal": 1146.0,
-    "bmrKcal": 1125.0,
-    "modIntensityMin": 0,
-    "vigIntensityMin": 0,
-    "weeklyIntensityTotal": 0,
+    "activeKcal": 402.0,
+    "totalKcal": 1656.0,
+    "bmrKcal": 1254.0,
+    "modIntensityMin": 1,
+    "vigIntensityMin": 34,
+    "weeklyIntensityTotal": 69,
     "weeklyIntensityGoal": 150,
     "bbHigh": 56,
     "bbLow": 9,
     "bbWake": 54,
-    "bbEnd": 49,
-    "bbCharged": 47,
-    "bbDrained": 15,
+    "bbEnd": 37,
+    "bbCharged": 48,
+    "bbDrained": 28,
     "sleepScore": 77,
     "sleepSec": 27720,
     "deepSec": 2400,
@@ -35,14 +35,19 @@
     "hrvAvg": 77,
     "hrvWeeklyAvg": 76,
     "hrvStatus": "BALANCED",
-    "trainingReadiness": 81,
-    "trainingReadinessLevel": "HIGH",
-    "trainingReadinessFeedback": "HIGH RT HIGHEST SS AVAILABLE",
+    "trainingReadiness": 48,
+    "trainingReadinessLevel": "LOW",
+    "trainingReadinessFeedback": "LOW RT MOD OR LOW SS MOD",
     "trainingReadinessSeries": [
       {
         "time": "12:33",
         "score": 81,
         "level": "HIGH"
+      },
+      {
+        "time": "14:23",
+        "score": 48,
+        "level": "LOW"
       }
     ],
     "bodyBatterySeries": [
@@ -55,29 +60,29 @@
         "level": 9
       },
       {
-        "time": "04:21",
-        "level": 13
+        "time": "04:48",
+        "level": 14
       },
       {
-        "time": "08:39",
-        "level": 35
-      },
-      {
-        "time": "08:42",
-        "level": 35
+        "time": "09:27",
+        "level": 40
       },
       {
         "time": "11:39",
         "level": 56
+      },
+      {
+        "time": "14:18",
+        "level": 37
       }
     ],
-    "trainingStatus": "OVERREACHING",
-    "acuteLoad": null,
+    "trainingStatus": "UNPRODUCTIVE",
+    "acuteLoad": 111,
     "chronicLoad": 176,
-    "acwr": null,
+    "acwr": 0.6,
     "loadFocus": "AEROBIC LOW SHORTAGE",
     "aerobicLowLoad": 86.50075,
-    "aerobicHighLoad": 235.81577,
+    "aerobicHighLoad": 322.84247,
     "anaerobicLoad": 49.31909,
     "aerobicLowMin": 130,
     "aerobicLowMax": 342,
@@ -86,10 +91,10 @@
     "anaerobicMin": 0,
     "anaerobicMax": 211,
     "vo2max": 46.0,
-    "enduranceScore": 5236,
+    "enduranceScore": 5222,
     "enduranceClass": "Intermediate",
     "fitnessAge": 26.8,
-    "recoveryTimeHrs": 1.1,
+    "recoveryTimeHrs": 34.4,
     "lactateHR": 184,
     "weight": 78.55,
     "bmi": 26.899999618530273,
