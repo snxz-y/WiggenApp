@@ -1,28 +1,28 @@
 [
   {
     "date": "2026-07-21",
-    "rhr": 54,
-    "minHR": 52,
+    "rhr": 46,
+    "minHR": 43,
     "maxHR": 90,
-    "avgStress": 38,
+    "avgStress": 23,
     "maxStress": 89,
-    "steps": 79,
+    "steps": 124,
     "stepsGoal": 4560,
     "floors": null,
     "floorsGoal": 10,
-    "activeKcal": 1.0,
-    "totalKcal": 305.0,
-    "bmrKcal": 304.0,
+    "activeKcal": 2.0,
+    "totalKcal": 974.0,
+    "bmrKcal": 972.0,
     "modIntensityMin": 0,
     "vigIntensityMin": 0,
     "weeklyIntensityTotal": 130,
     "weeklyIntensityGoal": 150,
-    "bbHigh": 14,
+    "bbHigh": 78,
     "bbLow": 8,
     "bbWake": null,
-    "bbEnd": 14,
-    "bbCharged": 6,
-    "bbDrained": 4,
+    "bbEnd": 76,
+    "bbCharged": 70,
+    "bbDrained": 6,
     "sleepScore": null,
     "sleepSec": null,
     "deepSec": null,
@@ -41,28 +41,28 @@
     "trainingReadinessSeries": [],
     "bodyBatterySeries": [
       {
-        "time": "00:00",
-        "level": 12
-      },
-      {
-        "time": "01:03",
-        "level": 10
-      },
-      {
-        "time": "01:12",
-        "level": 10
-      },
-      {
         "time": "01:57",
         "level": 8
       },
       {
-        "time": "02:24",
-        "level": 8
+        "time": "03:42",
+        "level": 16
       },
       {
-        "time": "03:18",
-        "level": 14
+        "time": "03:45",
+        "level": 16
+      },
+      {
+        "time": "07:24",
+        "level": 49
+      },
+      {
+        "time": "07:30",
+        "level": 50
+      },
+      {
+        "time": "10:48",
+        "level": 78
       }
     ],
     "trainingStatus": null,
@@ -82,15 +82,15 @@
     "vo2max": null,
     "enduranceScore": null,
     "enduranceClass": "Intermediate",
-    "fitnessAge": 26.8,
+    "fitnessAge": 27.1,
     "recoveryTimeHrs": null,
     "lactateHR": 184,
-    "weight": null,
-    "bmi": null,
-    "bodyFat": null,
-    "muscleMass": null,
-    "boneMass": null,
-    "bodyWater": null,
+    "weight": 78.52,
+    "bmi": 26.899999618530273,
+    "bodyFat": 26.5,
+    "muscleMass": 32.95,
+    "boneMass": 4.62,
+    "bodyWater": 53.6,
     "race5kSec": null,
     "race10kSec": null,
     "raceHalfSec": null,
