@@ -35,13 +35,18 @@
     "hrvAvg": 75,
     "hrvWeeklyAvg": 77,
     "hrvStatus": "BALANCED",
-    "trainingReadiness": 70,
+    "trainingReadiness": 71,
     "trainingReadinessLevel": "MODERATE",
     "trainingReadinessFeedback": "MOD RT LOW SS GOOD",
     "trainingReadinessSeries": [
       {
         "time": "11:23",
         "score": 70,
+        "level": "MODERATE"
+      },
+      {
+        "time": "14:51",
+        "score": 71,
         "level": "MODERATE"
       }
     ],
@@ -72,11 +77,11 @@
       }
     ],
     "trainingStatus": "UNPRODUCTIVE",
-    "acuteLoad": 107,
+    "acuteLoad": 122,
     "chronicLoad": 176,
     "acwr": 0.6,
     "loadFocus": "AEROBIC LOW SHORTAGE",
-    "aerobicLowLoad": 68.17853,
+    "aerobicLowLoad": 80.13869,
     "aerobicHighLoad": 322.84247,
     "anaerobicLoad": 49.31909,
     "aerobicLowMin": 130,
@@ -86,7 +91,7 @@
     "anaerobicMin": 0,
     "anaerobicMax": 211,
     "vo2max": 46.0,
-    "enduranceScore": 5221,
+    "enduranceScore": 5228,
     "enduranceClass": "Intermediate",
     "fitnessAge": 27.1,
     "recoveryTimeHrs": 13.8,
