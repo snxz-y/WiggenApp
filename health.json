@@ -4,15 +4,15 @@
     "rhr": 52,
     "minHR": 47,
     "maxHR": 145,
-    "avgStress": 46,
-    "maxStress": 97,
-    "steps": 10190,
+    "avgStress": 52,
+    "maxStress": 98,
+    "steps": 10421,
     "stepsGoal": 6170,
     "floors": 154.579,
     "floorsGoal": 10,
-    "activeKcal": 427.0,
-    "totalKcal": 1893.0,
-    "bmrKcal": 1466.0,
+    "activeKcal": 454.0,
+    "totalKcal": 2203.0,
+    "bmrKcal": 1749.0,
     "modIntensityMin": 41,
     "vigIntensityMin": 8,
     "weeklyIntensityTotal": 236,
@@ -61,20 +61,20 @@
         "level": 5
       },
       {
-        "time": "05:30",
-        "level": 27
-      },
-      {
         "time": "06:21",
         "level": 33
       },
       {
-        "time": "10:51",
-        "level": 16
+        "time": "06:45",
+        "level": 31
       },
       {
-        "time": "11:18",
-        "level": 16
+        "time": "13:24",
+        "level": 9
+      },
+      {
+        "time": "13:30",
+        "level": 9
       },
       {
         "time": "14:45",
