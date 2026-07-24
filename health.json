@@ -35,14 +35,19 @@
     "hrvAvg": 67,
     "hrvWeeklyAvg": 74,
     "hrvStatus": "BALANCED",
-    "trainingReadiness": 24,
-    "trainingReadinessLevel": "POOR",
-    "trainingReadinessFeedback": "POOR RT MOD OR LOW SS POOR",
+    "trainingReadiness": 25,
+    "trainingReadinessLevel": "LOW",
+    "trainingReadinessFeedback": "LOW RT MOD OR LOW SS POOR",
     "trainingReadinessSeries": [
       {
         "time": "06:30",
         "score": 24,
         "level": "POOR"
+      },
+      {
+        "time": "07:22",
+        "score": 25,
+        "level": "LOW"
       }
     ],
     "bodyBatterySeries": [
