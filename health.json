@@ -35,14 +35,19 @@
     "hrvAvg": null,
     "hrvWeeklyAvg": null,
     "hrvStatus": null,
-    "trainingReadiness": 45,
-    "trainingReadinessLevel": "LOW",
-    "trainingReadinessFeedback": "LOW RT MOD OR LOW SS UNKNOWN SLEEP HISTORY NEG",
+    "trainingReadiness": 52,
+    "trainingReadinessLevel": "MODERATE",
+    "trainingReadinessFeedback": "MOD RT LOW SS UNKNOWN SLEEP HISTORY NEG",
     "trainingReadinessSeries": [
       {
         "time": "00:22",
         "score": 45,
         "level": "LOW"
+      },
+      {
+        "time": "08:22",
+        "score": 52,
+        "level": "MODERATE"
       }
     ],
     "bodyBatterySeries": [
