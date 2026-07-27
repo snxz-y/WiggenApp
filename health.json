@@ -1,27 +1,27 @@
 [
   {
     "date": "2026-07-27",
-    "rhr": 54,
-    "minHR": 52,
+    "rhr": 48,
+    "minHR": 45,
     "maxHR": 95,
-    "avgStress": 51,
+    "avgStress": 25,
     "maxStress": 92,
-    "steps": 100,
+    "steps": 165,
     "stepsGoal": 5540,
     "floors": null,
     "floorsGoal": 10,
     "activeKcal": 10.0,
-    "totalKcal": 285.0,
-    "bmrKcal": 275.0,
+    "totalKcal": 967.0,
+    "bmrKcal": 957.0,
     "modIntensityMin": 0,
     "vigIntensityMin": 0,
     "weeklyIntensityTotal": 0,
     "weeklyIntensityGoal": 150,
-    "bbHigh": 11,
+    "bbHigh": 73,
     "bbLow": 6,
     "bbWake": null,
-    "bbEnd": 9,
-    "bbCharged": 3,
+    "bbEnd": 73,
+    "bbCharged": 67,
     "bbDrained": 5,
     "sleepScore": null,
     "sleepSec": null,
@@ -51,24 +51,24 @@
         "level": 11
       },
       {
-        "time": "01:00",
-        "level": 8
-      },
-      {
-        "time": "01:06",
-        "level": 8
-      },
-      {
         "time": "02:03",
         "level": 6
       },
       {
-        "time": "02:12",
-        "level": 6
+        "time": "03:42",
+        "level": 11
       },
       {
-        "time": "02:54",
-        "level": 8
+        "time": "07:21",
+        "level": 41
+      },
+      {
+        "time": "07:24",
+        "level": 41
+      },
+      {
+        "time": "10:48",
+        "level": 73
       }
     ],
     "trainingStatus": null,
@@ -88,15 +88,15 @@
     "vo2max": null,
     "enduranceScore": null,
     "enduranceClass": "Intermediate",
-    "fitnessAge": 27.4,
+    "fitnessAge": 27.3,
     "recoveryTimeHrs": 0.6,
     "lactateHR": 184,
-    "weight": null,
-    "bmi": null,
-    "bodyFat": null,
-    "muscleMass": null,
-    "boneMass": null,
-    "bodyWater": null,
+    "weight": 76.57,
+    "bmi": 26.200000762939453,
+    "bodyFat": 25.8,
+    "muscleMass": 32.48,
+    "boneMass": 4.52,
+    "bodyWater": 54.1,
     "race5kSec": null,
     "race10kSec": null,
     "raceHalfSec": null,
