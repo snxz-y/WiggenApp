@@ -4,15 +4,15 @@
     "rhr": 47,
     "minHR": 44,
     "maxHR": 135,
-    "avgStress": 36,
+    "avgStress": 35,
     "maxStress": 99,
-    "steps": 10107,
+    "steps": 10252,
     "stepsGoal": 5520,
     "floors": 12.192,
     "floorsGoal": 10,
-    "activeKcal": 205.0,
-    "totalKcal": 2183.0,
-    "bmrKcal": 1978.0,
+    "activeKcal": 206.0,
+    "totalKcal": 2231.0,
+    "bmrKcal": 2025.0,
     "modIntensityMin": 1,
     "vigIntensityMin": 5,
     "weeklyIntensityTotal": 11,
@@ -20,8 +20,8 @@
     "bbHigh": 43,
     "bbLow": 5,
     "bbWake": 43,
-    "bbEnd": 13,
-    "bbCharged": 42,
+    "bbEnd": 14,
+    "bbCharged": 43,
     "bbDrained": 35,
     "sleepScore": 56,
     "sleepSec": 20700,
@@ -55,16 +55,16 @@
         "level": 43
       },
       {
-        "time": "07:42",
-        "level": 42
+        "time": "07:51",
+        "level": 41
       },
       {
-        "time": "14:42",
-        "level": 22
+        "time": "15:33",
+        "level": 21
       },
       {
-        "time": "15:24",
-        "level": 22
+        "time": "15:42",
+        "level": 21
       },
       {
         "time": "22:15",
