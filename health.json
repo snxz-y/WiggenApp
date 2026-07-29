@@ -83,8 +83,8 @@
     "floors": 12.192,
     "floorsGoal": 10,
     "activeKcal": 206.0,
-    "totalKcal": 2231.0,
-    "bmrKcal": 2025.0,
+    "totalKcal": 2272.0,
+    "bmrKcal": 2066.0,
     "modIntensityMin": 1,
     "vigIntensityMin": 5,
     "weeklyIntensityTotal": 11,
@@ -92,8 +92,8 @@
     "bbHigh": 43,
     "bbLow": 5,
     "bbWake": 43,
-    "bbEnd": 14,
-    "bbCharged": 43,
+    "bbEnd": 16,
+    "bbCharged": 45,
     "bbDrained": 35,
     "sleepScore": 56,
     "sleepSec": 20700,
@@ -127,16 +127,16 @@
         "level": 43
       },
       {
-        "time": "07:51",
-        "level": 41
+        "time": "08:00",
+        "level": 40
       },
       {
-        "time": "15:33",
-        "level": 21
+        "time": "15:45",
+        "level": 20
       },
       {
-        "time": "15:42",
-        "level": 21
+        "time": "16:00",
+        "level": 20
       },
       {
         "time": "22:15",
