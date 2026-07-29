@@ -35,9 +35,9 @@
     "hrvAvg": null,
     "hrvWeeklyAvg": null,
     "hrvStatus": null,
-    "trainingReadiness": 44,
-    "trainingReadinessLevel": "LOW",
-    "trainingReadinessFeedback": "LOW HRV LOW",
+    "trainingReadiness": 60,
+    "trainingReadinessLevel": "MODERATE",
+    "trainingReadinessFeedback": "MOD HRV LOW",
     "trainingReadinessSeries": [
       {
         "time": "00:22",
@@ -48,6 +48,11 @@
         "time": "06:22",
         "score": 44,
         "level": "LOW"
+      },
+      {
+        "time": "06:50",
+        "score": 60,
+        "level": "MODERATE"
       }
     ],
     "bodyBatterySeries": [
@@ -76,25 +81,25 @@
         "level": 94
       }
     ],
-    "trainingStatus": null,
-    "acuteLoad": null,
-    "chronicLoad": null,
-    "acwr": null,
-    "loadFocus": null,
-    "aerobicLowLoad": null,
-    "aerobicHighLoad": null,
-    "anaerobicLoad": null,
+    "trainingStatus": "PEAKING",
+    "acuteLoad": 29,
+    "chronicLoad": 176,
+    "acwr": 0.1,
+    "loadFocus": "BELOW TARGETS",
+    "aerobicLowLoad": 87.55559,
+    "aerobicHighLoad": 87.0267,
+    "anaerobicLoad": 0.0,
     "aerobicLowMin": 130,
     "aerobicLowMax": 342,
     "aerobicHighMin": 256,
     "aerobicHighMax": 467,
     "anaerobicMin": 0,
     "anaerobicMax": 211,
-    "vo2max": null,
-    "enduranceScore": null,
+    "vo2max": 46.0,
+    "enduranceScore": 5207,
     "enduranceClass": "Intermediate",
     "fitnessAge": 28.4,
-    "recoveryTimeHrs": 0,
+    "recoveryTimeHrs": 1,
     "lactateHR": 184,
     "weight": null,
     "bmi": null,
