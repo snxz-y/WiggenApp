@@ -1,5 +1,15 @@
 [
   {
+    "date": "2026-07-30",
+    "saturatedFat": 0,
+    "calories": 80,
+    "protein": 19.4,
+    "carbs": 0,
+    "fat": 0,
+    "sugar": 0,
+    "fiber": 0
+  },
+  {
     "date": "2026-07-29",
     "sugar": 129.5,
     "saturatedFat": 838.4,
