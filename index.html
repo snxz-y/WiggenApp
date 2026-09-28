@@ -598,6 +598,12 @@ const ACT_URL='https://raw.githubusercontent.com/snxz-y/WiggenApp/main/activitie
 const SHIFTS_URL='https://raw.githubusercontent.com/snxz-y/WiggenApp/main/shifts.json';
 const HEALTH_URL='https://raw.githubusercontent.com/snxz-y/WiggenApp/main/health.json';
 let activities=[],healthData=[],shiftsData=[],currentPeriod='today';
+// Pulssone-gulv (bpm). Standardverdier til health.json har hrZones fra Garmin.
+let HRZ={z1:104,z2:125,z3:146,z4:166,z5:187};
+const setHRZones=()=>{const e=[...healthData].sort((a,b)=>b.date.localeCompare(a.date)).find(d=>d.hrZones&&d.hrZones.z5);if(e)HRZ={...HRZ,...e.hrZones};};
+const zRange=i=>i===5?`${HRZ.z5}+`:`${HRZ['z'+i]}–${HRZ['z'+(i+1)]-1}`;
+const BIRTH_DATE='1997-06-18';
+const ageNow=()=>{const b=new Date(BIRTH_DATE),t=new Date();let a=t.getFullYear()-b.getFullYear();if(t.getMonth()<b.getMonth()||(t.getMonth()===b.getMonth()&&t.getDate()<b.getDate()))a--;return a;};
 const ss={runs:{col:'date',asc:false},bikes:{col:'date',asc:false},walks:{col:'date',asc:false}};
 let chartInstances={};
 
@@ -659,10 +665,10 @@ const pace=(d,s)=>fmt(s/(d/1000))+'/km';
 const n=(v,dec=0,suf='')=>v==null?'—':(dec?parseFloat(v).toFixed(dec):Math.round(v))+suf;
 const hrCls=hr=>{
   if(hr==null)return'';
-  if(hr>=187)return'color:var(--z5);font-weight:600';      // Z5
-  if(hr>=166)return'color:var(--z4);font-weight:600';      // Z4
-  if(hr>=146)return'color:var(--z3);font-weight:600';                      // Z3
-  if(hr>=125)return'color:var(--z2)';                      // Z2
+  if(hr>=HRZ.z5)return'color:var(--z5);font-weight:600';   // Z5
+  if(hr>=HRZ.z4)return'color:var(--z4);font-weight:600';   // Z4
+  if(hr>=HRZ.z3)return'color:var(--z3);font-weight:600';   // Z3
+  if(hr>=HRZ.z2)return'color:var(--z2)';                   // Z2
   return'color:var(--z1)';                                 // Z1
 };
 const zbar=a=>{
@@ -698,7 +704,7 @@ function renderRuns(){
     <td>${fmtDate(r.date)}</td><td>${gcLinks(r.activityId)}</td>
     <td style="font-weight:700;font-size:14px;color:var(--accent);text-decoration:underline;text-underline-offset:3px">${isIndoor(r)?INDOOR:fmtD(r.distanceM)}</td>
     <td style="font-weight:600">${isIndoor(r)?INDOOR:pace(r.distanceM,r.durationSec)}</td>
-    <td style="${hrCls(r.avgHR)}">${r.avgHR}</td><td class="${r.maxHR>=187?'hi':r.maxHR>=166?'warn':''}">${r.maxHR}</td>
+    <td style="${hrCls(r.avgHR)}">${r.avgHR}</td><td class="${r.maxHR>=HRZ.z5?'hi':r.maxHR>=HRZ.z4?'warn':''}">${r.maxHR}</td>
     <td>${r.fastest1k?fmt(r.fastest1k):'—'}</td><td>${r.fastest5k?fmt(r.fastest5k):'—'}</td><td>${r.fastest10k?fmt(r.fastest10k):'—'}</td>
     <td class="${r.vo2max>=47?'ok':''}">${n(r.vo2max)}</td>
     <td>${n(r.load,1)}</td><td>${n(r.calories)}</td>
@@ -723,7 +729,7 @@ function renderBikes(){
   const rows=getSorted(activities.filter(a=>a.type==='cycling'),'bikes');
   document.getElementById('tbody-bikes').innerHTML=rows.map(b=>`<tr>
     <td>${fmtDate(b.date)}</td><td>${gcLinks(b.activityId)}</td><td>${isIndoor(b)?INDOOR:fmtD(b.distanceM)}</td><td style="font-weight:600">${isIndoor(b)?INDOOR:fmtSpd(b.distanceM/b.durationSec)}</td><td>${b.maxSpeed?fmtSpd(b.maxSpeed):'—'}</td>
-    <td style="${hrCls(b.avgHR)}">${b.avgHR}</td><td class="${b.maxHR>=187?'hi':b.maxHR>=166?'warn':''}">${b.maxHR}</td>
+    <td style="${hrCls(b.avgHR)}">${b.avgHR}</td><td class="${b.maxHR>=HRZ.z5?'hi':b.maxHR>=HRZ.z4?'warn':''}">${b.maxHR}</td>
     <td>${n(b.elevGain)}m</td><td class="muted-cell">${n(b.elevLoss)}m</td>
     <td>${fmt(b.durationSec)}</td><td>${n(b.load,1)}</td><td class="muted-cell">-${n(b.bodyBatDrain)}</td><td>${n(b.calories)}</td>
     <td>${zbar(b)}</td><td class="muted-cell" style="font-size:11px">${fmtEffect(b.label)}</td>
@@ -733,7 +739,7 @@ function renderWalks(){
   const rows=getSorted(activities.filter(a=>a.type==='walking'),'gåturer');
   document.getElementById('tbody-walks').innerHTML=rows.map(w=>`<tr>
     <td>${fmtDate(w.date)}</td><td>${gcLinks(w.activityId)}</td><td style="font-weight:700;font-size:14px;color:var(--accent);text-decoration:underline;text-underline-offset:3px">${isIndoor(w)?INDOOR:fmtD(w.distanceM)}</td><td>${isIndoor(w)?INDOOR:pace(w.distanceM,w.durationSec)}</td>
-    <td style="${hrCls(w.avgHR)}">${w.avgHR}</td><td class="${w.maxHR>=187?'hi':w.maxHR>=166?'warn':''}">${w.maxHR}</td>
+    <td style="${hrCls(w.avgHR)}">${w.avgHR}</td><td class="${w.maxHR>=HRZ.z5?'hi':w.maxHR>=HRZ.z4?'warn':''}">${w.maxHR}</td>
     <td>${n(w.elevGain)}m</td><td class="muted-cell">${n(w.elevLoss)}m</td>
     <td>${fmt(w.durationSec)}</td><td>${n(w.steps)}</td>
     <td>${n(w.load,1)}</td><td class="muted-cell">-${n(w.bodyBatDrain)}</td><td>${n(w.calories)}</td>
@@ -750,7 +756,7 @@ function renderAll(){
     <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis">${a.name}</td>
     <td>${isIndoor(a)?INDOOR:fmtD(a.distanceM)}</td><td>${fmt(a.durationSec)}</td>
     <td style="font-weight:600">${isIndoor(a)?INDOOR:(a.type==='cycling'?fmtSpd(a.distanceM/a.durationSec):pace(a.distanceM,a.durationSec))}</td>
-    <td style="${hrCls(a.avgHR)}">${a.avgHR}</td><td class="${a.maxHR>=187?'hi':a.maxHR>=166?'warn':''}">${a.maxHR}</td>
+    <td style="${hrCls(a.avgHR)}">${a.avgHR}</td><td class="${a.maxHR>=HRZ.z5?'hi':a.maxHR>=HRZ.z4?'warn':''}">${a.maxHR}</td>
     <td>${n(a.elevGain)}m</td><td>${n(a.load,1)}</td>
     <td class="${a.vo2max>=47?'ok':''}">${a.vo2max||'—'}</td>
     <td>${n(a.calories)}</td><td class="muted-cell">-${n(a.bodyBatDrain)}</td>
@@ -2016,7 +2022,7 @@ function renderHealth(){
         </div>
         <div class="hero-pair">
           <div><div class="stat-label">VO₂ Max</div><div class="hero-pair-v" style="color:var(--accent2)">${GL('vo2max')}<span> ml/kg/min</span></div></div>
-          <div><div class="stat-label">Fitness Age</div><div class="hero-pair-v" style="color:var(--green)">${GL('fitnessAge',1)}<span> vs 28 faktisk</span></div></div>
+          <div><div class="stat-label">Fitness Age</div><div class="hero-pair-v" style="color:var(--green)">${GL('fitnessAge',1)}<span> vs ${ageNow()} faktisk</span></div></div>
         </div>
       </div>`;
     })()}
@@ -2192,7 +2198,7 @@ function renderHealth(){
 
 // ── INSIGHTS ───────────────────────────────────────────────────────────────
 const INS_GOAL=65;
-const INS_ZLBL=['Z1 104–124','Z2 125–145','Z3 146–165','Z4 166–186','Z5 187+'];
+const INS_ZLBL=()=>[1,2,3,4,5].map(i=>`Z${i} ${zRange(i)}`);
 const INS_ZVAR=['--z1','--z2','--z3','--z4','--z5'];
 const INS_DRIVERS=[
   {key:'hrvAvg',label:'HRV',unit:' ms'},{key:'avgStress',label:'Snitt Stress',unit:''},
@@ -2272,10 +2278,10 @@ function insRenderDriver(key){
               y:{title:{display:true,text:'Training readiness',color:tick},min:0,max:100,grid:{color:grid},ticks:{color:tick}}}}});
 }
 function insMakeCall(level,readiness,recovHrs){
-  if(level==='HIGH'||readiness>=65)return{cls:'push',label:'Kjør på',sm:'God dag for kvalitet — intervaller eller terskel. Sikt på Z4 (166–186), gjerne litt Z5.'};
-  if(level==='MODERATE'||(readiness>=45&&recovHrs<24))return{cls:'easy',label:'Moderat',sm:'Jevn aerob trening går fint — hold deg i Z2–Z3 (125–165). Spar de harde øktene.'};
-  if(recovHrs>=24)return{cls:'rest',label:'Hvile / veldig lett',sm:`Kroppen trenger fortsatt ~${Math.round(recovHrs)}t restitusjon. Gå tur eller hvil; kun Z1 (≤124) hvis du trener.`};
-  return{cls:'easy',label:'Lett',sm:'Ta det rolig — Z1–Z2 (≤145). La readiness bygge seg opp igjen før du tar i.'};
+  if(level==='HIGH'||readiness>=65)return{cls:'push',label:'Kjør på',sm:`God dag for kvalitet — intervaller eller terskel. Sikt på Z4 (${zRange(4)}), gjerne litt Z5.`};
+  if(level==='MODERATE'||(readiness>=45&&recovHrs<24))return{cls:'easy',label:'Moderat',sm:`Jevn aerob trening går fint — hold deg i Z2–Z3 (${HRZ.z2}–${HRZ.z4-1}). Spar de harde øktene.`};
+  if(recovHrs>=24)return{cls:'rest',label:'Hvile / veldig lett',sm:`Kroppen trenger fortsatt ~${Math.round(recovHrs)}t restitusjon. Gå tur eller hvil; kun Z1 (≤${HRZ.z2-1}) hvis du trener.`};
+  return{cls:'easy',label:'Lett',sm:`Ta det rolig — Z1–Z2 (≤${HRZ.z3-1}). La readiness bygge seg opp igjen før du tar i.`};
 }
 function renderInsights(){
   if(!healthData||!healthData.length){document.getElementById('ins-d-head').textContent='Ingen helsedata lastet.';return;}
@@ -2316,7 +2322,7 @@ function renderInsights(){
       : `Bare <b class="warn">${easy}% av treningen var rolig</b> — <b class="bad">${hard}%</b> lå i Z3–Z5. Det er mye hard trening/terskel; mer rolig Z1–Z2-volum gir bedre kvalitetsøkter og lavere skaderisiko.`;
     const bar=document.getElementById('ins-zbar'),leg=document.getElementById('ins-zleg');bar.innerHTML='';leg.innerHTML='';
     pct.forEach((p,i)=>{if(p>0)bar.insertAdjacentHTML('beforeend',`<span style="width:${p}%;background:var(${INS_ZVAR[i]})">${p>=8?p+'%':''}</span>`);
-      leg.insertAdjacentHTML('beforeend',`<span><span class="zone-dot" style="background:var(${INS_ZVAR[i]})"></span>${INS_ZLBL[i]} · ${p}%</span>`);});
+      leg.insertAdjacentHTML('beforeend',`<span><span class="zone-dot" style="background:var(${INS_ZVAR[i]})"></span>${INS_ZLBL()[i]} · ${p}%</span>`);});
   }
 }
 
@@ -3061,7 +3067,7 @@ async function loadData() {
     fetch(REVIEWS_URL + nc).then(r => r.json()),
     fetch(SHIFTS_URL + nc).then(r => r.json()).catch(() => [])
   ]);
-  activities = acts || []; healthData = health || [];
+  activities = acts || []; healthData = health || []; setHRZones();
   nutritionData = nutr || []; reviewsData = reviews || [];
   shiftsData = shifts || [];
   // Floor daily RESTING burn to BURN_FLOOR. On days the watch is off for a long
