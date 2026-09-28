@@ -4,7 +4,7 @@
 Personal health & training dashboard. Live at **https://snxz-y.github.io/WiggenApp/**. GitHub repo: `snxz-y/WiggenApp`. Single-page app (`index.html`) with four tabs: Activities, Health, Nutrition, Reviews. Dark theme, lime (`#c8f53a`) + purple (`#7c6dfa`) accents.
 
 ## Owner context
-Jørgen, 28, 171cm, ~76kg, goal 65kg. Shift nurse in Trondheim, Norway. Quit Zyn June 5 2026. Dairy allergy. Garmin Epix Pro Gen 2. HR zones: Z1 104-124, Z2 125-145, Z3 146-165, Z4 166-186, Z5 187+. Nutrition targets: 1600 kcal, 150g protein, 145g carbs, 51g fat.
+Jørgen, born 18 June 1997 (the app computes age from `BIRTH_DATE` in `index.html`), 171cm, ~76kg, goal 65kg. Shift nurse in Trondheim, Norway. Quit Zyn June 5 2026. Dairy allergy. Garmin Epix Pro Gen 2. HR zones and lactate threshold come from Garmin (see below); nothing zone-related is hardcoded in the app anymore. Nutrition targets: 1600 kcal, 150g protein, 145g carbs, 51g fat.
 
 ## File locations (Windows PC)
 All scripts in `C:\Users\Jørgen\Documents\files\`:
@@ -14,6 +14,11 @@ All scripts in `C:\Users\Jørgen\Documents\files\`:
 - `sync_log.txt` — sync output log
 
 Garmin MCP tokens: `C:\Users\Jørgen\.garmin-mcp\` (oauth1, oauth2, profile)
+
+## Garmin-derived settings (not hardcoded)
+- **Lactate threshold:** `lactateHR`, `lactatePaceSec`, `lactatePower` in each `health.json` entry (patched in via `patch_lactate2.py`, Sept 2026). Shown on the Health tab.
+- **HR zones:** `hrZones` = `{z1..z5 (zone floors, bpm), max, method}` from `/biometric-service/heartRateZones` (DEFAULT sport, else RUNNING), patched in via `patch_hrzones.py`. `index.html` loads the newest entry with `hrZones` into `HRZ` (`setHRZones()`), falling back to 104/125/146/166/187 if none exist. Used for HR colouring, max-HR highlighting, Insights zone legend and readiness advice. As of 27 Sept 2026 Garmin reports HR_MAX-based zones: Z1 99, Z2 118, Z3 138, Z4 158, Z5 177, max 197.
+- **Note:** the HA box's `/config/garmin/garmin_sync.py` is the live copy and has both patches. Keep the repo copy in sync with it after patching.
 
 ## Data files in GitHub repo
 - `activities.json` — workouts
@@ -25,6 +30,7 @@ Garmin MCP tokens: `C:\Users\Jørgen\.garmin-mcp\` (oauth1, oauth2, profile)
 - **Garmin sync (runs on the Home Assistant box):** As of 22 June 2026 the sync runs on the always-on HA box (HA OS, `192.168.10.103:8123`) via the **Advanced SSH & Web Terminal** add-on (slug `a0d7b954_ssh`). Files live in `/config/garmin/`: `garmin_sync.py`, `ha_garmin.py` (wrapper — sets `USERPROFILE` so `TOKEN_DIR=./.garmin-mcp`, and sets `GH_PAT`), and the `.garmin-mcp/` token files (`oauth1_token.json`, `oauth2_token.json`, `profile.json`). `requests` is pip-installed in the add-on. It runs in **local mode** (reads/refreshes the cached OAuth2 token on disk), so the OAuth1→OAuth2 exchange only happens when the token nears expiry — avoiding Garmin 429 at 15-min frequency.
   - **Schedule:** busybox cron in the add-on, `*/15 6-23 * * *` plus `0 0 * * *` = every 15 min 06:00–24:00 Norway local time (the box clock is local). Crontab stored at `/config/garmin/crontab`; log at `/config/garmin/sync.log`.
   - **Reboot persistence:** the add-on's **init_commands** reload the crontab and start crond on every boot (`crontab /config/garmin/crontab`, `crond -b -L /config/garmin/cron-daemon.log`) — verified surviving an add-on restart.
+  - **SSH access:** key-based from the Windows PC (`~/.ssh/id_ed25519`, added to the add-on's `ssh.authorized_keys`). Connect with `ssh -c aes256-gcm@openssh.com hassio@192.168.10.103` (or `ssh ha` if the `~/.ssh/config` alias is set up). Patches are applied with `curl -s <raw url> | sudo python3 -` on the box.
   - **Cloud job DISABLED:** the old GitHub Actions workflow `.github/workflows/garmin-sync.yml` (`cron: '*/15 4-22 * * *'`) was set to `disabled_manually` on 22 June 2026 so it no longer competes with the box. To re-enable: GitHub → Actions → "Garmin Sync" → Enable workflow. `garmin_sync.py` is committed to the repo (the HA box runs that same file). The cloud job, if re-enabled, reads the GitHub token from env (`GH_PAT` secret) and Garmin creds from `GARMIN_OAUTH1_TOKEN`/`GARMIN_OAUTH1_SECRET`/`GARMIN_DISPLAY_NAME` secrets; no tokens are hardcoded in the committed file. There is **no** local Windows Task Scheduler task (the old `GarminSync_*` tasks were removed).
   - **Activities are upserted, not skipped:** `sync_activities` re-processes the last ~2 days every run. It inserts new activities, repairs partial/foreign-schema entries (e.g. ones hand-added via Garmin MCP that lack `distanceM`), and refreshes metrics Garmin computes minutes after a run (power, running dynamics, HR zones, VO2max, load). Do **not** hand-write activity entries with a custom schema — let the sync own `activities.json`.
 - **On-demand sync:** removed. The in-app "Sync Garmin" button (and its `triggerGarminSync()` handler) was deleted on 22 June 2026 because the HA box now auto-syncs every 15 min, and the old button dispatched the now-disabled `garmin-sync.yml` workflow. For a manual sync, run `python3 /config/garmin/ha_garmin.py` on the HA box (e.g. via the SSH add-on web terminal). The Worker's `/sync-garmin` endpoint still exists but is no longer called by the app.
