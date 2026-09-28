@@ -190,7 +190,19 @@ def sync_health(hdrs, dn, target_date=None):
     endurance= gget(f"{BASE}/metrics-service/metrics/endurancescore", hdrs, {"calendarDate": TARGET}) or {}
     fitness  = gget(f"{BASE}/fitnessage-service/fitnessage/{TARGET}", hdrs) or {}
     im       = gget(f"{BASE}/wellness-service/wellness/daily/im/{TARGET}", hdrs) or {}
-    race_raw = gget(f"{BASE}/metrics-service/metrics/racepredictions/latest", hdrs) or {}
+    race_raw = gget(f"{BASE}/metrics-service/metrics/racepredictions/latest/{dn}", hdrs) or {}
+    if isinstance(race_raw, list): race_raw = race_raw[0] if race_raw else {}
+    lt_raw  = gget(f"{BASE}/biometric-service/biometric/latestLactateThreshold", hdrs) or []
+    lt_list = [e for e in (lt_raw if isinstance(lt_raw, list) else [lt_raw]) if isinstance(e, dict)]
+    _lt_hr  = next((e.get("hearRate") or e.get("heartRate") for e in lt_list if e.get("hearRate") or e.get("heartRate")), None)
+    _lt_spd = next((e.get("speed") for e in lt_list if e.get("speed")), None)
+    if _lt_spd and _lt_spd < 1.5: _lt_spd *= 10
+    _lt_pace = round(1000 / _lt_spd) if _lt_spd else None
+    ptw = gget(f"{BASE}/biometric-service/biometric/powerToWeight/latest/{TARGET}?sport=Running", hdrs) or []
+    ptw = (ptw[0] if ptw else {}) if isinstance(ptw, list) else ptw
+    _lt_pw   = ptw.get("functionalThresholdPower")
+    _lt_pwkg = round(ptw["powerToWeight"], 2) if ptw.get("powerToWeight") else None
+    print(f"  Lactate: HR {_lt_hr}, pace {_lt_pace} s/km, power {_lt_pw} W ({_lt_pwkg} W/kg) | Race 5K: {race_raw.get('time5K')} s")
 
     sleep_dto = sleep.get("dailySleepDTO", {}) or {}
     scores = sleep_dto.get("sleepScores", {}) or {}
@@ -310,8 +322,28 @@ def sync_health(hdrs, dn, target_date=None):
             continue
         bb_series.append({"time": tl, "level": lvl})
 
+    hrz_raw  = gget(f"{BASE}/biometric-service/heartRateZones", hdrs) or []
+
+    # Pulssoner: Garmin gir en rad per sport (DEFAULT, RUNNING, CYCLING ...).
+    # Bruk DEFAULT, ellers RUNNING, ellers forste rad. Lagre sonegulvene.
+    hr_zones = None
+    try:
+        rows = hrz_raw if isinstance(hrz_raw, list) else [hrz_raw]
+        rows = [r for r in rows if isinstance(r, dict) and r.get("zone1Floor")]
+        pick = (next((r for r in rows if r.get("sport") == "DEFAULT"), None)
+                or next((r for r in rows if r.get("sport") == "RUNNING"), None)
+                or (rows[0] if rows else None))
+        if pick:
+            hr_zones = {f"z{i}": int(pick[f"zone{i}Floor"]) for i in range(1, 6)}
+            hr_zones["max"] = pick.get("maxHeartRateUsed")
+            hr_zones["method"] = pick.get("trainingMethod")
+    except Exception as e:
+        print(f"  HR zones parse error: {e}")
+    print(f"  HR zones: {hr_zones}")
+
     entry = {
         "date": TARGET,
+        "hrZones": hr_zones,
         "rhr": stats.get("restingHeartRate") or stats.get("minHeartRate") or hr.get("restingHeartRate"),
         "minHR": stats.get("minHeartRate") or hr.get("minHeartRate"),
         "maxHR": stats.get("maxHeartRate") or hr.get("maxHeartRate"),
@@ -367,7 +399,7 @@ def sync_health(hdrs, dn, target_date=None):
         "enduranceClass": end_class,
         "fitnessAge": round(fa_val, 1) if fa_val else None,
         "recoveryTimeHrs": _recovery_hrs,
-        "lactateHR": 184,
+        "lactateHR": _lt_hr, "lactatePaceSec": _lt_pace, "lactatePower": _lt_pw, "lactatePowerKg": _lt_pwkg,
         "weight": wt_val,
         "bmi": body_today.get("bmi"),
         "bodyFat": body_today.get("bodyFat") or body_today.get("bodyFatPercentage"),
