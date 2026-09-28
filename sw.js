@@ -1,30 +1,12 @@
-const CACHE = 'wiggenapp-v1';
-const PRECACHE = [
-  '/WiggenApp/',
-  '/WiggenApp/index.html',
-  '/WiggenApp/manifest.json',
-  '/WiggenApp/icon-192.png',
-  '/WiggenApp/icon-512.png'
-];
-
-self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(PRECACHE)).then(() => self.skipWaiting()));
-});
-
+// Kill switch. index.html no longer registers a service worker, but one was
+// registered briefly in June 2026 and would keep serving a stale cached app.
+// Browsers re-fetch this file on navigation; this version clears all caches and
+// unregisters itself. Safe to delete once no device could still have the old one.
+self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', e => {
-  e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim()));
-});
-
-self.addEventListener('fetch', e => {
-  const url = new URL(e.request.url);
-  // Always network-first for JSON data files so they stay fresh
-  if (url.pathname.endsWith('.json') || url.hostname === 'raw.githubusercontent.com') {
-    e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
-    return;
-  }
-  // Cache-first for everything else
-  e.respondWith(caches.match(e.request).then(cached => cached || fetch(e.request).then(res => {
-    if (res.ok) { const c = res.clone(); caches.open(CACHE).then(cache => cache.put(e.request, c)); }
-    return res;
-  })));
+  e.waitUntil((async () => {
+    for (const k of await caches.keys()) await caches.delete(k);
+    await self.registration.unregister();
+    for (const c of await self.clients.matchAll({ type: 'window' })) c.navigate(c.url);
+  })());
 });

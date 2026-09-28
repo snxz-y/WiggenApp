@@ -1,9 +1,8 @@
 """
-garmin_sync.py - Daily Garmin data sync to GitHub
-Runs via GitHub Actions (cloud) OR Windows Task Scheduler (local fallback).
-
-Cloud mode: set env vars GARMIN_OAUTH1_TOKEN, GARMIN_OAUTH1_SECRET, GARMIN_DISPLAY_NAME
-Local mode: falls back to reading from ~/.garmin-mcp/ token files as before
+garmin_sync.py - Garmin -> GitHub sync for WiggenApp.
+Runs every 15 min on the Home Assistant box via cron (/config/garmin/ha_garmin.py
+sets USERPROFILE and GH_PAT, then runs this file). Reads/refreshes the OAuth
+tokens in <USERPROFILE>/.garmin-mcp/ and pushes health.json + activities.json.
 """
 
 import json, base64, os, requests, time, hmac, hashlib, urllib.parse, secrets as _secrets
@@ -89,39 +88,7 @@ def get_oauth2_via_oauth1(oauth1_token, oauth1_secret):
     raise RuntimeError(f"OAuth2 exchange failed after {len(delays)} attempts (last status {last})")
 
 def load_tokens():
-    """
-    Cloud mode: read OAuth1 creds from env vars, exchange for OAuth2.
-    Local mode: load from ~/.garmin-mcp files (with refresh-if-expiring logic).
-    """
-    oauth1_token  = os.environ.get("GARMIN_OAUTH1_TOKEN")
-    oauth1_secret = os.environ.get("GARMIN_OAUTH1_SECRET")
-    display_name  = os.environ.get("GARMIN_DISPLAY_NAME")
-
-    if oauth1_token and oauth1_secret and display_name:
-        # Cloud mode: reuse cached OAuth2 token if still valid
-        cache_path = "oauth2_token.json"
-        if os.path.exists(cache_path):
-            try:
-                with open(cache_path) as f:
-                    tokens = json.load(f)
-                remaining = tokens.get("expires_at", 0) - time.time()
-                if remaining > 300:
-                    print(f"  Cloud mode: using cached OAuth2 (expires in {int(remaining/60)}m)")
-                    return tokens, display_name
-                print(f"  Cloud mode: cached token expiring ({int(remaining)}s), refreshing...")
-            except Exception as e:
-                print(f"  Cloud mode: cache unreadable ({e}), exchanging fresh...")
-        else:
-            print("  Cloud mode: no cached token, exchanging OAuth1 → OAuth2...")
-        tokens = get_oauth2_via_oauth1(oauth1_token, oauth1_secret)
-        try:
-            with open(cache_path, "w") as f:
-                json.dump(tokens, f)
-        except Exception as e:
-            print(f"  Warning: could not save token cache: {e}")
-        return tokens, display_name
-
-    # Local fallback
+    """Load OAuth2 token + display name from TOKEN_DIR, refreshing via OAuth1 if expiring."""
     print("  Local mode: reading token files...")
     with open(os.path.join(TOKEN_DIR, "oauth2_token.json")) as f:
         tokens = json.load(f)
@@ -391,9 +358,10 @@ def sync_health(hdrs, dn, target_date=None):
         "aerobicLowLoad": aerobic_low,
         "aerobicHighLoad": aerobic_high,
         "anaerobicLoad": anaerobic,
-        "aerobicLowMin": 130, "aerobicLowMax": 342,
-        "aerobicHighMin": 256, "aerobicHighMax": 467,
-        "anaerobicMin": 0, "anaerobicMax": 211,
+        # Garmin's monthly load-focus target ranges (old fixed values as fallback)
+        "aerobicLowMin": (lb.get("monthlyLoadAerobicLowTargetMin") or 130), "aerobicLowMax": (lb.get("monthlyLoadAerobicLowTargetMax") or 342),
+        "aerobicHighMin": (lb.get("monthlyLoadAerobicHighTargetMin") or 256), "aerobicHighMax": (lb.get("monthlyLoadAerobicHighTargetMax") or 467),
+        "anaerobicMin": (lb.get("monthlyLoadAnaerobicTargetMin") or 0), "anaerobicMax": (lb.get("monthlyLoadAnaerobicTargetMax") or 211),
         "vo2max": (training.get("mostRecentVO2Max") or {}).get("generic", {}).get("vo2MaxValue") or stats.get("vo2Max"),
         "enduranceScore": end_score,
         "enduranceClass": end_class,
@@ -599,6 +567,5 @@ if __name__ == "__main__":
         print(f"\nFailed: {e}")
         import traceback, sys
         traceback.print_exc()
-        # Exit non-zero so a failed run shows red in GitHub Actions instead of
-        # silently passing (e.g. a Garmin 429 on the OAuth token exchange).
+        # Exit non-zero so cron/sync.log shows the failure (e.g. a Garmin 429).
         sys.exit(1)

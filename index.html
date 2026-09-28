@@ -370,45 +370,45 @@ document.addEventListener('DOMContentLoaded',function(){var t=document.documentE
   <div id="nav-activities" class="panel">
     <div class="subnav" data-sect="act" style="align-items:center">
       <button class="subnav-btn active" onclick="showSubTab('act','summary',this)">📊 Oversikt</button>
-      <button class="subnav-btn" onclick="showSubTab('act','løpeturer',this)">🏃 Løping</button>
-      <button class="subnav-btn" onclick="showSubTab('act','gåturer',this)">🚶 Gåturer</button>
+      <button class="subnav-btn" onclick="showSubTab('act','runs',this)">🏃 Løping</button>
+      <button class="subnav-btn" onclick="showSubTab('act','walks',this)">🚶 Gåturer</button>
       <button class="subnav-btn" onclick="showSubTab('act','bikes',this)">🚴 Sykling</button>
       <button class="subnav-btn" onclick="showSubTab('act','all',this)">📋 Alle</button>
     </div>
     <div id="act-sub-summary" class="sub-panel active"><div id="act-summary"></div></div>
     <div id="act-sub-runs" class="sub-panel">
     <div class="subtabs">
-      <button class="subtab active" onclick="showSub('løpeturer',this)" style="display:none">Løping</button>
+      <button class="subtab active" onclick="showSub('runs',this)" style="display:none">Løping</button>
       <button class="subtab" onclick="showSub('bikes',this)" style="display:none">Sykling</button>
-      <button class="subtab" onclick="showSub('gåturer',this)" style="display:none">Gåturer</button>
+      <button class="subtab" onclick="showSub('walks',this)" style="display:none">Gåturer</button>
       <button class="subtab" onclick="showSub('all',this)" style="display:none">Alle</button>
     </div>
 
     <div id="sub-runs" class="subpanel">
       <div class="zone-legend">
-        <span><span class="zone-dot" style="background:var(--z1)"></span>Z1 — Lett / hvile</span>
-        <span><span class="zone-dot" style="background:var(--z2)"></span>Z2 — Aerob base</span>
-        <span><span class="zone-dot" style="background:var(--z3)"></span>Z3 — Tempo</span>
-        <span><span class="zone-dot" style="background:var(--z4)"></span>Z4 — Terskel</span>
-        <span><span class="zone-dot" style="background:var(--z5)"></span>Z5 — Maks</span>
-        <span style="margin-left:6px;color:var(--red)">Rød puls = snitt &gt;175 eller maks &gt;185</span>
+        <span><span class="zone-dot" style="background:var(--z1)"></span>Z1 — Lett / hvile<span class="zr" data-z="1"></span></span>
+        <span><span class="zone-dot" style="background:var(--z2)"></span>Z2 — Aerob base<span class="zr" data-z="2"></span></span>
+        <span><span class="zone-dot" style="background:var(--z3)"></span>Z3 — Tempo<span class="zr" data-z="3"></span></span>
+        <span><span class="zone-dot" style="background:var(--z4)"></span>Z4 — Terskel<span class="zr" data-z="4"></span></span>
+        <span><span class="zone-dot" style="background:var(--z5)"></span>Z5 — Maks<span class="zr" data-z="5"></span></span>
+        <span id="hr-note" style="margin-left:6px;color:var(--red)"></span>
       </div>
       <div class="tbl-wrap"><table>
         <thead><tr>
-          <th onclick="sort('løpeturer','date')">Dato</th>
+          <th onclick="sort('runs','date')">Dato</th>
           <th>GC</th>
-          <th onclick="sort('løpeturer','distanceM')">Dist</th>
-          <th onclick="sort('løpeturer','pace')">Tempo</th>
-          <th onclick="sort('løpeturer','avgHR')">Snittpuls</th>
-          <th onclick="sort('løpeturer','maxHR')">Makspuls</th>
-          <th onclick="sort('løpeturer','fastest1k')">Beste 1 km</th>
-          <th onclick="sort('løpeturer','fastest5k')">Beste 5 km</th>
-          <th onclick="sort('løpeturer','fastest10k')">Beste 10 km</th>
-          <th onclick="sort('løpeturer','vo2max')">VO₂max</th>
-          <th onclick="sort('løpeturer','load')">Load</th>
-          <th onclick="sort('løpeturer','calories')">kcal</th>
+          <th onclick="sort('runs','distanceM')">Dist</th>
+          <th onclick="sort('runs','pace')">Tempo</th>
+          <th onclick="sort('runs','avgHR')">Snittpuls</th>
+          <th onclick="sort('runs','maxHR')">Makspuls</th>
+          <th onclick="sort('runs','fastest1k')">Beste 1 km</th>
+          <th onclick="sort('runs','fastest5k')">Beste 5 km</th>
+          <th onclick="sort('runs','fastest10k')">Beste 10 km</th>
+          <th onclick="sort('runs','vo2max')">VO₂max</th>
+          <th onclick="sort('runs','load')">Load</th>
+          <th onclick="sort('runs','calories')">kcal</th>
           <th>Soner</th>
-          <th onclick="sort('løpeturer','label')">Effect</th>
+          <th onclick="sort('runs','label')">Effekt</th>
           <th></th>
         </tr></thead>
         <tbody id="tbody-runs"></tbody>
@@ -439,7 +439,7 @@ document.addEventListener('DOMContentLoaded',function(){var t=document.documentE
           <th onclick="sort('bikes','bodyBatDrain')">BB ↓</th>
           <th onclick="sort('bikes','calories')">kcal</th>
           <th>Soner</th>
-          <th onclick="sort('bikes','label')">Effect</th>
+          <th onclick="sort('bikes','label')">Effekt</th>
         </tr></thead>
         <tbody id="tbody-bikes"></tbody>
       </table></div>
@@ -454,21 +454,21 @@ document.addEventListener('DOMContentLoaded',function(){var t=document.documentE
       </div>
       <div class="tbl-wrap"><table>
         <thead><tr>
-          <th onclick="sort('gåturer','date')">Dato</th>
+          <th onclick="sort('walks','date')">Dato</th>
           <th>GC</th>
-          <th onclick="sort('gåturer','distanceM')">Dist</th>
-          <th onclick="sort('gåturer','pace')">Tempo</th>
-          <th onclick="sort('gåturer','avgHR')">Snittpuls</th>
-          <th onclick="sort('gåturer','maxHR')">Makspuls</th>
-          <th onclick="sort('gåturer','elevGain')">Høyde ↑</th>
-          <th onclick="sort('gåturer','elevLoss')">Høyde ↓</th>
-          <th onclick="sort('gåturer','durationSec')">Varighet</th>
-          <th onclick="sort('gåturer','steps')">Skritt</th>
-          <th onclick="sort('gåturer','load')">Load</th>
-          <th onclick="sort('gåturer','bodyBatDrain')">BB ↓</th>
-          <th onclick="sort('gåturer','calories')">kcal</th>
+          <th onclick="sort('walks','distanceM')">Dist</th>
+          <th onclick="sort('walks','pace')">Tempo</th>
+          <th onclick="sort('walks','avgHR')">Snittpuls</th>
+          <th onclick="sort('walks','maxHR')">Makspuls</th>
+          <th onclick="sort('walks','elevGain')">Høyde ↑</th>
+          <th onclick="sort('walks','elevLoss')">Høyde ↓</th>
+          <th onclick="sort('walks','durationSec')">Varighet</th>
+          <th onclick="sort('walks','steps')">Skritt</th>
+          <th onclick="sort('walks','load')">Load</th>
+          <th onclick="sort('walks','bodyBatDrain')">BB ↓</th>
+          <th onclick="sort('walks','calories')">kcal</th>
           <th>Soner</th>
-          <th onclick="sort('gåturer','label')">Effect</th>
+          <th onclick="sort('walks','label')">Effekt</th>
         </tr></thead>
         <tbody id="tbody-walks"></tbody>
       </table></div>
@@ -480,7 +480,7 @@ document.addEventListener('DOMContentLoaded',function(){var t=document.documentE
         <input id="filter-search" type="text" placeholder="Søk..." oninput="renderAll()" style="width:140px">
       </div>
       <div class="tbl-wrap"><table>
-        <thead><tr><th>Dato</th><th>GC</th><th>Type</th><th>Navn</th><th>Dist</th><th>Varighet</th><th>Tempo/fart</th><th>Snittpuls</th><th>Makspuls</th><th>Høyde ↑</th><th>Load</th><th>VO₂max</th><th>kcal</th><th>BB ↓</th><th>Effect</th></tr></thead>
+        <thead><tr><th>Dato</th><th>GC</th><th>Type</th><th>Navn</th><th>Dist</th><th>Varighet</th><th>Tempo/fart</th><th>Snittpuls</th><th>Makspuls</th><th>Høyde ↑</th><th>Load</th><th>VO₂max</th><th>kcal</th><th>BB ↓</th><th>Effekt</th></tr></thead>
         <tbody id="tbody-all"></tbody>
       </table></div>
     </div>
@@ -597,10 +597,13 @@ document.addEventListener('DOMContentLoaded',function(){var t=document.documentE
 const ACT_URL='https://raw.githubusercontent.com/snxz-y/WiggenApp/main/activities.json';
 const SHIFTS_URL='https://raw.githubusercontent.com/snxz-y/WiggenApp/main/shifts.json';
 const HEALTH_URL='https://raw.githubusercontent.com/snxz-y/WiggenApp/main/health.json';
-let activities=[],healthData=[],shiftsData=[],currentPeriod='today';
+let activities=[],healthData=[],shiftsData=[];
 // Pulssone-gulv (bpm). Standardverdier til health.json har hrZones fra Garmin.
 let HRZ={z1:104,z2:125,z3:146,z4:166,z5:187};
-const setHRZones=()=>{const e=[...healthData].sort((a,b)=>b.date.localeCompare(a.date)).find(d=>d.hrZones&&d.hrZones.z5);if(e)HRZ={...HRZ,...e.hrZones};};
+const setHRZones=()=>{const e=[...healthData].sort((a,b)=>b.date.localeCompare(a.date)).find(d=>d.hrZones&&d.hrZones.z5);if(e)HRZ={...HRZ,...e.hrZones};
+  document.querySelectorAll('.zr[data-z]').forEach(el=>el.textContent=` (${zRange(+el.dataset.z)})`);
+  const hn=document.getElementById('hr-note');if(hn)hn.textContent=`Rød makspuls = Z5 (≥${HRZ.z5}), oransje = Z4 (≥${HRZ.z4})`;
+};
 const zRange=i=>i===5?`${HRZ.z5}+`:`${HRZ['z'+i]}–${HRZ['z'+(i+1)]-1}`;
 const BIRTH_DATE='1997-06-18';
 const ageNow=()=>{const b=new Date(BIRTH_DATE),t=new Date();let a=t.getFullYear()-b.getFullYear();if(t.getMonth()<b.getMonth()||(t.getMonth()===b.getMonth()&&t.getDate()<b.getDate()))a--;return a;};
@@ -699,7 +702,7 @@ function toggleMore(btn){
   btn.textContent=show?'Mindre':'Mer';
 }
 function renderRuns(){
-  const rows=getSorted(activities.filter(a=>a.type==='running'),'løpeturer');
+  const rows=getSorted(activities.filter(a=>a.type==='running'),'runs');
   document.getElementById('tbody-runs').innerHTML=rows.map(r=>`<tr>
     <td>${fmtDate(r.date)}</td><td>${gcLinks(r.activityId)}</td>
     <td style="font-weight:700;font-size:14px;color:var(--accent);text-decoration:underline;text-underline-offset:3px">${isIndoor(r)?INDOOR:fmtD(r.distanceM)}</td>
@@ -736,7 +739,7 @@ function renderBikes(){
   </tr>`).join('');
 }
 function renderWalks(){
-  const rows=getSorted(activities.filter(a=>a.type==='walking'),'gåturer');
+  const rows=getSorted(activities.filter(a=>a.type==='walking'),'walks');
   document.getElementById('tbody-walks').innerHTML=rows.map(w=>`<tr>
     <td>${fmtDate(w.date)}</td><td>${gcLinks(w.activityId)}</td><td style="font-weight:700;font-size:14px;color:var(--accent);text-decoration:underline;text-underline-offset:3px">${isIndoor(w)?INDOOR:fmtD(w.distanceM)}</td><td>${isIndoor(w)?INDOOR:pace(w.distanceM,w.durationSec)}</td>
     <td style="${hrCls(w.avgHR)}">${w.avgHR}</td><td class="${w.maxHR>=HRZ.z5?'hi':w.maxHR>=HRZ.z4?'warn':''}">${w.maxHR}</td>
@@ -766,45 +769,6 @@ function renderAll(){
 
 
 // ═══════════════════════════════════════════════
-// TRAINING LOAD (Acute 7d vs Chronic 42d EWMA)
-// ═══════════════════════════════════════════════
-function renderTrainingLoad(){
-  const el=document.getElementById('act-load-chart');if(!el)return;
-  const runs=activities.filter(a=>a.type==='running'&&a.load&&a.date).sort((a,b)=>a.date.localeCompare(b.date));
-  if(runs.length<2)return;
-  const all=[];
-  const start=new Date(runs[0].date);const end=new Date();
-  for(let d=new Date(start);d<=end;d.setDate(d.getDate()+1)){
-    const ds=d.toISOString().slice(0,10);
-    const load=runs.filter(r=>r.date===ds).reduce((s,r)=>s+(r.load||0),0);
-    all.push({date:ds,load});
-  }
-  const labels=[];const acute=[];const chronic=[];
-  let a=0,c=0;
-  const ka=2/(7+1),kc=2/(42+1);
-  all.forEach((d,i)=>{
-    a=i===0?d.load:d.load*ka+a*(1-ka);
-    c=i===0?d.load:d.load*kc+c*(1-kc);
-    if(i>=41||i>=all.length-30){
-      const _dp=d.date.split('-');labels.push(_dp[2]+'/'+_dp[1]);
-      acute.push(+a.toFixed(1));
-      chronic.push(+c.toFixed(1));
-    }
-  });
-  destroyChartById('act-load-chart');
-  chartInstances['act-load-chart']=new Chart(el,{
-    type:'line',
-    data:{labels,datasets:[
-      {label:'Acute (7d)',data:acute,borderColor:'#c49078',backgroundColor:'#c4907820',borderWidth:2,fill:false,pointRadius:0,tension:.3},
-      {label:'Chronic (42d)',data:chronic,borderColor:'#7c6dfa',backgroundColor:'#7c6dfa20',borderWidth:2,fill:false,pointRadius:0,tension:.3}
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:chartTick(),font:{size:10},boxWidth:10}}},
-      scales:{x:{ticks:{color:chartTick(),font:{size:10},maxTicksLimit:8},grid:{color:chartGrid()}},
-        y:{ticks:{color:chartTick(),font:{size:10}},grid:{color:chartGrid()},beginAtZero:true}}}
-  });
-}
-
-// ═══════════════════════════════════════════════
 // RACE PREDICTIONS from VO2max (Riegel formula)
 // ═══════════════════════════════════════════════
 function renderRacePreds(){
@@ -819,33 +783,6 @@ function renderRacePreds(){
     {dist:'Marathon',sec:entry.raceMarathonSec}
   ];
   el.innerHTML=preds.map(p=>`<div class="race-card"><div class="race-dist">${p.dist}</div><div class="race-time">${fmt(p.sec)}</div></div>`).join('');
-}
-
-// ═══════════════════════════════════════════════
-// ACTIVITY HEATMAP CALENDAR
-// ═══════════════════════════════════════════════
-function renderHeatmap(){
-  const el=document.getElementById('act-heatmap');if(!el)return;
-  const runDates=new Set(activities.filter(a=>a.type==='running').map(a=>a.date));
-  const actDates=new Map();
-  activities.forEach(a=>{
-    const k=a.date;
-    actDates.set(k,(actDates.get(k)||0)+1);
-  });
-  // Last 52 weeks
-  const today=new Date();const oneYear=new Date(today);oneYear.setDate(today.getDate()-364);
-  // Start from last Monday before oneYear
-  const dow=(oneYear.getDay()+6)%7;
-  const gridStart=new Date(oneYear);gridStart.setDate(oneYear.getDate()-dow);
-  const cells=[];
-  for(let d=new Date(gridStart);d<=today;d.setDate(d.getDate()+1)){
-    const ds=d.toISOString().slice(0,10);
-    const cnt=actDates.get(ds)||0;
-    const lv=cnt===0?'':cnt===1?'lv1':cnt===2?'lv2':cnt>=3?'lv3':'lv1';
-    const isRun=runDates.has(ds);
-    cells.push(`<div class="hm-cell${lv?' '+lv:''}" title="${ds}: ${cnt} activit${cnt===1?'y':'ies'}"></div>`);
-  }
-  el.innerHTML=cells.join('');
 }
 
 // ═══════════════════════════════════════════════
@@ -976,7 +913,7 @@ function renderWeightChart(sorted){
     const daysToGoal=(65-intercept)/slope;
     if(daysToGoal>0&&daysToGoal<500){
       const g=new Date();g.setDate(g.getDate()+Math.round(daysToGoal-n));
-      goalLabel=`Goal 65kg: ${g.toLocaleDateString('no-NO',{day:'2-digit',month:'short',year:'numeric'})}`;
+      goalLabel=`Mål 65 kg: ${g.toLocaleDateString('no-NO',{day:'2-digit',month:'short',year:'numeric'})}`;
     }
   }
   const goalLine=labels.map((_,i)=>+(intercept+slope*i).toFixed(2));
@@ -1023,9 +960,9 @@ function renderGoalProjection(){
     if(daysToGoal>0){
       onTrack=true;
       const g=new Date();g.setDate(g.getDate()+Math.round(daysToGoal));
-      etaStr=g.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+      etaStr=g.toLocaleDateString('no-NO',{day:'2-digit',month:'short',year:'numeric'});
       const wks=Math.round(daysToGoal/7);
-      etaSub='≈ '+wks+' week'+(wks===1?'':'s')+' away';
+      etaSub='≈ '+wks+(wks===1?' uke':' uker')+' unna';
     }
   } else if(remaining<=0){ etaStr='Mål nådd'; etaSub='på eller under 65 kg'; onTrack=true; }
   else { etaStr='Ikke i rute'; etaSub=slope>0.0005?'på vei opp':'stabil'; }
@@ -1060,7 +997,7 @@ function renderGoalProjection(){
         <span style="color:var(--muted)"> vs </span><b style="color:var(--text)">${avgBurn.toLocaleString()} forbrent</b>
         <span style="color:var(--muted)"> — a </span><b style="color:${vClr}">${Math.abs(actBal).toLocaleString()} kcal/day ${actBal>0?'underskudd':'overskudd'}</b>,
         <span style="color:${vClr}">${vTxt}</span>.
-        <span style="color:var(--muted)"> (${paired.length} recent days with both meals &amp; Garmin logged.)</span></div>`;
+        <span style="color:var(--muted)"> (${paired.length} siste dager med både måltider og Garmin-data.)</span></div>`;
     }
   }
   const card=(label,val,sub,clr)=>`<div style="flex:1;min-width:150px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px">
@@ -1636,49 +1573,10 @@ function applyHealthRange(){
   try{renderHealth();}catch(e){console.error('renderHealth:',e);}
 }
 
-function setHealthPreset(p,el){
-  if(!healthData.length)return;
-  const sorted=[...healthData].sort((a,b)=>b.date.localeCompare(a.date));
-  const latest=sorted[0].date;
-  const ref=new Date(latest);
-  if(p==='today'){
-    healthStartDate=latest;healthEndDate=latest;healthSingleDay=true;
-    
-    document.getElementById('health-date').value=latest;
-  } else {
-    healthSingleDay=false;
-    healthEndDate=latest;
-    document.getElementById('health-date').value=latest;
-    if(p==='7d')ref.setDate(ref.getDate()-7);
-    else if(p==='14d')ref.setDate(ref.getDate()-14);
-    else if(p==='4w')ref.setDate(ref.getDate()-28);
-    else if(p==='3m')ref.setMonth(ref.getMonth()-3);
-    else if(p==='6m')ref.setMonth(ref.getMonth()-6);
-    else if(p==='all'){
-      healthStartDate=sorted[sorted.length-1].date;
-      document.getElementById('health-start').value=healthStartDate;
-      renderHealth();
-      document.querySelectorAll('.period-tab').forEach(t=>t.classList.remove('active'));
-      if(el)el.classList.add('active');
-      return;
-    }
-    healthStartDate=ref.toISOString().slice(0,10);
-    document.getElementById('health-start').value=healthStartDate;
-  }
-  document.querySelectorAll('.period-tab').forEach(t=>t.classList.remove('active'));
-  if(el)el.classList.add('active');
-  renderHealth();
-}
 
 function avgg(arr,key){const v=arr.map(d=>d[key]).filter(x=>x!=null);return v.length?(v.reduce((a,b)=>a+b,0)/v.length):null;}
 function latestt(arr,key){for(const d of arr){if(d[key]!=null)return d[key];}return null;}
 
-function mkChart(id,type,labels,datasets){
-  destroyChartById(id);
-  const ctx=document.getElementById(id);
-  if(!ctx)return;
-  chartInstances[id]=new Chart(ctx,{type,data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:chartTick(),font:{size:10}},grid:{color:'rgba(255,255,255,.04)'}},y:{ticks:{color:chartTick(),font:{size:10}},grid:{color:'rgba(255,255,255,.04)'}}}}}); 
-}
 function destroyChartById(id){if(chartInstances[id]){try{chartInstances[id].destroy();}catch(e){}delete chartInstances[id];}}
 
 function renderHealth(){
@@ -1692,8 +1590,6 @@ function renderHealth(){
   const _gS=[...healthData].sort((a,b)=>b.date.localeCompare(a.date));
   const GL=(k,dec=0)=>{const v=latestt(_gS,k);return v!=null?n(v,dec):'—';};
   const gLatest=(k)=>{for(const r of _gS){if(r[k]!=null)return r[k];}return null;};
-  const gDate=(k)=>{for(const r of _gS){if(r[k]!=null){const p=r.date.split('-');return p[2]+'/'+p[1];}}return null;};
-  const staleLbl=(k)=>{const dt=gDate(k);return dt&&dt!==fmtDate(d.date)?`<div style="font-size:9px;color:var(--muted);margin-top:2px">as of ${dt}</div>`:'';};
 
   const sleepH=isToday&&d.sleepSec?`${Math.floor(d.sleepSec/3600)}h ${Math.round((d.sleepSec%3600)/60)}m`:'—';
   const deepPct=isToday&&d.sleepSec?Math.round(d.deepSec/d.sleepSec*100):0;
@@ -1795,7 +1691,6 @@ function renderHealth(){
   }
 
   // Endurance score scale: 3570 (base) to 10560 (max), classes at 5100/5800/6600/7300/8100/8800
-  const endPct=d.enduranceScore?Math.min(100,Math.round((d.enduranceScore-3570)/(10560-3570)*100)):0;
   const endClass=d.enduranceScore>=8800?'Elite':d.enduranceScore>=8100?'Superior':d.enduranceScore>=7300?'Expert':d.enduranceScore>=6600?'Well-trained':d.enduranceScore>=5800?'Trained':d.enduranceScore>=5100?'Intermediate':'Beginner';
 
   // kcal donut data
@@ -1821,21 +1716,6 @@ function renderHealth(){
   const floorsVal=isToday?d.floors:Math.round(avgg(hrows,'floors'));
   const floorsOk=floorsVal>=floorsGoal;
 
-  // Body comp — independent date range (all healthData with weight, not just hrows)
-  const compRows=getCompRows();
-  const compLabels=compRows.map(r=>{ const p=r.date.split('-'); return p[2]+'/'+p[1]; });
-  const showCharts=compRows.length>1;
-  // latest value + delta (end minus start) for comp range
-  const cLast=compRows.length?compRows[compRows.length-1]:null;
-  const cFirst=compRows.length?compRows[0]:null;
-  const cVal=(k,dec=1)=>cLast&&cLast[k]!=null?n(cLast[k],dec):'—';
-  const cDelta=(k,dec=1)=>{
-    if(!cFirst||!cLast||cFirst===cLast)return'';
-    const diff=(cLast[k]||0)-(cFirst[k]||0);
-    if(diff===0)return'';
-    const sign=diff>0?'+':'';
-    return` <span style="font-size:11px;color:${diff<0?'var(--green)':'var(--red)'}">(${sign}${n(diff,dec)})</span>`;
-  };
 
     // Week-over-week deltas
     const now2=new Date();
@@ -2174,7 +2054,6 @@ function renderHealth(){
       const mkW = (id, datasets, ymin, ymax) => {
         const el = document.getElementById(id); if(!el) return;
         destroyChartById(id);
-        const scaleOpts = { ticks:{color:chartTick(),font:{size:9},maxTicksLimit:5}, grid:{color:chartGrid()}};
         chartInstances[id] = new Chart(el, { type:'line', data:{labels:wLabels, datasets}, options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:datasets.length>1,labels:{color:'#a09488',font:{size:10},boxWidth:10,padding:12}},tooltip:{enabled:true}},scales:{x:{...scaleOpts,ticks:{...scaleOpts.ticks,maxTicksLimit:8}},y:{...scaleOpts,min:ymin,max:ymax}}}});
       };
       const line = (data,color,label,fill=false) => ({data,borderColor:color,backgroundColor:color+'28',borderWidth:1.5,fill,tension:.35,pointRadius:2.5,pointBackgroundColor:color,label});
@@ -2197,7 +2076,6 @@ function renderHealth(){
 
 
 // ── INSIGHTS ───────────────────────────────────────────────────────────────
-const INS_GOAL=65;
 const INS_ZLBL=()=>[1,2,3,4,5].map(i=>`Z${i} ${zRange(i)}`);
 const INS_ZVAR=['--z1','--z2','--z3','--z4','--z5'];
 const INS_DRIVERS=[
@@ -2339,8 +2217,7 @@ function showSubTab(sect, tab, el) {
     // All list tabs share act-sub-runs, just trigger showSub for inner tabs
     const listPanel=document.getElementById('act-sub-runs');
     if(listPanel){listPanel.classList.add('active');}
-    if(tab==='løpeturer'||tab==='bikes'||tab==='gåturer'||tab==='all'){
-      const fakeBtn=null;
+    if(tab==='runs'||tab==='bikes'||tab==='walks'||tab==='all'){
       // Trigger showSub for the right sub-tab
       const innerBtn=document.querySelector(`.subtab[onclick*="showSub('${tab}"]`);
       showSub(tab,innerBtn);
@@ -2379,7 +2256,6 @@ function showSub(id,el){
   document.getElementById('sub-'+id).style.display='block';
   el.classList.add('active');
 }
-// setPeriod replaced by setHealthPreset
 
 
 
@@ -2416,37 +2292,7 @@ function applyNutrEnd() {
   renderNutrition();
 }
 
-function setNutrPreset(p, el) {
-  if (!nutritionData.length) return;
-  const sorted = [...nutritionData].sort((a,b) => b.date.localeCompare(a.date));
-  const latest = sorted[0].date;
-  const ref = new Date(latest);
-  nutrEndDate = latest;
-  document.getElementById('nutr-end').value=latest;
-  if (p === 'yesterday') {
-    nutrStartDate = latest; nutrEndDate = latest; nutrSingleDay = true;
-    document.getElementById('nutr-start').value=latest;
-  } else {
-    nutrSingleDay = false;
-    if (p === '7d') ref.setDate(ref.getDate()-7);
-    else if (p === '14d') ref.setDate(ref.getDate()-14);
-    else if (p === '4w') ref.setDate(ref.getDate()-28);
-    else if (p === 'all') { nutrStartDate = sorted[sorted.length-1].date; document.getElementById('nutr-start').value=nutrStartDate; renderNutrition(); document.querySelectorAll('.period-tab').forEach(t=>t.classList.remove('active')); if(el)el.classList.add('active'); return; }
-    nutrStartDate = ref.toISOString().slice(0,10);
-    document.getElementById('nutr-start').value=nutrStartDate;
-  }
-  document.querySelectorAll('.period-tab').forEach(t => t.classList.remove('active'));
-  if (el) el.classList.add('active');
-  renderNutrition();
-}
 
-function toggleReview(i) {
-  const body = document.getElementById('review-body-' + i);
-  const chevron = document.getElementById('review-chevron-' + i);
-  const isOpen = body.style.display !== 'none';
-  body.style.display = isOpen ? 'none' : 'block';
-  chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
-}
 
 // Normalize a stored review period into a clean "DD/MM/YYYY → DD/MM/YYYY".
 // Handles both ISO (2026-06-14) and DD/MM/YYYY tokens, and ignores any
@@ -2464,29 +2310,6 @@ function formatReviewPeriod(period) {
   return period;
 }
 
-// Lightweight Markdown → HTML for review text (headers, bold, bullets, rules).
-function mdToHtml(md) {
-  if (!md) return '';
-  let s = String(md).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  const inline = t => t.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-  const lines = s.split('\n');
-  let html = '', inList = false;
-  const closeList = () => { if (inList) { html += '</ul>'; inList = false; } };
-  for (const raw of lines) {
-    const line = raw.trim();
-    if (!line) { closeList(); continue; }
-    if (/^---+$/.test(line) || /^\*\*\*+$/.test(line)) { closeList(); html += '<hr style="border:none;border-top:1px solid var(--border);margin:14px 0">'; continue; }
-    let m;
-    if (m = line.match(/^###\s+(.*)/)) { closeList(); html += `<div style="font-weight:700;font-size:13px;margin:14px 0 5px">${inline(m[1])}</div>`; continue; }
-    if (m = line.match(/^##\s+(.*)/))  { closeList(); html += `<div style="font-weight:700;font-size:14.5px;color:var(--accent);margin:18px 0 8px">${inline(m[1])}</div>`; continue; }
-    if (m = line.match(/^#\s+(.*)/))   { closeList(); html += `<div style="font-family:var(--font-serif);font-size:18px;margin:4px 0 12px">${inline(m[1])}</div>`; continue; }
-    if (m = line.match(/^[-*]\s+(.*)/)) { if (!inList) { html += '<ul style="margin:6px 0 10px 20px;padding:0">'; inList = true; } html += `<li style="margin:4px 0">${inline(m[1])}</li>`; continue; }
-    closeList();
-    html += `<p style="margin:0 0 11px">${inline(line)}</p>`;
-  }
-  closeList();
-  return html;
-}
 
 // Format a pasted coach review (title line | dates, then "N. Heading" + prose)
 // into themed HTML: serif title, lime numbered section chips, clean paragraphs.
@@ -2598,7 +2421,7 @@ async function saveCoachReview() {
       status.style.color = '#c47878'; status.textContent = 'Lagring feilet.';
     }
   } catch (e) {
-    status.style.color = '#c47878'; status.textContent = 'Error: ' + e.message;
+    status.style.color = '#c47878'; status.textContent = 'Feil: ' + e.message;
   }
   btn.disabled = false; btn.textContent = 'Lagre målsetning';
 }
@@ -2752,7 +2575,6 @@ const NUTR_URL = 'https://raw.githubusercontent.com/snxz-y/WiggenApp/main/nutrit
 const REVIEWS_URL = 'https://raw.githubusercontent.com/snxz-y/WiggenApp/main/reviews.json';
 let nutritionData = [];
 let reviewsData = [];
-let currentNutrPeriod = 'today';
 
 const TARGETS = { calories: 1600, protein: 120, carbs: 164, fat: 51 };
 
@@ -3091,14 +2913,6 @@ async function loadData() {
   });
 }
 
-// Re-render every view from the current globals (used after a manual sync).
-function renderAllViews() {
-  try { renderActivities(); } catch(e) { console.error('renderActivities', e); }
-  try { renderCoachReviews(); } catch(e) { console.error('renderCoachReviews', e); }
-  try { renderHealth(); } catch(e) { console.error('renderHealth', e); }
-  try { renderNutrition(); } catch(e) { console.error('renderNutrition', e); }
-  try { renderWork(); } catch(e) {}
-}
 
 // ── INIT ─────────────────────────────────────────────────────────────────────
 (async () => {

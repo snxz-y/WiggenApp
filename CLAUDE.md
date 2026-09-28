@@ -6,19 +6,22 @@ Personal health & training dashboard. Live at **https://snxz-y.github.io/WiggenA
 ## Owner context
 Jørgen, born 18 June 1997 (the app computes age from `BIRTH_DATE` in `index.html`), 171cm, ~76kg, goal 65kg. Shift nurse in Trondheim, Norway. Dairy allergy. Garmin Epix Pro Gen 2. HR zones and lactate threshold come from Garmin (see below); nothing zone-related is hardcoded in the app anymore. Nutrition targets: 1600 kcal, 150g protein, 145g carbs, 51g fat.
 
-## File locations (Windows PC)
-All scripts in `C:\Users\Jørgen\Documents\files\`:
-- `index.html` — the site
-- `garmin_sync.py` — daily Garmin→GitHub sync, auto-refreshes OAuth token
-- `garmin_backfill.py` — one-off historical data backfill
-- `sync_log.txt` — sync output log
+## Source of truth
+The GitHub repo is the source of truth for all code. The Windows folder `C:\Users\Jørgen\Documents\files\` is only a working copy, so don't treat files there as canonical. Garmin MCP tokens for Cowork: `C:\Users\Jørgen\.garmin-mcp\` (oauth1, oauth2, profile).
 
-Garmin MCP tokens: `C:\Users\Jørgen\.garmin-mcp\` (oauth1, oauth2, profile)
+## Repo files
+- `index.html` — the whole app. `manifest.json` + `icon-*.png` — PWA metadata.
+- `sw.js` — **kill switch only** (clears caches + unregisters a service worker briefly registered in June 2026). `index.html` does not register a service worker. Can be deleted after a while.
+- `garmin_sync.py` — the Garmin sync that runs on the HA box (repo copy == box copy).
+- `worker.js` — source of the Cloudflare Worker (must be pasted into Cloudflare manually to deploy).
+- `activities.json`, `health.json`, `nutrition.json`, `reviews.json`, `shifts.json` — data.
+- `.github/workflows/pages-deploy.yml` — deploys GitHub Pages when site files change.
 
 ## Garmin-derived settings (not hardcoded)
-- **Lactate threshold:** `lactateHR`, `lactatePaceSec`, `lactatePower` in each `health.json` entry (patched in via `patch_lactate2.py`, Sept 2026). Shown on the Health tab.
-- **HR zones:** `hrZones` = `{z1..z5 (zone floors, bpm), max, method}` from `/biometric-service/heartRateZones` (DEFAULT sport, else RUNNING), patched in via `patch_hrzones.py`. `index.html` loads the newest entry with `hrZones` into `HRZ` (`setHRZones()`), falling back to 104/125/146/166/187 if none exist. Used for HR colouring, max-HR highlighting, Insights zone legend and readiness advice. As of 27 Sept 2026 Garmin reports HR_MAX-based zones: Z1 99, Z2 118, Z3 138, Z4 158, Z5 177, max 197.
-- **Note:** the HA box's `/config/garmin/garmin_sync.py` is the live copy and has both patches. Keep the repo copy in sync with it after patching.
+- **Lactate threshold:** `lactateHR`, `lactatePaceSec`, `lactatePower` in each `health.json` entry (from `/biometric-service/biometric/latestLactateThreshold`). Shown on the Health tab.
+- **HR zones:** `hrZones` = `{z1..z5 (zone floors, bpm), max, method}` from `/biometric-service/heartRateZones` (DEFAULT sport, else RUNNING). `index.html` loads the newest entry with `hrZones` into `HRZ` (`setHRZones()`), falling back to 104/125/146/166/187 if none exist. Used for HR colouring, max-HR highlighting, Insights zone legend and readiness advice. As of 27 Sept 2026 Garmin reports HR_MAX-based zones: Z1 99, Z2 118, Z3 138, Z4 158, Z5 177, max 197.
+- **Load-focus target ranges:** `aerobicLowMin/Max`, `aerobicHighMin/Max`, `anaerobicMin/Max` come from Garmin's training-load-balance data (old fixed numbers as fallback).
+- **Age:** computed in the app from `BIRTH_DATE`.
 
 ## Data files in GitHub repo
 - `activities.json` — workouts
@@ -31,14 +34,15 @@ Garmin MCP tokens: `C:\Users\Jørgen\.garmin-mcp\` (oauth1, oauth2, profile)
   - **Schedule:** busybox cron in the add-on, `*/15 6-23 * * *` plus `0 0 * * *` = every 15 min 06:00–24:00 Norway local time (the box clock is local). Crontab stored at `/config/garmin/crontab`; log at `/config/garmin/sync.log`.
   - **Reboot persistence:** the add-on's **init_commands** reload the crontab and start crond on every boot (`crontab /config/garmin/crontab`, `crond -b -L /config/garmin/cron-daemon.log`) — verified surviving an add-on restart.
   - **SSH access:** key-based from the Windows PC (`~/.ssh/id_ed25519`, added to the add-on's `ssh.authorized_keys`). Connect with `ssh -c aes256-gcm@openssh.com hassio@192.168.10.103` (or `ssh ha` if the `~/.ssh/config` alias is set up). Patches are applied with `curl -s <raw url> | sudo python3 -` on the box.
-  - **Cloud job DISABLED:** the old GitHub Actions workflow `.github/workflows/garmin-sync.yml` (`cron: '*/15 4-22 * * *'`) was set to `disabled_manually` on 22 June 2026 so it no longer competes with the box. To re-enable: GitHub → Actions → "Garmin Sync" → Enable workflow. `garmin_sync.py` is committed to the repo (the HA box runs that same file). The cloud job, if re-enabled, reads the GitHub token from env (`GH_PAT` secret) and Garmin creds from `GARMIN_OAUTH1_TOKEN`/`GARMIN_OAUTH1_SECRET`/`GARMIN_DISPLAY_NAME` secrets; no tokens are hardcoded in the committed file. There is **no** local Windows Task Scheduler task (the old `GarminSync_*` tasks were removed).
+  - **Deploying `garmin_sync.py` changes:** edit and push the repo file, then on the PC run `ssh -c aes256-gcm@openssh.com hassio@192.168.10.103 "sudo cp /config/garmin/garmin_sync.py /config/garmin/garmin_sync.py.bak && sudo curl -sf https://raw.githubusercontent.com/snxz-y/WiggenApp/<commit-sha>/garmin_sync.py -o /config/garmin/garmin_sync.py"` (use the commit SHA, not `main`, to avoid raw-CDN caching). Don't patch the box copy in place any more, so the two can't drift apart.
+  - **No cloud sync:** the GitHub Actions `garmin-sync.yml` workflow and the cloud (OAuth1-from-env) mode in `garmin_sync.py` were deleted in Sept 2026. There is no Windows Task Scheduler task either.
   - **Activities are upserted, not skipped:** `sync_activities` re-processes the last ~2 days every run. It inserts new activities, repairs partial/foreign-schema entries (e.g. ones hand-added via Garmin MCP that lack `distanceM`), and refreshes metrics Garmin computes minutes after a run (power, running dynamics, HR zones, VO2max, load). Do **not** hand-write activity entries with a custom schema — let the sync own `activities.json`.
-- **On-demand sync:** removed. The in-app "Sync Garmin" button (and its `triggerGarminSync()` handler) was deleted on 22 June 2026 because the HA box now auto-syncs every 15 min, and the old button dispatched the now-disabled `garmin-sync.yml` workflow. For a manual sync, run `python3 /config/garmin/ha_garmin.py` on the HA box (e.g. via the SSH add-on web terminal). The Worker's `/sync-garmin` endpoint still exists but is no longer called by the app.
+- **On-demand sync:** removed. The in-app "Sync Garmin" button (and its `triggerGarminSync()` handler) was deleted on 22 June 2026 because the HA box now auto-syncs every 15 min, and the old button dispatched the now-disabled `garmin-sync.yml` workflow. For a manual sync, run `python3 /config/garmin/ha_garmin.py` on the HA box (e.g. via the SSH add-on web terminal).
 - **Nutrition:** Health Auto Export iPhone app → Cloudflare Worker → GitHub. Syncs every 6h. Widget on home screen keeps it reliable.
-- **Cloudflare Worker:** `https://nutrition-reciever.margidowiggen.workers.dev` — handles `/` (nutrition), `/save-review`, `/generate-review`, `/sync-garmin` (dispatches the Actions workflow). Secrets: `GITHUB_TOKEN`, `ANTHROPIC_KEY`.
+- **Cloudflare Worker:** `https://nutrition-reciever.margidowiggen.workers.dev` — handles `/` (nutrition from Health Auto Export), `/save-review`, `/delete-review`. Secret: `GITHUB_TOKEN`. Source is `worker.js` in the repo; deploy by pasting it into the Cloudflare dashboard.
 
 ## Målsetninger (formerly Reviews)
-The old AI-generated weekly reviews are gone. The Målsetninger tab lets Jørgen write or paste goals (optional title + text); they are saved via the Worker's `/save-review` to `reviews.json` and shown as collapsible accordions with delete. The app no longer calls `/generate-review` (the Worker endpoint still exists).
+The old AI-generated weekly reviews are gone. The Målsetninger tab lets Jørgen write or paste goals (optional title + text); they are saved via the Worker's `/save-review` to `reviews.json` and shown as collapsible accordions with delete. `/generate-review` (Claude API) was removed from the Worker in Sept 2026.
 
 ## Removed features
 - **Zyn tracking** — removed from the app (Sept 2026). Don't re-add.
@@ -47,21 +51,20 @@ The old AI-generated weekly reviews are gone. The Målsetninger tab lets Jørgen
 ## Key behaviors
 - Dates display DD/MM/YYYY everywhere via custom date picker (pill-shaped button, opens dark calendar popup). Defaults to today minus 1 day.
 - Health & Nutrition tabs: single date picker, no Apply button (applies on select).
-- Macro split shows two donuts: Goal (left) vs Actual (right).
-- Training readiness feedback codes translated to plain English.
+- Macro split shows two donuts: Mål (left) vs Faktisk (right).
+- Training readiness feedback codes are translated to plain Norwegian.
+- Activity tab keys in code stay English (`runs`, `bikes`, `walks`, `all`) — only visible labels are Norwegian. Translating the keys broke the Løping/Gåturer tables once (fixed Sept 2026).
 
 ## Push command (standard)
+Push via the GitHub contents API with `$env:GH_PAT`, sending the JSON body as UTF-8 bytes (PowerShell 5 otherwise mangles æøå):
 ```powershell
-$token="<GITHUB_TOKEN>"
-$repo="snxz-y/WiggenApp"
-$h=@{Authorization="token $token";Accept="application/vnd.github.v3+json";"Content-Type"="application/json";"User-Agent"="wt"}
-$d=(Get-Item -LiteralPath "C:\Users\Jørgen\Documents\files").FullName
-$bytes=[System.IO.File]::ReadAllBytes("$d\index.html")
-$c=[Convert]::ToBase64String($bytes)
-$sha=(Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/contents/index.html" -Headers $h -Method GET).sha
-$b=@{message="update";content=$c;sha=$sha}
-Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/contents/index.html" -Headers $h -Method PUT -Body($b|ConvertTo-Json -Depth 3)|Out-Null
+$repo="snxz-y/WiggenApp"; $file="index.html"
+$h=@{Authorization="token $env:GH_PAT";Accept="application/vnd.github.v3+json";"User-Agent"="wt"}
+$c=[Convert]::ToBase64String([IO.File]::ReadAllBytes("$PWD\$file"))
+$sha=(Invoke-RestMethod "https://api.github.com/repos/$repo/contents/$file" -Headers $h).sha
+$b=@{message="update $file";content=$c;sha=$sha}|ConvertTo-Json
+Invoke-RestMethod "https://api.github.com/repos/$repo/contents/$file" -Headers $h -Method PUT -Body ([Text.Encoding]::UTF8.GetBytes($b)) -ContentType "application/json; charset=utf-8" | Out-Null
 ```
 
 ## Getting run feedback remotely
-If PC is on + Claude Desktop running, use **Cowork** from iPhone: fetch latest run via Garmin MCP and trigger the sync to update WiggenApp on demand — no waiting for the scheduled 23:00 sync. Without the MCP (plain Claude app), read `https://raw.githubusercontent.com/snxz-y/WiggenApp/main/activities.json` — but only AFTER a sync has pushed the run.
+If PC is on + Claude Desktop running, use **Cowork** from iPhone: fetch latest run via Garmin MCP and trigger a manual sync on the HA box (`ssh ... "cd /config/garmin && sudo python3 ha_garmin.py"`) instead of waiting up to 15 min. Without the MCP (plain Claude app), read `https://raw.githubusercontent.com/snxz-y/WiggenApp/main/activities.json` — but only AFTER a sync has pushed the run.
