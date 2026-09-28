@@ -1,12 +1,12 @@
 """Legger til henting av pulssoner fra Garmin i garmin_sync.py.
 
-Lagrer sonegulvene som "hrZones" i hver health.json-oppføring:
+Lagrer sonegulvene som "hrZones" i hver health.json-oppforing:
   {"z1": 104, "z2": 125, "z3": 146, "z4": 166, "z5": 187, "max": 199, "method": "..."}
 index.html leser nyeste hrZones og bruker dem i stedet for hardkodede verdier.
 
-Kan kjøres flere ganger (hopper over hvis allerede patchet). Finner selv
-/config/garmin/garmin_sync.py på HA-boksen, ellers garmin_sync.py i gjeldende mappe.
-Fungerer også via stdin:  ... | ssh ... "sudo python3 -"
+Kan kjores flere ganger (hopper over hvis allerede patchet). Finner selv
+/config/garmin/garmin_sync.py pa HA-boksen, ellers garmin_sync.py i gjeldende mappe.
+Fungerer ogsa via stdin:  ... | ssh ... "sudo python3 -"
 """
 import os, sys
 
@@ -22,8 +22,8 @@ if "hrZones" in src:
 FETCH_ANCHOR = '    race_raw = gget(f"{BASE}/metrics-service/metrics/racepredictions/latest", hdrs) or {}\n'
 FETCH_CODE = FETCH_ANCHOR + '''    hrz_raw  = gget(f"{BASE}/biometric-service/heartRateZones", hdrs) or []
 
-    # Pulssoner: Garmin gir én rad per sport (DEFAULT, RUNNING, CYCLING ...).
-    # Bruk DEFAULT, ellers RUNNING, ellers første rad. Lagre sonegulvene.
+    # Pulssoner: Garmin gir en rad per sport (DEFAULT, RUNNING, CYCLING ...).
+    # Bruk DEFAULT, ellers RUNNING, ellers forste rad. Lagre sonegulvene.
     hr_zones = None
     try:
         rows = hrz_raw if isinstance(hrz_raw, list) else [hrz_raw]
