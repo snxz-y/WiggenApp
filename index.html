@@ -25,7 +25,7 @@
   --on-accent:#fbf8f1;--marker:rgba(60,40,20,.45);
   --chart-tick:#8a7d6d;--chart-grid:rgba(70,50,30,.09);
   --score-good:#5f8c6a;--score-ok:#b07d22;--score-warn:#c2772e;--score-bad:#b5544a;
-  --st-deep:#6f63c2;--st-rem:#4a9fb0;--st-light:#7fae8f;--st-awake:#b9ab99;
+  --st-deep:#4a3aa7;--st-rem:#2a78d6;--st-light:#1baf7a;--st-awake:#eb6834;
   --z1:#4a9fb0;--z2:#5f9e6a;--z3:#c2a015;--z4:#cd5a25;--z5:#a82f2f;
   --shadow:0 1px 2px rgba(60,40,20,.04),0 8px 24px rgba(60,40,20,.05);
   --font-body:'Hanken Grotesk',system-ui,-apple-system,sans-serif;
@@ -40,7 +40,7 @@
   --on-accent:#211a12;--marker:rgba(255,255,255,.85);
   --chart-tick:#9b8d7d;--chart-grid:rgba(255,255,255,.05);
   --score-good:#88b596;--score-ok:#d4b56a;--score-warn:#e0935a;--score-bad:#d68a82;
-  --st-deep:#8b81e0;--st-rem:#5fc0d2;--st-light:#9bc9a9;--st-awake:#7a6e62;
+  --st-deep:#6250cc;--st-rem:#3a9ae8;--st-light:#1a9e70;--st-awake:#d95926;
   --z1:#5fc0d2;--z2:#86c08f;--z3:#e6c84a;--z4:#ee8040;--z5:#dc6258;
   --shadow:0 1px 2px rgba(0,0,0,.2),0 10px 30px rgba(0,0,0,.28);
 }
@@ -198,12 +198,6 @@ tr:hover td{background:var(--surface2)}
 .date-picker-day.today{box-shadow:inset 0 0 0 1px var(--accent2)}
 input[readonly]{font-family:var(--font-mono);font-weight:500;letter-spacing:.01em;color:var(--text)}
 input[readonly]::placeholder{color:var(--muted);font-weight:400;opacity:1;letter-spacing:.02em}
-/* Work tab & shift correlation */
-.shift-day{background:rgba(212,176,100,.08);border-color:rgba(212,176,100,.25)}
-.shift-eve{background:rgba(124,109,250,.08);border-color:rgba(124,109,250,.25)}
-.shift-night{background:rgba(30,80,160,.1);border-color:rgba(30,80,160,.3)}
-.shift-off{background:rgba(122,171,136,.06);border-color:rgba(122,171,136,.2)}
-.shift-vacation{background:rgba(0,180,160,.08);border-color:rgba(0,180,160,.25)}
 .corr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-bottom:1.25rem}
 .corr-card{border-radius:10px;padding:12px 14px;border:1px solid var(--border)}
 .heatmap-grid{display:grid;grid-template-rows:repeat(7,10px);grid-auto-flow:column;gap:2px;margin-bottom:1.25rem;overflow-x:auto}
@@ -312,7 +306,7 @@ th{font-family:var(--font-body);letter-spacing:.04em}
 }
 @media(max-width:400px){
   .content{padding:.85rem .7rem}
-  .stat-grid,.recovery-support,.activity-support,.training-support{grid-template-columns:1fr}
+  .stat-grid,.recovery-support,.activity-support,.training-support{grid-template-columns:repeat(2,minmax(0,1fr))}
   .hero-pair{grid-template-columns:1fr 1fr}
   .rf-score{font-size:40px}
   .nav-tab{padding:7px 10px;font-size:12px}
@@ -375,6 +369,37 @@ th{font-family:var(--font-body);letter-spacing:.04em}
 .cal-sheet-desc{margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:13px;line-height:1.55;white-space:pre-wrap;word-break:break-word}
 .cal-sheet-none{margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:12px;color:var(--muted)}
 @media(max-width:520px){.cal-ev{grid-template-columns:4px 80px 1fr;gap:8px}.cal-time{font-size:11.5px}.cal-cell{min-height:54px;padding:3px}.cal-mchips{display:none}.cal-mdots{display:flex}.cal-month{gap:2px}}
+
+/* Two charts side by side; one column on phones. minmax(0,1fr) lets canvases shrink. */
+.chart-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.chart-card,.stat-card{min-width:0}
+@media(max-width:680px){.chart-pair{grid-template-columns:minmax(0,1fr)}}
+/* Period chips: 7 d · 14 d · 30 d · 3 mnd · Alt */
+.range-chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:0 0 12px}
+.range-chip{background:var(--surface);border:1px solid var(--border);color:var(--muted2);border-radius:999px;padding:4px 12px;font:inherit;font-size:12px;font-weight:600;cursor:pointer}
+.range-chip.active{background:var(--accent2);border-color:var(--accent2);color:var(--on-accent)}
+.range-note{font-size:11px;color:var(--muted);text-align:center;margin:-6px 0 12px}
+.empty-note{padding:1.25rem;text-align:center;color:var(--muted);background:var(--surface);border:1px dashed var(--border);border-radius:10px;margin-bottom:1.25rem;font-size:13px;line-height:1.5}
+/* Horizontal bar list (weekday averages etc.) */
+.hbar-list{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:1.25rem}
+.hbar-row{display:grid;grid-template-columns:42px 1fr 86px;align-items:center;gap:10px;padding:5px 0;font-size:12px}
+.hbar-track{height:10px;background:var(--surface2);border-radius:5px;overflow:hidden}
+.hbar-fill{height:100%;border-radius:5px;background:var(--accent2)}
+.hbar-val{text-align:right;font-variant-numeric:tabular-nums;color:var(--text);font-weight:600}
+.hbar-val span{color:var(--muted);font-weight:400}
+
+.sl-compare{min-width:0}
+.sl-compare td,.sl-compare th{padding:8px 8px;white-space:normal}
+.sl-compare td:first-child{font-weight:600}
+/* Søvn */
+.sl-table td,.sl-table th{white-space:nowrap}
+.sl-table td{font-variant-numeric:tabular-nums}
+.sl-pair{display:flex;justify-content:space-between;align-items:center;width:100%;background:none;border:none;border-top:1px solid var(--border);padding:8px 0;font:inherit;font-size:13px;color:var(--text);cursor:pointer;text-align:left}
+.sl-pair:first-of-type{border-top:none}
+.sl-r{font-variant-numeric:tabular-nums;font-weight:600;font-size:12px;padding:2px 8px;border-radius:99px;background:var(--surface2)}
+.sl-periods{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.sl-date{font:inherit;font-size:13px;padding:5px 8px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);margin-top:4px}
+.sl-diff{font-weight:600}.sl-diff.good{color:var(--green)}.sl-diff.bad{color:var(--red)}
 </style>
 <script>
 (function(){try{var t=localStorage.getItem('wiggen-theme')||'light';document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','light');}})();
@@ -394,6 +419,7 @@ function setTheme(t){
   var btn=document.getElementById('theme-toggle');if(btn)btn.textContent=(t==='light'?'☾':'☀');
   var meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.setAttribute('content',t==='light'?'#f1ebe0':'#1a1611');
   rethemeCharts();
+  try{if(document.getElementById('nav-sleep').classList.contains('active'))renderSleep();}catch(e){}
 }
 function toggleTheme(){var cur=document.documentElement.getAttribute('data-theme')||'light';setTheme(cur==='light'?'dark':'light');}
 document.addEventListener('DOMContentLoaded',function(){var t=document.documentElement.getAttribute('data-theme')||'light';var btn=document.getElementById('theme-toggle');if(btn)btn.textContent=(t==='light'?'☾':'☀');var meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.setAttribute('content',t==='light'?'#f1ebe0':'#1a1611');});
@@ -417,9 +443,9 @@ document.addEventListener('DOMContentLoaded',function(){var t=document.documentE
     <button class="nav-tab" onclick="showNav('insights',this)"><span class="nav-ic">🔬</span>Innsikt</button>
     <button class="nav-tab" onclick="showNav('activities',this)"><span class="nav-ic">🏃</span>Aktiviteter</button>
     <button class="nav-tab" onclick="showNav('nutrition',this)"><span class="nav-ic">🍽️</span>Kosthold</button>
-    <button class="nav-tab" onclick="showNav('reviews',this)"><span class="nav-ic">🎯</span>Målsetninger</button>
-    <button class="nav-tab" onclick="showNav('work',this)"><span class="nav-ic">💼</span>Jobb</button>
+    <button class="nav-tab" onclick="showNav('sleep',this)"><span class="nav-ic">😴</span>Søvn</button>
     <button class="nav-tab" onclick="showNav('calendar',this)"><span class="nav-ic">📅</span>Kalender</button>
+    <button class="nav-tab" onclick="showNav('reviews',this)"><span class="nav-ic">🎯</span>Målsetninger</button>
   </div>
 </div>
 <div class="content">
@@ -560,19 +586,21 @@ document.addEventListener('DOMContentLoaded',function(){var t=document.documentE
     <div id="health-content"></div>
     </div><!-- /health-sub-today -->
     <div id="health-sub-trends" class="sub-panel">
-      <div class="section-head">Søvnkvalitet (7-dagers snitt)</div>
-      <div class="chart-card"><canvas id="sleep-trend-chart" height="130"></canvas></div>
-      <div class="section-head">HRV-trend (7-dagers snitt)</div>
-      <div class="chart-card"><canvas id="hrv-trend-chart" height="130"></canvas></div>
+      <div id="trend-range"></div>
+      <div id="hrv-warning"></div>
+      <div class="section-head">Søvnscore (7-dagers snitt)</div>
+      <div class="chart-card"><div style="height:170px;position:relative"><canvas id="sleep-trend-chart" role="img" aria-label="Søvnscore, 7-dagers snitt"></canvas></div></div>
+      <div class="section-head">HRV (7-dagers snitt)</div>
+      <div class="chart-card"><div style="height:170px;position:relative"><canvas id="hrv-trend-chart" role="img" aria-label="HRV, 7-dagers snitt"></canvas></div></div>
+      <div class="section-head">Hvilepuls (7-dagers snitt)</div>
+      <div class="chart-card"><div style="height:170px;position:relative"><canvas id="rhr-trend-chart" role="img" aria-label="Hvilepuls, 7-dagers snitt"></canvas></div></div>
       <div class="section-head">Body Battery-topp (7-dagers snitt)</div>
-      <div class="chart-card"><canvas id="bb-trend-chart" height="130"></canvas></div>
-      <div class="section-head">Vekt + trendlinje</div>
-      <div id="weight-goal-info" style="font-size:11px;color:var(--green);margin-bottom:6px"></div>
-      <div class="chart-card"><canvas id="weight-trend-chart" height="150"></canvas></div>
+      <div class="chart-card"><div style="height:170px;position:relative"><canvas id="bb-trend-chart" role="img" aria-label="Body Battery-topp, 7-dagers snitt"></canvas></div></div>
+      <div class="section-head">Vekt og trend</div>
+      <div id="weight-goal-info" class="range-note" style="margin:0 0 8px"></div>
+      <div class="chart-card"><div style="height:200px;position:relative"><canvas id="weight-trend-chart" role="img" aria-label="Vekt med 7-dagers snitt og trendlinje"></canvas></div></div>
       <div class="section-head">Fettprosent</div>
-      <div class="chart-card"><canvas id="bodyfat-trend-chart" height="130"></canvas></div>
-      <div class="section-head">RHR vs Training Load</div>
-      <div class="chart-card"><canvas id="rhr-load-scatter" height="150"></canvas></div>
+      <div class="chart-card"><div style="height:170px;position:relative"><canvas id="bodyfat-trend-chart" role="img" aria-label="Fettprosent"></canvas></div></div>
     </div><!-- /health-sub-trends -->
     <div id="health-sub-composition" class="sub-panel">
       <div id="health-comp-content"></div>
@@ -587,6 +615,7 @@ document.addEventListener('DOMContentLoaded',function(){var t=document.documentE
       <button class="subnav-btn" onclick="showSubTab('nutr','insights',this);renderNutritionExtras()">📊 Trender</button>
     </div>
     <div id="nutr-sub-daily" class="sub-panel active">
+    <div id="nutr-range-chips"></div>
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:1.5rem;flex-wrap:wrap;justify-content:center">
       <span style="font-size:12px;color:var(--muted);font-weight:600">Fra</span>
       <div style="position:relative;display:inline-block"><input type="text" id="nutr-start" readonly placeholder="DD/MM/YYYY" onclick="togglePicker('nutr-start-picker','nutr-start')" style="font-size:14px;padding:7px 14px;border:1px solid var(--accent2);border-radius:20px;background:var(--surface2);color:var(--text);width:140px;cursor:pointer;font-weight:600;letter-spacing:.02em;text-align:center"><div id="nutr-start-picker" class="date-picker" style="display:none"></div></div>
@@ -597,14 +626,16 @@ document.addEventListener('DOMContentLoaded',function(){var t=document.documentE
     </div><!-- /nutr-sub-daily -->
     <div id="nutr-sub-insights" class="sub-panel"><div id="nutr-extras"></div></div>
   </div><!-- /nav-nutrition -->
-  <div id="nav-work" class="panel">
-    <div class="subnav" data-sect="work">
-      <button class="subnav-btn active" onclick="showSubTab('work','correlation',this)">📊 Sammenheng</button>
-      <button class="subnav-btn" onclick="showSubTab('work','schedule',this)">📅 Turnus</button>
+  <div id="nav-sleep" class="panel">
+    <div class="subnav" data-sect="sleep">
+      <button class="subnav-btn active" onclick="showSubTab('sleep','overview',this);renderSleep()">🌙 Oversikt</button>
+      <button class="subnav-btn" onclick="showSubTab('sleep','relation',this);renderSleep()">🔗 Sammenheng</button>
+      <button class="subnav-btn" onclick="showSubTab('sleep','compare',this);renderSleep()">⚖️ Sammenlign</button>
     </div>
-    <div id="work-sub-correlation" class="sub-panel active"><div id="work-content"><p style="color:var(--muted);padding:20px">Laster vakter…</p></div></div>
-    <div id="work-sub-schedule" class="sub-panel"><div id="work-schedule"></div></div>
-  </div><!-- /nav-work -->
+    <div id="sleep-sub-overview" class="sub-panel active"><div id="sleep-overview"></div></div>
+    <div id="sleep-sub-relation" class="sub-panel"><div id="sleep-relation"></div></div>
+    <div id="sleep-sub-compare" class="sub-panel"><div id="sleep-compare"></div></div>
+  </div><!-- /nav-sleep -->
 
   <div id="nav-calendar" class="panel">
     <div id="cal-content"></div>
@@ -613,7 +644,8 @@ document.addEventListener('DOMContentLoaded',function(){var t=document.documentE
     <div class="section-head">Readiness</div>
     <div class="chart-card">
       <div class="ins-title">Hva påvirker Training Readiness?</div>
-      <div class="ins-note" id="ins-d-note">Hvert punkt er én morgen. Velg en måling for å se hvor tett den følger Training Readiness fra Garmin.</div>
+      <div class="ins-note" id="ins-d-note">Hvert punkt er én morgen (første readiness-måling den dagen). Velg en måling for å se hvor tett den følger readiness. Søvn i detalj finner du under Søvn → Sammenheng.</div>
+      <div id="ins-d-range"></div>
       <div class="ins-pills" id="ins-pills"></div>
       <div class="ins-head" id="ins-d-head"></div>
       <div class="ins-meter">
@@ -624,14 +656,15 @@ document.addEventListener('DOMContentLoaded',function(){var t=document.documentE
     </div>
     <div class="chart-card">
       <div class="ins-title">Dagens treningsråd</div>
-      <div class="ins-note">Kun veiledende — leser Training Readiness og Recovery Time fra Garmin og foreslår hvor hardt du bør trene.</div>
+      <div class="ins-note">Kun veiledende — leser Training Readiness og restitusjonstid fra Garmin og foreslår hvor hardt du bør trene.</div>
       <div class="ins-call" id="ins-call-box"><div class="big" id="ins-call-big"></div><div class="sm" id="ins-call-sm"></div></div>
       <div class="tbl-wrap"><table id="ins-call-table"><thead><tr><th>Dato</th><th>Readiness</th><th>Restitusjon igjen</th><th>Råd</th></tr></thead><tbody></tbody></table></div>
     </div>
 
     <div class="section-head">Trening</div>
     <div class="chart-card">
-      <div class="ins-title">Intensitetsfordeling · siste 7 treningsdager</div>
+      <div class="ins-title" id="ins-i-title">Intensitetsfordeling</div>
+      <div id="ins-i-range" style="margin-top:8px"></div>
       <div class="ins-note">Andel av treningstiden i hver pulssone. For utholdenhet bør mesteparten være rolig (Z1–Z2).</div>
       <div class="ins-head" id="ins-i-head"></div>
       <div class="ins-zbar" id="ins-zbar"></div>
@@ -657,9 +690,8 @@ document.addEventListener('DOMContentLoaded',function(){var t=document.documentE
 
 <script>
 const ACT_URL='https://raw.githubusercontent.com/snxz-y/WiggenApp/main/activities.json';
-const SHIFTS_URL='https://raw.githubusercontent.com/snxz-y/WiggenApp/main/shifts.json';
 const HEALTH_URL='https://raw.githubusercontent.com/snxz-y/WiggenApp/main/health.json';
-let activities=[],healthData=[],shiftsData=[];
+let activities=[],healthData=[];
 // Pulssone-gulv (bpm). Standardverdier til health.json har hrZones fra Garmin.
 let HRZ={z1:104,z2:125,z3:146,z4:166,z5:187};
 const setHRZones=()=>{const e=[...healthData].sort((a,b)=>b.date.localeCompare(a.date)).find(d=>d.hrZones&&d.hrZones.z5);if(e)HRZ={...HRZ,...e.hrZones};
@@ -671,6 +703,19 @@ const BIRTH_DATE='1997-06-18';
 const ageNow=()=>{const b=new Date(BIRTH_DATE),t=new Date();let a=t.getFullYear()-b.getFullYear();if(t.getMonth()<b.getMonth()||(t.getMonth()===b.getMonth()&&t.getDate()<b.getDate()))a--;return a;};
 const ss={runs:{col:'date',asc:false},bikes:{col:'date',asc:false},walks:{col:'date',asc:false}};
 let chartInstances={};
+// ── Shared date helpers ──
+const isoDate=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const daysAgoIso=n=>{const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()-n);return isoDate(d);};
+const ddmm=iso=>iso?`${iso.slice(8,10)}/${iso.slice(5,7)}`:'';            // chart axis labels
+const ddmmyyyy=iso=>iso?`${iso.slice(8,10)}/${iso.slice(5,7)}/${iso.slice(0,4)}`:'';
+// Real time axis for irregular data (weigh-ins): x = day number, ticks shown as DD/MM.
+const dayNum=iso=>Math.floor(Date.parse(iso+'T00:00:00Z')/864e5);
+const dayAxis=(extra={})=>({type:'linear',...extra,ticks:{color:chartTick(),font:{size:10},maxTicksLimit:6,maxRotation:0,callback:v=>ddmm(new Date(v*864e5).toISOString().slice(0,10)),...(extra.ticks||{})},grid:{color:chartGrid()}});
+const WEEKDAYS_NB=['Søndag','Mandag','Tirsdag','Onsdag','Torsdag','Fredag','Lørdag'];
+// Period chips. opts: [[days,label],...]; 0 = all data. fn = global function name taking days.
+function rangeChips(active,fn,opts=[[7,'7 d'],[14,'14 d'],[30,'30 d'],[90,'3 mnd'],[0,'Alt']]){
+  return `<div class="range-chips" role="group" aria-label="Periode">${opts.map(([v,l])=>`<button class="range-chip${v===active?' active':''}" aria-pressed="${v===active}" onclick="${fn}(${v})">${l}</button>`).join('')}</div>`;
+}
 
 const gcLinks=id=>id?`<a class="gc-btn" href="https://connect.garmin.com/activity/${id}" target="_blank" rel="noopener">GC</a>`:'';
 const fmtEffect=t=>{
@@ -680,14 +725,14 @@ const fmtEffect=t=>{
   // benefit messages ("MINOR_AEROBIC_BENEFIT_6") — into one short category.
   // Order matters (ANAEROBIC before AEROBIC; NO_ before AEROBIC).
   const k=t.toString().toUpperCase().replace(/\s+/g,'_').replace(/_\d+$/,'');
-  if(k.startsWith('NO_'))return'Recovery';
+  if(k.startsWith('NO_'))return'Restitusjon';
   if(k.includes('SPRINT'))return'Sprint';
-  if(k.includes('ANAEROBIC'))return'Anaerobic';
+  if(k.includes('ANAEROBIC'))return'Anaerob';
   if(k.includes('VO2'))return'VO2 Max';
-  if(k.includes('LACTATE')||k.includes('THRESHOLD'))return'Lactate threshold';
+  if(k.includes('LACTATE')||k.includes('THRESHOLD'))return'Terskel';
   if(k.includes('TEMPO'))return'Tempo';
-  if(k.includes('AEROBIC')||k.includes('BASE'))return'Aerobic base';
-  if(k.includes('RECOVERY'))return'Recovery';
+  if(k.includes('AEROBIC')||k.includes('BASE'))return'Aerob base';
+  if(k.includes('RECOVERY'))return'Restitusjon';
   return k.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
 };
 const fmtDate=d=>{
@@ -853,33 +898,33 @@ function renderRacePreds(){
 function renderHealthComp(){
   const el=document.getElementById('health-comp-content');if(!el)return;
   const rows=getCompRows();
-  if(!rows.length){el.innerHTML='<div style="padding:3rem;text-align:center;color:var(--muted)">Ingen data om kroppssammensetning ennå.</div>';return;}
+  if(!rows.length){el.innerHTML=`<div class="section-head">Kroppssammensetning</div>${rangeChips(compDays,'setCompDays',[[30,'1 mnd'],[90,'3 mnd'],[180,'6 mnd'],[0,'Alt']])}<div class="empty-note">Ingen veiinger i perioden.</div>`;return;}
   const last=rows[rows.length-1];const first=rows[0];
   const labels=rows.map(r=>{const p=r.date.split('-');return p[2]+'/'+p[1];});
   const cV=(k,dec=1)=>last&&last[k]!=null?(+last[k]).toFixed(dec):'—';
-  const cD=(k,dec=1)=>{if(!first||first===last||first[k]==null||last[k]==null)return'';const d=+(last[k]-first[k]).toFixed(dec);if(d===0)return'';return` <span style="font-size:11px;color:${d<0?'var(--green)':'var(--red)'}">(${d>0?'+':''}${d})</span>`;};
+  const better={weight:-1,bmi:-1,bodyFat:-1,muscleMass:1};
+  const cD=(k,dec=1)=>{if(!first||first===last||first[k]==null||last[k]==null)return'';const d=+(last[k]-first[k]).toFixed(dec);if(d===0)return'';const good=(better[k]||0)*d>0;return` <span style="font-size:11px;color:${better[k]?(good?'var(--green)':'var(--red)'):'var(--muted)'}">(${d>0?'+':''}${String(d).replace('.',',')})</span>`;};
   el.innerHTML=`
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
-      <div class="section-head inline" style="margin:0">Kroppssammensetning</div>
-      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)">
-        <div style="position:relative;display:inline-block"><input type="text" id="comp-start" readonly placeholder="DD/MM/YYYY" onclick="togglePicker('comp-start-picker','comp-start')" value="${toDisplay(compStartDate||'')}" style="font-size:11px;padding:4px 10px;border:1px solid var(--border);border-radius:20px;background:var(--surface2);color:var(--text);width:110px;cursor:pointer;text-align:center"><div id="comp-start-picker" class="date-picker" style="display:none"></div></div>
-        <span>→</span>
-        <div style="position:relative;display:inline-block"><input type="text" id="comp-end" readonly placeholder="DD/MM/YYYY" onclick="togglePicker('comp-end-picker','comp-end')" value="${toDisplay(compEndDate||'')}" style="font-size:11px;padding:4px 10px;border:1px solid var(--border);border-radius:20px;background:var(--surface2);color:var(--text);width:110px;cursor:pointer;text-align:center"><div id="comp-end-picker" class="date-picker" style="display:none"></div></div>
-      </div>
+    <div class="section-head">Kroppssammensetning</div>
+    ${rangeChips(compDays,'setCompDays',[[30,'1 mnd'],[90,'3 mnd'],[180,'6 mnd'],[0,'Alt']])}
+    <div style="display:flex;align-items:center;justify-content:center;gap:6px;font-size:11px;color:var(--muted);margin-bottom:1rem">
+      <div style="position:relative;display:inline-block"><input type="text" id="comp-start" readonly placeholder="DD/MM/YYYY" onclick="togglePicker('comp-start-picker','comp-start')" value="${toDisplay(compStartDate||'')}" style="font-size:11px;padding:4px 10px;border:1px solid var(--border);border-radius:20px;background:var(--surface2);color:var(--text);width:110px;cursor:pointer;text-align:center"><div id="comp-start-picker" class="date-picker" style="display:none"></div></div>
+      <span>→</span>
+      <div style="position:relative;display:inline-block"><input type="text" id="comp-end" readonly placeholder="DD/MM/YYYY" onclick="togglePicker('comp-end-picker','comp-end')" value="${toDisplay(compEndDate||'')}" style="font-size:11px;padding:4px 10px;border:1px solid var(--border);border-radius:20px;background:var(--surface2);color:var(--text);width:110px;cursor:pointer;text-align:center"><div id="comp-end-picker" class="date-picker" style="display:none"></div></div>
     </div>
     <div class="stat-grid" style="margin-bottom:1.25rem">
-      <div class="stat-card"><div class="stat-label">Vekt</div><div class="stat-value" style="font-size:22px">${cV('weight',1)}${cD('weight',1)}<span style="font-size:14px;color:var(--muted)">kg</span></div><div class="stat-sub">Mål: 65 kg</div></div>
+      <div class="stat-card"><div class="stat-label">Vekt</div><div class="stat-value" style="font-size:22px">${cV('weight',1)}<span style="font-size:14px;color:var(--muted)"> kg</span>${cD('weight',1)}</div><div class="stat-sub">Mål: 65 kg</div></div>
       <div class="stat-card"><div class="stat-label">BMI</div><div class="stat-value" style="font-size:22px">${cV('bmi',1)}${cD('bmi',1)}</div><div class="stat-sub">Normal: 18.5–24.9</div></div>
-      <div class="stat-card"><div class="stat-label">Kroppsfett</div><div class="stat-value" style="color:var(--amber);font-size:22px">${cV('bodyFat',1)}${cD('bodyFat',1)}<span style="font-size:14px;color:var(--muted)">%</span></div><div class="stat-sub">Mål: &lt;20%</div></div>
-      <div class="stat-card"><div class="stat-label">Muskelmasse</div><div class="stat-value" style="font-size:22px;color:var(--green)">${cV('muscleMass',1)}${cD('muscleMass',1)}<span style="font-size:14px;color:var(--muted)">kg</span></div></div>
+      <div class="stat-card"><div class="stat-label">Kroppsfett</div><div class="stat-value" style="color:var(--amber);font-size:22px">${cV('bodyFat',1)}<span style="font-size:14px;color:var(--muted)"> %</span>${cD('bodyFat',1)}</div><div class="stat-sub">Mål: &lt;20%</div></div>
+      <div class="stat-card"><div class="stat-label">Muskelmasse</div><div class="stat-value" style="font-size:22px;color:var(--green)">${cV('muscleMass',1)}<span style="font-size:14px;color:var(--muted)"> kg</span>${cD('muscleMass',1)}</div></div>
       <div class="stat-card"><div class="stat-label">Benmasse</div><div class="stat-value" style="font-size:22px">${cV('boneMass',2)}<span style="font-size:14px;color:var(--muted)">kg</span></div></div>
       <div class="stat-card"><div class="stat-label">Kroppsvann</div><div class="stat-value" style="font-size:22px;color:var(--accent2)">${cV('bodyWater',1)}<span style="font-size:14px;color:var(--muted)">%</span></div></div>
     </div>`;
   if(rows.length>1){
-    const mk=(id,data,color,label)=>{destroyChartById(id);const el2=document.getElementById(id);if(!el2)return;chartInstances[id]=new Chart(el2,{type:'line',data:{labels,datasets:[{data,borderColor:color,backgroundColor:color+'22',borderWidth:2,fill:true,tension:.3,pointRadius:2,pointBackgroundColor:color}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:chartTick(),font:{size:9},maxTicksLimit:8},grid:{color:chartGrid()}},y:{ticks:{color:chartTick(),font:{size:9}},grid:{color:chartGrid()}}}}});};
+    const mk=(id,data,color,label)=>{destroyChartById(id);const el2=document.getElementById(id);if(!el2)return;chartInstances[id]=new Chart(el2,{type:'line',data:{datasets:[{label,data:rows.map((r,i)=>({x:dayNum(r.date),y:data[i]})).filter(p=>p.y!=null),borderColor:color,backgroundColor:color+'22',borderWidth:2,fill:true,tension:.3,pointRadius:2,pointBackgroundColor:color}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'nearest',axis:'x',intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{title:c=>ddmmyyyy(new Date(c[0].parsed.x*864e5).toISOString().slice(0,10))}}},scales:{x:dayAxis({ticks:{font:{size:9},maxTicksLimit:5}}),y:{ticks:{color:chartTick(),font:{size:9}},grid:{color:chartGrid()}}}}});};
     el.innerHTML+=`
     <div class="chart-card"><div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px">Vekt (kg)</div><div style="height:160px;position:relative"><canvas id="compChartW" height="160"></canvas></div></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+    <div class="chart-pair" style="margin-top:10px">
       <div class="chart-card"><div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">Kroppsfett (%)</div><div style="height:120px;position:relative"><canvas id="compChartF" height="120"></canvas></div></div>
       <div class="chart-card"><div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">Muskelmasse (kg)</div><div style="height:120px;position:relative"><canvas id="compChartM" height="120"></canvas></div></div>
       <div class="chart-card"><div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">Kroppsvann (%)</div><div style="height:120px;position:relative"><canvas id="compChartBW" height="120"></canvas></div></div>
@@ -888,50 +933,42 @@ function renderHealthComp(){
     setTimeout(()=>{
       mk('compChartW',rows.map(r=>r.weight),'#c49078','Vekt');
       mk('compChartF',rows.map(r=>r.bodyFat),'#c9a84c','Kroppsfett');
-      mk('compChartM',rows.map(r=>r.muscleMass),'#7aab88','Muscle');
-      mk('compChartBW',rows.map(r=>r.bodyWater),'#60a5fa','Water');
+      mk('compChartM',rows.map(r=>r.muscleMass),'#7aab88','Muskelmasse');
+      mk('compChartBW',rows.map(r=>r.bodyWater),'#60a5fa','Kroppsvann');
       mk('compChartBMI',rows.map(r=>r.bmi),'#a89ef8','BMI');
     },50);
   }
 }
 
+// Helse → Trender. 7-day averages are computed on all data, then the chosen
+// period (trendDays, default 90) is shown. Axis dates are DD/MM.
+let trendDays=90;
+function setTrendDays(d){trendDays=d;renderHealthTrends();}
 function renderHealthTrends(){
   const sorted=[...healthData].sort((a,b)=>a.date.localeCompare(b.date));
   if(sorted.length<3)return;
+  const r=document.getElementById('trend-range');if(r)r.innerHTML=rangeChips(trendDays,'setTrendDays',[[30,'30 d'],[90,'3 mnd'],[180,'6 mnd'],[0,'Alt']]);
+  const from=trendDays?daysAgoIso(trendDays-1):'';
+  renderRollingChart('sleep-trend-chart','sleepScore',sorted,'Søvnscore','#6f7fb8',from);
+  renderRollingChart('hrv-trend-chart','hrvAvg',sorted,'HRV (ms)','#5f8c6a',from);
+  renderRollingChart('rhr-trend-chart','rhr',sorted,'Hvilepuls (bpm)','#b5544a',from);
+  renderRollingChart('bb-trend-chart','bbHigh',sorted,'Body Battery-topp','#b56a45',from);
+  renderWeightChart(sorted,from);
+  renderBodyFatChart(sorted,from);
 
-  // Sleep 7d rolling avg
-  renderRollingChart('sleep-trend-chart','sleepScore',sorted,'Sleep Score (7-dagers snitt)','#8b9cc4');
-  // HRV trend
-  renderRollingChart('hrv-trend-chart','hrvAvg',sorted,'HRV snitt (7d)','#7aab88');
-  // Body battery
-  renderRollingChart('bb-trend-chart','bbHigh',sorted,'Body Battery-topp (7d)','#c49078');
-
-  // Weight smoothed + goal line
-  renderWeightChart(sorted);
-
-  // Body fat trend
-  renderBodyFatChart(sorted);
-
-  // RHR vs load scatter
-  renderRHRLoadScatter();
-
-  // HRV warning
+  // HRV warning: last 7 days vs the 7 before
   const hrv7=sorted.slice(-7).filter(h=>h.hrvAvg).map(h=>h.hrvAvg);
   const hrv14=sorted.slice(-14,-7).filter(h=>h.hrvAvg).map(h=>h.hrvAvg);
   const avg7=hrv7.length?hrv7.reduce((s,v)=>s+v,0)/hrv7.length:null;
   const avg14=hrv14.length?hrv14.reduce((s,v)=>s+v,0)/hrv14.length:null;
   const warnEl=document.getElementById('hrv-warning');
-  if(warnEl&&avg7&&avg14){
-    const drop=avg14-avg7;
-    if(drop>5){
-      warnEl.innerHTML=`<div style="background:rgba(196,120,120,.1);border:1px solid rgba(196,120,120,.3);border-radius:8px;padding:10px 14px;font-size:12px;color:#c47878;margin-bottom:1rem">⚠️ HRV falt ${drop.toFixed(1)} ms denne uka vs forrige (${avg7.toFixed(0)} vs ${avg14.toFixed(0)}) — vurder restitusjon.</div>`;
-    } else {
-      warnEl.innerHTML='';
-    }
+  if(warnEl){
+    const drop=avg7&&avg14?avg14-avg7:0;
+    warnEl.innerHTML=drop>5?`<div class="empty-note" style="border-style:solid;border-color:var(--red);color:var(--red)">⚠️ HRV har falt ${drop.toFixed(1)} ms siste 7 dager mot uka før (${avg7.toFixed(0)} mot ${avg14.toFixed(0)} ms) — vurder mer restitusjon.</div>`:'';
   }
 }
 
-function renderRollingChart(id,key,sorted,label,color){
+function renderRollingChart(id,key,sorted,label,color,from=''){
   const el=document.getElementById(id);if(!el)return;
   const window7=7;
   const pts=sorted.filter(d=>d[key]!=null);
@@ -940,62 +977,63 @@ function renderRollingChart(id,key,sorted,label,color){
   pts.forEach((d,i)=>{
     const slice=pts.slice(Math.max(0,i-window7+1),i+1).map(p=>p[key]);
     const avg=slice.reduce((s,v)=>s+v,0)/slice.length;
-    labels.push(d.date.slice(5).replace('-','/'));
+    if(d.date<from)return;
+    labels.push(ddmm(d.date));
     vals.push(+avg.toFixed(1));
   });
   destroyChartById(id);
   chartInstances[id]=new Chart(el,{
-    type:'line',data:{labels,datasets:[{label,data:vals,borderColor:color,backgroundColor:color+'20',borderWidth:2,fill:true,pointRadius:0,tension:.4}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-      scales:{x:{ticks:{color:chartTick(),font:{size:10},maxTicksLimit:8},grid:{color:chartGrid()}},
+    type:'line',data:{labels,datasets:[{label,data:vals,borderColor:color,backgroundColor:color+'20',borderWidth:2,fill:true,pointRadius:0,pointHoverRadius:4,tension:.4}]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${label}: ${c.parsed.y}`}}},
+      scales:{x:{ticks:{color:chartTick(),font:{size:10},maxTicksLimit:7,maxRotation:0},grid:{color:chartGrid()}},
         y:{ticks:{color:chartTick(),font:{size:10}},grid:{color:chartGrid()}}}}
   });
 }
 
-function renderWeightChart(sorted){
+function renderWeightChart(sorted,from=''){
   const el=document.getElementById('weight-trend-chart');if(!el)return;
-  const pts=sorted.filter(d=>d.weight!=null);
+  const all=sorted.filter(d=>d.weight!=null);
+  const pts=all.filter(d=>d.date>=from);
   if(pts.length<2)return;
-  // 7d rolling average (noise reduction)
+  // 7d rolling average (noise reduction), window taken from all weigh-ins
   const labels=[];const raw=[];const smooth=[];
   pts.forEach((d,i)=>{
-    const slice=pts.slice(Math.max(0,i-6),i+1).map(p=>p.weight);
-    labels.push(d.date.slice(5).replace('-','/'));
+    const j=all.indexOf(d),slice=all.slice(Math.max(0,j-6),j+1).map(p=>p.weight);
+    labels.push(ddmm(d.date));
     raw.push(d.weight);
     smooth.push(+(slice.reduce((s,v)=>s+v,0)/slice.length).toFixed(2));
   });
-  // Project goal: linear regression on smooth values
-  const n=smooth.length;
-  const xi=smooth.map((_,i)=>i);
-  const meanX=(n-1)/2,meanY=smooth.reduce((s,v)=>s+v,0)/n;
-  const slope=xi.reduce((s,x,i)=>s+(x-meanX)*(smooth[i]-meanY),0)/xi.reduce((s,x)=>s+(x-meanX)**2,0);
+  // Trend: linear regression of the 7-day average against calendar days
+  const day0=new Date(pts[0].date+'T12:00'),xi=pts.map(d=>Math.round((new Date(d.date+'T12:00')-day0)/864e5));
+  const n=smooth.length,meanX=xi.reduce((s,x)=>s+x,0)/n,meanY=smooth.reduce((s,v)=>s+v,0)/n;
+  const den=xi.reduce((s,x)=>s+(x-meanX)**2,0);
+  const slope=den?xi.reduce((s,x,i)=>s+(x-meanX)*(smooth[i]-meanY),0)/den:0;   // kg per day
   const intercept=meanY-slope*meanX;
-  let goalLabel='',goalDays='';
+  let goalLabel='';
   if(slope<0){
-    const daysToGoal=(65-intercept)/slope;
-    if(daysToGoal>0&&daysToGoal<500){
-      const g=new Date();g.setDate(g.getDate()+Math.round(daysToGoal-n));
+    const goalDay=(65-intercept)/slope,lastDay=xi[n-1];
+    if(goalDay>lastDay&&goalDay-lastDay<500){
+      const g=new Date(pts[n-1].date+'T12:00');g.setDate(g.getDate()+Math.round(goalDay-lastDay));
       goalLabel=`Mål 65 kg: ${g.toLocaleDateString('no-NO',{day:'2-digit',month:'short',year:'numeric'})}`;
     }
   }
-  const goalLine=labels.map((_,i)=>+(intercept+slope*i).toFixed(2));
+  const goalLine=xi.map(x=>+(intercept+slope*x).toFixed(2));
   destroyChartById('weight-trend-chart');
   chartInstances['weight-trend-chart']=new Chart(el,{
     type:'line',
     data:{labels,datasets:[
-      {label:'Daglig',data:raw,borderColor:'#c4907840',borderWidth:1,pointRadius:2,pointBackgroundColor:'#c49078',tension:.3,fill:false},
-      {label:'7d snitt',data:smooth,borderColor:'#c49078',borderWidth:2,pointRadius:0,tension:.4,fill:false},
-      {label:'Trend',data:goalLine,borderColor:'#7c6dfa60',borderWidth:1.5,borderDash:[4,4],pointRadius:0,tension:0,fill:false}
+      {label:'Veiing',data:pts.map((d,i)=>({x:dayNum(d.date),y:raw[i]})),showLine:false,pointRadius:3,pointBackgroundColor:'#b56a4599',pointBorderWidth:0,fill:false},
+      {label:'7-veiingers snitt',data:pts.map((d,i)=>({x:dayNum(d.date),y:smooth[i]})),borderColor:'#b56a45',borderWidth:2,pointRadius:0,tension:.3,fill:false},
+      {label:'Trend',data:pts.map((d,i)=>({x:dayNum(d.date),y:goalLine[i]})),borderColor:'#7c6dfa',borderWidth:1.5,borderDash:[5,4],pointRadius:0,tension:0,fill:false}
     ]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:true,labels:{color:chartTick(),font:{size:10},boxWidth:10}},
-        annotation:{}},
-      scales:{x:{ticks:{color:chartTick(),font:{size:10},maxTicksLimit:8},grid:{color:chartGrid()}},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:true,labels:{color:chartTick(),font:{size:10},boxWidth:10}},tooltip:{callbacks:{title:c=>ddmmyyyy(new Date(c[0].parsed.x*864e5).toISOString().slice(0,10)),label:c=>` ${c.dataset.label}: ${c.parsed.y} kg`}}},
+      scales:{x:dayAxis(),
         y:{ticks:{color:chartTick(),font:{size:10}},grid:{color:chartGrid()},
           min:Math.max(60,Math.min(...raw)-1),max:Math.max(...raw)+1}}}
   });
   const infoEl=document.getElementById('weight-goal-info');
-  if(infoEl&&goalLabel)infoEl.textContent=goalLabel+(slope<0?` (${(slope*7).toFixed(2)} kg/wk)`:'');
+  if(infoEl)infoEl.textContent=goalLabel?`${goalLabel} (${(slope*7).toFixed(2).replace('.',',')} kg/uke i perioden)`:`Trend i perioden: ${slope>=0?'+':''}${(slope*7).toFixed(2).replace('.',',')} kg/uke`;
 }
 
 function renderGoalProjection(){
@@ -1031,8 +1069,8 @@ function renderGoalProjection(){
   let status,statusClr;
   if(remaining<=0){status='Mål nådd \ud83c\udf89';statusClr='var(--green)';}
   else if(slope<-0.0005){status='I rute';statusClr='var(--green)';}
-  else if(slope>0.0005){status='Gaining';statusClr='var(--red)';}
-  else {status='Stalled';statusClr='var(--amber)';}
+  else if(slope>0.0005){status='Går opp';statusClr='var(--red)';}
+  else {status='Står stille';statusClr='var(--amber)';}
   const rateClr=ratePerWk<-0.01?'var(--green)':ratePerWk>0.01?'var(--red)':'var(--amber)';
   const now=new Date();
   const yearEnd=new Date(now.getFullYear(),11,31);
@@ -1057,7 +1095,7 @@ function renderGoalProjection(){
       actualBox=`<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;font-size:13px;color:var(--text);line-height:1.5;margin-top:12px">
         <span style="color:var(--muted)">I det siste spiser du faktisk </span><b style="color:var(--text)">${avgEat.toLocaleString()} kcal/dag</b>
         <span style="color:var(--muted)"> vs </span><b style="color:var(--text)">${avgBurn.toLocaleString()} forbrent</b>
-        <span style="color:var(--muted)"> — a </span><b style="color:${vClr}">${Math.abs(actBal).toLocaleString()} kcal/day ${actBal>0?'underskudd':'overskudd'}</b>,
+        <span style="color:var(--muted)"> — et </span><b style="color:${vClr}">${Math.abs(actBal).toLocaleString()} kcal/dag ${actBal>0?'underskudd':'overskudd'}</b>,
         <span style="color:${vClr}">${vTxt}</span>.
         <span style="color:var(--muted)"> (${paired.length} siste dager med både måltider og Garmin-data.)</span></div>`;
     }
@@ -1070,7 +1108,7 @@ function renderGoalProjection(){
     <div class="section-head">Vektmål</div>
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:1.2rem;text-align:center">
       <div style="font-family:var(--font-serif);font-size:48px;font-weight:500;letter-spacing:-1.5px;line-height:1;color:var(--text)">${lastAvg.toFixed(1)}<span style="font-size:20px;color:var(--muted)"> kg</span></div>
-      <div style="font-size:12px;color:var(--muted);margin-top:6px">7-day average · ${remaining>0?`${remaining.toFixed(1)} kg igjen`:'mål nådd'}</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:6px">7-dagers snitt · ${remaining>0?`${remaining.toFixed(1)} kg igjen`:'mål nådd'}</div>
       <div style="margin-top:16px;height:10px;border-radius:6px;background:var(--surface2);overflow:hidden;position:relative">
         <div style="height:100%;width:${pct.toFixed(1)}%;background:var(--accent);border-radius:6px;transition:width .4s"></div>
       </div>
@@ -1084,7 +1122,7 @@ function renderGoalProjection(){
       ${card('Status',status,onTrack?'med nåværende tempo':'endring trengs',statusClr)}
     </div>
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;font-size:13px;color:var(--text);line-height:1.5">
-      <span style="color:var(--muted)">For å nå <b style="color:var(--text)">${GOAL} kg by ${yeLabel}</b> trenger du </span>
+      <span style="color:var(--muted)">For å nå <b style="color:var(--text)">${GOAL} kg innen ${yeLabel}</b> trenger du </span>
       <b style="color:var(--accent2)">${reqPerWk>0?reqPerWk.toFixed(2):'0'} kg/uke</b>
       <span style="color:var(--muted)"> — omtrent </span><b style="color:var(--accent2)">${reqKcal>0?reqKcal:0} kcal/dag</b><span style="color:var(--muted)"> underskudd.</span>
     </div>
@@ -1092,401 +1130,312 @@ function renderGoalProjection(){
     <p style="font-size:10px;color:var(--muted);margin-top:10px">Prognosen er en lineær trend av 7-dagers snittvekt. Underskuddet er beregnet med ~7700 kcal per kg. «I det siste» = opptil 14 nylige dager der både måltider og Garmin-forbruk er logget.</p>`;
 }
 
-function renderBodyFatChart(sorted){
+function renderBodyFatChart(sorted,from=''){
   const el=document.getElementById('bodyfat-trend-chart');if(!el)return;
-  const pts=sorted.filter(d=>d.bodyFat!=null);
+  const pts=sorted.filter(d=>d.bodyFat!=null&&d.date>=from);
   if(pts.length<2)return;
-  const labels=pts.map(d=>d.date.slice(5).replace('-','/'));
+  const labels=pts.map(d=>ddmm(d.date));
   const vals=pts.map(d=>d.bodyFat);
   destroyChartById('bodyfat-trend-chart');
   chartInstances['bodyfat-trend-chart']=new Chart(el,{
-    type:'line',data:{labels,datasets:[{label:'Fettprosent',data:vals,borderColor:'#c9a84c',backgroundColor:'#c9a84c15',borderWidth:2,pointRadius:2,pointBackgroundColor:'#c9a84c',tension:.4,fill:true}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-      scales:{x:{ticks:{color:chartTick(),font:{size:10},maxTicksLimit:8},grid:{color:chartGrid()}},
+    type:'line',data:{datasets:[{label:'Fettprosent',data:pts.map((d,i)=>({x:dayNum(d.date),y:vals[i]})),borderColor:'#a9802a',backgroundColor:'#a9802a15',borderWidth:2,pointRadius:2,pointBackgroundColor:'#a9802a',tension:.4,fill:true}]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{title:c=>ddmmyyyy(new Date(c[0].parsed.x*864e5).toISOString().slice(0,10)),label:c=>` ${c.parsed.y} %`}}},
+      scales:{x:dayAxis(),
         y:{ticks:{color:chartTick(),font:{size:10}},grid:{color:chartGrid()}}}}
-  });
-}
-
-function renderRHRLoadScatter(){
-  const el=document.getElementById('rhr-load-scatter');if(!el)return;
-  const pts=[];
-  healthData.forEach(h=>{
-    if(!h.rhr)return;
-    const dayLoad=activities.filter(a=>a.date===h.date).reduce((s,a)=>s+(a.load||0),0);
-    pts.push({x:dayLoad,y:h.rhr});
-  });
-  if(pts.length<3)return;
-  destroyChartById('rhr-load-scatter');
-  chartInstances['rhr-load-scatter']=new Chart(el,{
-    type:'scatter',data:{datasets:[{label:'Load vs RHR',data:pts,backgroundColor:'#c4907880',pointRadius:4}]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:p=>`Load: ${p.parsed.x}, RHR: ${p.parsed.y} bpm`}}},
-      scales:{x:{title:{display:true,text:'Training Load',color:chartTick(),font:{size:10}},ticks:{color:chartTick(),font:{size:10}},grid:{color:chartGrid()}},
-        y:{title:{display:true,text:'RHR (bpm)',color:chartTick(),font:{size:10}},ticks:{color:chartTick(),font:{size:10}},grid:{color:chartGrid()}}}}
   });
 }
 
 // ═══════════════════════════════════════════════
 // NUTRITION EXTRAS
 // ═══════════════════════════════════════════════
+// Kosthold → Trender. Each section has its own period control:
+//  - calorie deficit: nxDefDays (default 14, chips 7/14/30/90/Alt)
+//  - weekday averages: nxWeeks (default 8 weeks, chips 4/8/12/Alt)
+// Days with < NX_MIN_KCAL logged are treated as incompletely logged and skipped.
+let nxDefDays=14,nxWeeks=8;
+const NX_MIN_KCAL=800;
+function setNxDef(d){nxDefDays=d;renderNutritionExtras();}
+function setNxWeeks(w){nxWeeks=w;renderNutritionExtras();}
 function renderNutritionExtras(){
   const el=document.getElementById('nutr-extras');if(!el)return;
-  if(!nutritionData||!nutritionData.length)return;
+  if(!nutritionData||!nutritionData.length){el.innerHTML='<div class="empty-note">Ingen kostholdsdata ennå.</div>';return;}
+  const byDateH=Object.fromEntries(healthData.map(h=>[h.date,h]));
+  const logged=[...nutritionData].filter(d=>(d.calories||0)>=NX_MIN_KCAL).sort((a,b)=>a.date.localeCompare(b.date));
+  const lastLogged=logged.length?logged[logged.length-1].date:null;
+  const stale=lastLogged&&lastLogged<daysAgoIso(3)
+    ?`<div class="empty-note" style="border-style:solid">Siste kostholdsregistrering er <b>${ddmmyyyy(lastLogged)}</b>. Perioder etter det er tomme til Health Auto Export sender data igjen.</div>`:'';
 
-  // Protein per kg of LEAN mass (bodyweight − fat mass)
-  const lastWeight=([...healthData].sort((a,b)=>b.date.localeCompare(a.date)).find(h=>h.weight)||{}).weight||76;
-  const lastBodyFat=([...healthData].sort((a,b)=>b.date.localeCompare(a.date)).find(h=>h.bodyFat!=null)||{}).bodyFat;
-  const leanMass=lastBodyFat!=null?+(lastWeight*(1-lastBodyFat/100)).toFixed(1):lastWeight;
-  const recent=[...nutritionData].filter(d=>d.calories>0).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,7);
-  const recentWithProtein=recent.filter(d=>d.protein!=null&&d.protein>0);
-  const avgProtein=recentWithProtein.length?recentWithProtein.reduce((s,d)=>s+d.protein,0)/recentWithProtein.length:0;
-  const proteinPerKg=(avgProtein/leanMass).toFixed(2);
-  const protTarget=2.0;
+  // Protein per kg lean mass (latest weight × (1 − fat%)), last 7 logged days
+  const hDesc=[...healthData].sort((a,b)=>b.date.localeCompare(a.date));
+  const lastWeight=(hDesc.find(h=>h.weight)||{}).weight||null;
+  const lastBodyFat=(hDesc.find(h=>h.bodyFat!=null)||{}).bodyFat;
+  const leanMass=lastWeight?(lastBodyFat!=null?+(lastWeight*(1-lastBodyFat/100)).toFixed(1):lastWeight):null;
+  const recent=logged.slice(-7).filter(d=>d.protein>0);
+  const avgProtein=recent.length?recent.reduce((s,d)=>s+d.protein,0)/recent.length:0;
+  const protTarget=2.0,ppk=leanMass?avgProtein/leanMass:0;
 
-  // Cumulative deficit (goal 1600 kcal, actual eaten)
-  const sorted=[...nutritionData].sort((a,b)=>a.date.localeCompare(b.date));
-  let cumDef=0;const defLabels=[];const defData=[];
-  sorted.forEach(d=>{
-    const eaten=d.calories||0;
-    const burned=([...healthData].find(h=>h.date===d.date)||{}).totalKcal||2100;
-    const deficit=burned-eaten;
-    cumDef+=deficit;
-    const [,_m,_day]=d.date.split('-'); defLabels.push(_day+'/'+_m);
-    defData.push(+cumDef.toFixed(0));
-  });
+  // Calorie deficit in the chosen period: burned (Garmin) − eaten, logged days only
+  const defFrom=nxDefDays?daysAgoIso(nxDefDays-1):(logged[0]||{}).date||'';
+  const defRows=logged.filter(d=>d.date>=defFrom&&byDateH[d.date]&&byDateH[d.date].totalKcal);
+  let cum=0;const defLabels=[],defData=[];
+  defRows.forEach(d=>{cum+=byDateH[d.date].totalKcal-d.calories;defLabels.push(ddmm(d.date));defData.push(Math.round(cum));});
+  const defTotal=Math.round(cum),defPerDay=defRows.length?Math.round(cum/defRows.length):0;
 
-  // Best/worst weekdays for macros
-  const dayGroups=[0,1,2,3,4,5,6].map(dow=>{
-    const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-    const entries=nutritionData.filter(d=>new Date(d.date).getDay()===dow&&d.calories);
-    const avgCal=entries.length?entries.reduce((s,d)=>s+(d.calories||0),0)/entries.length:0;
-    return{day:days[dow],avg:Math.round(avgCal),n:entries.length};
-  }).filter(d=>d.n>0).sort((a,b)=>a.avg-b.avg);
+  // Weekday averages, Monday first, last nxWeeks weeks
+  const wkFrom=nxWeeks?daysAgoIso(nxWeeks*7-1):'';
+  const wkRows=logged.filter(d=>d.date>=wkFrom);
+  const order=[1,2,3,4,5,6,0];
+  const wk=order.map(dow=>{const e=wkRows.filter(d=>new Date(d.date+'T12:00').getDay()===dow);
+    return{name:WEEKDAYS_NB[dow],avg:e.length?Math.round(e.reduce((s,d)=>s+d.calories,0)/e.length):null,n:e.length};});
+  const wkMax=Math.max(TARGETS.calories,...wk.map(d=>d.avg||0));
 
-  el.innerHTML=`
+  el.innerHTML=`${stale}
     <div class="section-head">Protein per kg fettfri masse</div>
     <div class="stat-grid" style="margin-bottom:1.25rem">
-      <div class="stat-card"><div class="stat-label">Protein, 7-dagers snitt</div><div class="stat-value">${Math.round(avgProtein)}g</div><div class="stat-sub">${Math.round(avgProtein)}g ÷ ${leanMass}kg fettfri = ${proteinPerKg}g/kg</div></div>
-      <div class="stat-card"><div class="stat-label">protein per kg fettfri masse</div><div class="stat-value" style="color:${+proteinPerKg>=protTarget?'var(--green)':'var(--red)'}">${proteinPerKg}g/kg</div><div class="stat-sub">mål ${protTarget}g/kg · trenger ${Math.round(protTarget*leanMass)}g/dag</div></div>
-      <div class="stat-card"><div class="stat-label">fettfri masse</div><div class="stat-value">${leanMass}kg</div><div class="stat-sub">${lastWeight}kg − ${lastBodyFat!=null?lastBodyFat+'% fat':'n/a'}</div></div>
+      <div class="stat-card"><div class="stat-label">Protein, snitt</div><div class="stat-value">${Math.round(avgProtein)} g</div><div class="stat-sub">siste ${recent.length} loggede dager</div></div>
+      <div class="stat-card"><div class="stat-label">Per kg fettfri masse</div><div class="stat-value" style="color:${ppk>=protTarget?'var(--green)':'var(--red)'}">${ppk.toFixed(2)} g/kg</div><div class="stat-sub">mål ${protTarget} g/kg · trenger ${leanMass?Math.round(protTarget*leanMass):'—'} g/dag</div></div>
+      <div class="stat-card"><div class="stat-label">Fettfri masse</div><div class="stat-value">${leanMass??'—'} kg</div><div class="stat-sub">${lastWeight??'—'} kg − ${lastBodyFat!=null?lastBodyFat+' % fett':'ukjent fett %'}</div></div>
     </div>
-    <div class="section-head">Akkumulert kaloriunderskudd</div>
-    <div class="chart-card"><canvas id="deficit-chart" height="140"></canvas></div>
+
+    <div class="section-head">Kaloriunderskudd</div>
+    ${rangeChips(nxDefDays,'setNxDef')}
+    ${defRows.length?`
+    <div class="stat-grid" style="margin-bottom:10px">
+      <div class="stat-card"><div class="stat-label">Totalt i perioden</div><div class="stat-value" style="color:${defTotal>=0?'var(--green)':'var(--red)'}">${defTotal>=0?'−':'+'}${Math.abs(defTotal).toLocaleString('nb-NO')} kcal</div><div class="stat-sub">${defTotal>=0?'underskudd':'overskudd'} · ≈ ${(Math.abs(defTotal)/7700).toFixed(1)} kg</div></div>
+      <div class="stat-card"><div class="stat-label">Snitt per dag</div><div class="stat-value">${defPerDay.toLocaleString('nb-NO')} kcal</div><div class="stat-sub">${defRows.length} dager med mat + Garmin</div></div>
+    </div>
+    <div class="chart-card"><div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">Akkumulert underskudd (kcal)</div><div style="height:170px;position:relative"><canvas id="deficit-chart" role="img" aria-label="Akkumulert kaloriunderskudd"></canvas></div></div>`
+    :`<div class="empty-note">Ingen dager med både kosthold og Garmin-forbruk i perioden.</div>`}
+    <div class="range-note">Dager med under ${NX_MIN_KCAL} kcal logget regnes som ufullstendige og er utelatt.</div>
+
     <div class="section-head">Snittkalorier per ukedag</div>
-    <div class="delta-grid">
-      ${dayGroups.map(d=>`<div class="delta-card"><div class="stat-label">${d.day}</div><div class="delta-val">${d.avg}<span style="font-size:11px;color:var(--muted)"> kcal</span></div><div class="delta-chg" style="color:var(--muted)">${d.n} dager</div></div>`).join('')}
-    </div>
+    ${rangeChips(nxWeeks,'setNxWeeks',[[4,'4 uker'],[8,'8 uker'],[12,'12 uker'],[0,'Alt']])}
+    ${wkRows.length?`<div class="hbar-list">${wk.map(d=>`<div class="hbar-row"><div>${d.name.slice(0,3)}</div>
+      <div class="hbar-track">${d.avg?`<div class="hbar-fill" style="width:${Math.round(d.avg/wkMax*100)}%"></div>`:''}</div>
+      <div class="hbar-val">${d.avg?d.avg.toLocaleString('nb-NO'):'—'} <span>· ${d.n} d</span></div></div>`).join('')}
+      <div class="range-note" style="margin:8px 0 0">Mål ${TARGETS.calories} kcal/dag · ${wkRows.length} loggede dager</div></div>`
+    :`<div class="empty-note">Ingen loggede dager de siste ${nxWeeks} ukene.</div>`}
   `;
 
   destroyChartById('deficit-chart');
   const ctx=document.getElementById('deficit-chart');
   if(ctx){
     chartInstances['deficit-chart']=new Chart(ctx,{
-      type:'line',data:{labels:defLabels,datasets:[{label:'Akkumulert underskudd (kcal)',data:defData,borderColor:'#7aab88',backgroundColor:'#7aab8820',borderWidth:2,fill:true,pointRadius:0,tension:.3}]},
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-        scales:{x:{ticks:{color:chartTick(),font:{size:10},maxTicksLimit:10},grid:{color:chartGrid()}},
-          y:{ticks:{color:chartTick(),font:{size:10}},grid:{color:chartGrid()}}}}
+      type:'line',data:{labels:defLabels,datasets:[{label:'Akkumulert underskudd',data:defData,borderColor:'#5f8c6a',backgroundColor:'#5f8c6a22',borderWidth:2,fill:true,pointRadius:defData.length>30?0:2.5,tension:.3}]},
+      options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.parsed.y.toLocaleString('nb-NO')} kcal`}}},
+        scales:{x:{ticks:{color:chartTick(),font:{size:10},maxTicksLimit:7,maxRotation:0},grid:{color:chartGrid()}},
+          y:{ticks:{color:chartTick(),font:{size:10},callback:v=>v.toLocaleString('nb-NO')},grid:{color:chartGrid()}}}}
     });
   }
 }
 
-// ═══════════════════════════════════════════════
-// WORK / SHIFT CORRELATION TAB
-// ═══════════════════════════════════════════════
-function renderWork(){
-  const el=document.getElementById('work-content');if(!el)return;
-  if(!shiftsData||!shiftsData.length){el.innerHTML='<p style="color:var(--muted)">Ingen vaktdata lastet.</p>';return;}
+// ── SØVN ───────────────────────────────────────────────────────────────────
+// Each health.json row holds the night that ENDED on that date (bedTime /
+// wakeTime are local clock times) plus that day's health metrics.
+// Three sub-views:
+//   Oversikt   – averages, sleep window, duration, stages, night table
+//   Sammenheng – pick a sleep measure and a health measure → scatter + r
+//   Sammenlign – period A vs period B (did a change help?)
+let slDays=30,slX='sleepH',slY='hrvAvg',slA=null,slB=null;
 
-  // Only correlate shifts where health data exists (sleep score from same date = night before shift)
-  const hasHealth=date=>healthData.some(h=>h.date===date&&h.sleepScore!=null);
-  const join=(date)=>{
-    const h=healthData.find(h=>h.date===date)||{};
-    const acts=activities.filter(a=>a.date===date);
-    const nutr=nutritionData&&nutritionData.find?nutritionData.find(n=>n.date===date):null;
-    return{...h,activities:acts,nutrition:nutr};
-  };
+// Clock handling: bedtimes before noon belong to the night before, so they are
+// shifted +24 h to keep 23:30 and 01:30 next to each other when averaging.
+const clockMin=t=>{if(!t)return null;const[h,m]=t.split(':').map(Number);return h*60+m;};
+const bedMin=t=>{const m=clockMin(t);return m==null?null:(m<720?m+1440:m);};
+const fmtClock=m=>{if(m==null)return'—';m=Math.round(((m%1440)+1440)%1440);return`${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;};
+const fmtDur=h=>h==null?'—':`${Math.floor(h)} t ${String(Math.round((h%1)*60)).padStart(2,'0')} min`;
+const mean=a=>{const v=a.filter(x=>x!=null&&!isNaN(x));return v.length?v.reduce((s,x)=>s+x,0)/v.length:null;};
+const sd=a=>{const v=a.filter(x=>x!=null);if(v.length<2)return null;const m=mean(v);return Math.sqrt(v.reduce((s,x)=>s+(x-m)**2,0)/(v.length-1));};
+// Morning Training Readiness: first reading of the day (the stored value is the latest one).
+const morningReadiness=d=>{const s=d.trainingReadinessSeries;return s&&s.length?s[0].score:d.trainingReadiness;};
 
-  // Current month bounds
-  const _now=new Date();
-  const _y=_now.getFullYear(), _m=_now.getMonth();
-  const _monthKey=`${_y}-${String(_m+1).padStart(2,'0')}`;
-  const _monthName=_now.toLocaleString('nb-NO',{month:'long'});
-  const _lastDay=new Date(_y,_m+1,0).getDate();
-  const _mm=String(_m+1).padStart(2,'0');
-  const _monthRange=`01/${_mm} – ${_lastDay}/${_mm}`;
-
-  // Shift overview: this month only (all shifts, no health filter needed for counts)
-  const monthShifts=shiftsData.filter(s=>s.date.startsWith(_monthKey));
-  const byTypeMonth={day:[],evening:[],night:[],off:[]};
-  monthShifts.forEach(s=>{const t=s.shiftType||'off';if(byTypeMonth[t])byTypeMonth[t].push(s);});
-
-  // Correlation: all shifts with health data (for metrics & sleep)
-  const corrShifts=shiftsData.filter(s=>hasHealth(s.date));
-  const byType={day:[],evening:[],night:[],off:[]};
-  corrShifts.forEach(s=>{
-    const d=join(s.date);
-    const type=s.shiftType||'off';
-    if(byType[type])byType[type].push({shift:s,data:d});
-  });
-
-  const corrDates=corrShifts.map(s=>s.date).sort();
-  const dataFrom=corrDates.length?corrDates[0].split('-').reverse().slice(0,2).join('/'):'—';
-
-  const metric=(rows,key)=>{const v=rows.map(r=>r.data[key]).filter(x=>x!=null);return v.length?+(v.reduce((s,x)=>s+x,0)/v.length).toFixed(1):null;};
-
-  const types=[
-    {key:'day',label:'Dag (07–15)',cls:'shift-day',emoji:'☀️'},
-    {key:'evening',label:'Kveld (14–22)',cls:'shift-eve',emoji:'🌆'},
-    {key:'night',label:'Natt',cls:'shift-night',emoji:'🌙'},
-    {key:'off',label:'Fri',cls:'shift-off',emoji:'😴'}
-  ];
-
-  const metrics=[
-    {key:'sleepScore',label:'Sleep Score',unit:'',note:'natta før vakt'},
-    {key:'hrvAvg',label:'HRV',unit:''},
-    {key:'rhr',label:'Hvilepuls',unit:' bpm'},
-    {key:'steps',label:'Skritt',unit:''},
-    {key:'bbHigh',label:'Body Battery',unit:''},
-    {key:'avgStress',label:'Snitt Stress',unit:''}
-  ];
-
-  // Transport %: ran/walked/biked on that day
-  const transportFreq=(rows)=>rows.length?+(rows.filter(r=>r.data.activities.some(a=>['running','walking','cycling'].includes(a.type))).length/rows.length*100).toFixed(0):0;
-
-  // Kcal eaten (nutrition) and burnt (totalKcal from health)
-  const avgEaten=(rows)=>{const v=rows.filter(r=>r.data.nutrition&&r.data.nutrition.calories).map(r=>r.data.nutrition.calories);return v.length?Math.round(v.reduce((s,x)=>s+x,0)/v.length):null;};
-  const avgBurnt=(rows)=>{const v=rows.map(r=>r.data.totalKcal).filter(x=>x!=null);return v.length?Math.round(v.reduce((s,x)=>s+x,0)/v.length):null;};
-
-  // Circular mean for times (handles midnight wraparound correctly)
-  const avgTime=(times)=>{
-    if(!times.length)return'—';
-    let sinS=0,cosS=0;
-    times.forEach(t=>{
-      const [h,m]=t.split(':').map(Number);
-      const angle=((h*60+m)/(24*60))*2*Math.PI;
-      sinS+=Math.sin(angle);cosS+=Math.cos(angle);
-    });
-    let angle=Math.atan2(sinS/times.length,cosS/times.length);
-    if(angle<0)angle+=2*Math.PI;
-    const mins=Math.round(angle/(2*Math.PI)*24*60)%1440;
-    return Math.floor(mins/60)+':'+String(mins%60).padStart(2,'0');
-  };
-  const avgSleepDur=(rows)=>{
-    const v=rows.map(r=>r.data.sleepSec).filter(x=>x!=null);
-    if(!v.length)return'—';
-    const avg=v.reduce((s,x)=>s+x,0)/v.length;
-    return`${Math.floor(avg/3600)}h ${Math.round((avg%3600)/60)}m`;
-  };
-
-  let html=`
-    <div class="section-head" style="margin-top:0">Vaktoversikt — ${_monthName} ${_y}
-      <span style="font-size:11px;font-weight:400;color:var(--muted);margin-left:10px">${_monthRange}</span>
-    </div>
-    <div class="stat-grid" style="margin-bottom:1.25rem">
-      ${types.map(t=>`<div class="stat-card"><div class="stat-label">${t.emoji} ${t.label}</div><div class="stat-value">${byTypeMonth[t.key].length}<span style="font-size:14px;color:var(--muted)"> vakter</span></div></div>`).join('')}
-    </div>
-
-    <div class="section-head">Helsedata per vakttype
-      <span style="font-size:10px;font-weight:400;color:var(--muted);margin-left:8px">Søvn = natta før vakt</span>
-    </div>
-    <div style="overflow-x:auto;margin-bottom:1.25rem">
-    <table style="width:100%;border-collapse:collapse;font-size:12px">
-      <thead><tr><th style="text-align:left;padding:6px 10px;color:var(--muted);font-weight:600">Måling</th>
-        ${types.map(t=>`<th style="text-align:right;padding:6px 10px;color:var(--muted);font-weight:600">${t.emoji} ${t.key==='off'?'Fri':t.label.split(' ')[0]}</th>`).join('')}
-      </tr></thead>
-      <tbody>
-        ${metrics.map(m=>`<tr style="border-top:1px solid var(--border)">
-          <td style="padding:7px 10px;color:var(--text)">${m.label}</td>
-          ${types.map(t=>{const v=metric(byType[t.key],m.key);return`<td style="text-align:right;padding:7px 10px;color:var(--accent)">${v!=null?v+m.unit:'—'}</td>`;}).join('')}
-        </tr>`).join('')}
-        <tr style="border-top:1px solid var(--border)">
-          <td style="padding:7px 10px;color:var(--text)">🚴 Transport %</td>
-          ${types.map(t=>`<td style="text-align:right;padding:7px 10px;color:var(--accent)">${transportFreq(byType[t.key])}%</td>`).join('')}
-        </tr>
-        <tr style="border-top:1px solid var(--border)">
-          <td style="padding:7px 10px;color:var(--text)">🍽 Snitt kcal spist</td>
-          ${types.map(t=>{const v=avgEaten(byType[t.key]);return`<td style="text-align:right;padding:7px 10px;color:var(--accent)">${v||'—'}</td>`;}).join('')}
-        </tr>
-        <tr style="border-top:1px solid var(--border)">
-          <td style="padding:7px 10px;color:var(--text)">🔥 Snitt kcal forbrent</td>
-          ${types.map(t=>{const v=avgBurnt(byType[t.key]);return`<td style="text-align:right;padding:7px 10px;color:var(--accent)">${v||'—'}</td>`;}).join('')}
-        </tr>
-      </tbody>
-    </table>
-    </div>
-
-    <div class="section-head">Søvn per vakttype
-      <span style="font-size:11px;font-weight:400;color:var(--muted);margin-left:8px">Data fra ${dataFrom}</span>
-    </div>
-
-    ${(()=>{
-      const spread=(rows,key)=>{const v=rows.map(r=>r.data[key]).filter(x=>x!=null);if(!v.length)return null;return{min:Math.min(...v),avg:+(v.reduce((s,x)=>s+x,0)/v.length).toFixed(1),max:Math.max(...v)};};
-      const stages=(rows)=>{const valid=rows.filter(r=>r.data.sleepSec>0&&r.data.deepSec!=null);if(!valid.length)return null;const avg=(k)=>valid.reduce((s,r)=>s+(r.data[k]||0),0)/valid.length;const tot=avg('sleepSec')||1;return{deep:+(avg('deepSec')/tot*100).toFixed(0),rem:+(avg('remSec')/tot*100).toFixed(0),light:+(avg('lightSec')/tot*100).toFixed(0),awake:+(avg('awakeSec')/tot*100).toFixed(0)};};
-      const scoreClr=(v)=>v>=80?'var(--score-good)':v>=65?'var(--score-ok)':v>=50?'var(--score-warn)':'var(--score-bad)';
-      const rangeBar=(sp,clr)=>{if(!sp)return'<span style="color:var(--muted)">—</span>';const p=(v)=>Math.max(0,Math.min(100,v));return`<div style="position:relative;height:6px;background:var(--surface2);border-radius:3px;margin:5px 0"><div style="position:absolute;left:${p(sp.min)}%;width:${p(sp.max-sp.min)}%;height:100%;background:${clr};opacity:.35;border-radius:3px"></div><div style="position:absolute;left:calc(${p(sp.avg)}% - 3px);width:6px;height:6px;background:${clr};border-radius:50%;top:0"></div></div><div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted)"><span>${sp.min}</span><span style="color:${clr};font-weight:700">${sp.avg}</span><span>${sp.max}</span></div>`;};
-      const stageBar=(st)=>{if(!st)return'<span style="color:var(--muted);font-size:11px">—</span>';const segs=[{p:st.deep,c:'var(--st-deep)',l:'Deep'},{p:st.rem,c:'var(--st-rem)',l:'REM'},{p:st.light,c:'var(--st-light)',l:'Light'},{p:st.awake,c:'var(--st-awake)',l:'Awake'}];return`<div style="display:flex;height:8px;border-radius:4px;overflow:hidden;margin:6px 0">${segs.map(s=>`<div style="width:${s.p}%;background:${s.c}" title="${s.l} ${s.p}%"></div>`).join('')}</div><div style="display:flex;gap:8px;flex-wrap:wrap">${segs.map(s=>`<span style="font-size:9px;color:var(--muted)"><span style="color:${s.c}">●</span> ${s.l} ${s.p}%</span>`).join('')}</div>`;};
-      const activeTypes=types.filter(t=>byType[t.key].length>0);
-
-      const timingCards=activeTypes.map(t=>{
-        const beds=byType[t.key].filter(r=>r.data.bedTime).map(r=>r.data.bedTime);
-        const wakes=byType[t.key].filter(r=>r.data.wakeTime).map(r=>r.data.wakeTime);
-        const n=byType[t.key].length;
-        return`<div class="stat-card ${t.cls}"><div class="stat-label">${t.emoji} ${t.label} <span style="font-size:10px;color:var(--muted)">${n} netter</span></div>
-          <div style="margin-top:10px;display:grid;gap:10px">
-            <div><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Snitt leggetid</div><div style="font-size:22px;font-weight:700">${avgTime(beds)}</div></div>
-            <div><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Snitt oppvåkning</div><div style="font-size:22px;font-weight:700">${avgTime(wakes)}</div></div>
-            <div><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Snitt varighet</div><div style="font-size:20px;font-weight:700">${avgSleepDur(byType[t.key])}</div></div>
-          </div></div>`;
-      }).join('');
-
-      const scoreCards=activeTypes.map(t=>{
-        const sp=spread(byType[t.key],'sleepScore');
-        const clr=sp?scoreClr(sp.avg):'var(--muted)';
-        return`<div class="stat-card ${t.cls}"><div class="stat-label">${t.emoji} ${t.label}</div>
-          <div style="margin-top:10px">
-            <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Score — min / snitt / maks</div>
-            <div style="font-size:30px;font-weight:700;color:${clr};margin:4px 0">${sp?sp.avg:'—'}</div>
-            ${rangeBar(sp,clr)}
-          </div></div>`;
-      }).join('');
-
-      const stageCards=activeTypes.map(t=>{
-        const st=stages(byType[t.key]);
-        return`<div class="stat-card ${t.cls}"><div class="stat-label">${t.emoji} ${t.label}</div>
-          <div style="margin-top:10px">
-            <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Søvnfaser</div>
-            ${stageBar(st)}
-          </div></div>`;
-      }).join('');
-
-      return`
-        <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin:1rem 0 .5rem">Tidspunkt</div>
-        <div class="stat-grid" style="margin-bottom:1.5rem">${timingCards}</div>
-        <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem">Scorefordeling</div>
-        <div class="stat-grid" style="margin-bottom:1.5rem">${scoreCards}</div>
-        <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem">Søvnfaser</div>
-        <div class="stat-grid" style="margin-bottom:1.5rem">${stageCards}</div>
-      `;
-    })()}
-  `;
-
-  el.innerHTML=html;
-  renderWorkSchedule();
+function sleepNights(from,to){
+  return healthData.filter(h=>h.sleepSec&&(!from||h.date>=from)&&(!to||h.date<=to))
+    .sort((a,b)=>a.date.localeCompare(b.date))
+    .map(h=>({d:h,date:h.date,bed:bedMin(h.bedTime),wake:clockMin(h.wakeTime),sleepH:h.sleepSec/3600,
+      deepM:h.deepSec!=null?h.deepSec/60:null,remM:h.remSec!=null?h.remSec/60:null,
+      lightM:h.lightSec!=null?h.lightSec/60:null,awakeM:h.awakeSec!=null?h.awakeSec/60:null}));
 }
 
-function renderWorkSchedule(){
-  const el=document.getElementById('work-schedule');if(!el)return;
-  if(!shiftsData||!shiftsData.length){el.innerHTML='<p style="color:var(--muted);padding:20px">Ingen vaktdata.</p>';return;}
+// Measures available for the relationship and comparison views.
+// better: +1 higher is better, -1 lower is better, 0 neutral.
+const SL_SLEEP=[
+  {k:'sleepH',l:'Søvnlengde',f:n=>n.sleepH,fmt:fmtDur,better:1},
+  {k:'bed',l:'Leggetid',f:n=>n.bed,fmt:fmtClock,better:0,clock:true},
+  {k:'wake',l:'Våknetid',f:n=>n.wake,fmt:fmtClock,better:0,clock:true},
+  {k:'sleepScore',l:'Søvnscore',f:n=>n.d.sleepScore,fmt:v=>Math.round(v),better:1},
+  {k:'deepM',l:'Dyp søvn',f:n=>n.deepM,fmt:v=>`${Math.round(v)} min`,better:1},
+  {k:'remM',l:'REM-søvn',f:n=>n.remM,fmt:v=>`${Math.round(v)} min`,better:1},
+  {k:'awakeM',l:'Våken i natt',f:n=>n.awakeM,fmt:v=>`${Math.round(v)} min`,better:-1},
+];
+const SL_HEALTH=[
+  {k:'hrvAvg',l:'HRV (natt)',f:n=>n.d.hrvAvg,fmt:v=>`${Math.round(v)} ms`,better:1},
+  {k:'rhr',l:'Hvilepuls',f:n=>n.d.rhr,fmt:v=>`${Math.round(v)} bpm`,better:-1},
+  {k:'bbWake',l:'Body Battery morgen',f:n=>n.d.bbWake,fmt:v=>Math.round(v),better:1},
+  {k:'readiness',l:'Readiness morgen',f:n=>morningReadiness(n.d),fmt:v=>Math.round(v),better:1},
+  {k:'avgStress',l:'Snitt stress',f:n=>n.d.avgStress,fmt:v=>Math.round(v),better:-1},
+  {k:'avgResp',l:'Pustefrekvens',f:n=>n.d.avgResp,fmt:v=>`${v.toFixed(1)}/min`,better:0},
+];
 
-  // Parse date strings as local time (avoids UTC offset shifting dates by 1 in Norway UTC+2)
-  const parseLocal=s=>{const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d);};
-  const fmtIso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+function setSleepDays(d){slDays=d;renderSleep();}
+function setSleepX(k){slX=k;renderSleep();}
+function setSleepY(k){slY=k;renderSleep();}
+function sleepCss(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
+function sleepRangeFrom(){return slDays?daysAgoIso(slDays-1):null;}
 
-  const sorted=[...shiftsData].sort((a,b)=>a.date.localeCompare(b.date));
-  const firstDate=parseLocal(sorted[0].date);
-  const lastDate=parseLocal(sorted[sorted.length-1].date);
+function renderSleep(){
+  const on=id=>(document.getElementById('sleep-sub-'+id)||{classList:{contains:()=>false}}).classList.contains('active');
+  if(on('relation'))return renderSleepRelation();
+  if(on('compare'))return renderSleepCompare();
+  return renderSleepOverview();
+}
 
-  // Find Monday of the first week
-  const start=new Date(firstDate);
-  start.setDate(start.getDate()-((start.getDay()+6)%7));
+function sleepAxis(extra={}){
+  return {...extra,ticks:{color:chartTick(),font:{size:10},maxRotation:0,autoSkipPadding:8},grid:{color:chartGrid(),...(extra.grid||{})}};
+}
 
-  // Find Sunday of the last week
-  const end=new Date(lastDate);
-  end.setDate(end.getDate()+(6-((end.getDay()+6)%7)));
+function renderSleepOverview(){
+  const el=document.getElementById('sleep-overview');if(!el)return;
+  const N=sleepNights(sleepRangeFrom());
+  if(!N.length){el.innerHTML=rangeChips(slDays,'setSleepDays')+'<div class="empty-note">Ingen søvndata i perioden.</div>';return;}
+  const bedAvg=mean(N.map(n=>n.bed)),wakeAvg=mean(N.map(n=>n.wake)),bedSd=sd(N.map(n=>n.bed));
+  const hAvg=mean(N.map(n=>n.sleepH)),score=mean(N.map(n=>n.d.sleepScore));
+  const tot=N.reduce((s,n)=>s+(n.deepM||0)+(n.remM||0)+(n.lightM||0),0);
+  const pct=k=>tot?Math.round(N.reduce((s,n)=>s+(n[k]||0),0)/tot*100):null;
+  const over7=Math.round(N.filter(n=>n.sleepH>=7).length/N.length*100);
+  const regTxt=bedSd==null?'—':bedSd<=30?'jevn':bedSd<=60?'varierer litt':'varierer mye';
 
-  const shiftMap={};
-  sorted.forEach(s=>{shiftMap[s.date]=s;});
+  el.innerHTML=`${rangeChips(slDays,'setSleepDays')}
+  <div class="stat-grid">
+    <div class="stat-card"><div class="stat-label">Snitt leggetid</div><div class="stat-value">${fmtClock(bedAvg)}</div><div class="stat-sub">± ${bedSd!=null?Math.round(bedSd):'—'} min · ${regTxt}</div></div>
+    <div class="stat-card"><div class="stat-label">Snitt våknetid</div><div class="stat-value">${fmtClock(wakeAvg)}</div><div class="stat-sub">± ${sd(N.map(n=>n.wake))!=null?Math.round(sd(N.map(n=>n.wake))):'—'} min</div></div>
+    <div class="stat-card"><div class="stat-label">Snitt søvn</div><div class="stat-value">${fmtDur(hAvg)}</div><div class="stat-sub">${over7} % av nettene ≥ 7 t</div></div>
+    <div class="stat-card"><div class="stat-label">Søvnscore</div><div class="stat-value">${score!=null?Math.round(score):'—'}</div><div class="stat-sub">snitt av ${N.length} netter</div></div>
+    <div class="stat-card"><div class="stat-label">Dyp søvn</div><div class="stat-value">${pct('deepM')??'—'} %</div><div class="stat-sub">av søvnen (ofte 13–23 %)</div></div>
+    <div class="stat-card"><div class="stat-label">REM-søvn</div><div class="stat-value">${pct('remM')??'—'} %</div><div class="stat-sub">av søvnen (ofte 20–25 %)</div></div>
+  </div>
 
-  const dayNames=['Man','Tir','Ons','Tor','Fre','Lør','Søn'];
-  const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const today=fmtIso(new Date());
+  <div class="section-head">Søvnvindu</div>
+  <div class="chart-card"><div class="range-note" style="margin:0 0 8px;text-align:left">Hver stolpe er én natt: fra leggetid (øverst) til våknetid (nederst).</div>
+    <div style="height:240px;position:relative"><canvas id="sl-window" role="img" aria-label="Leggetid og våknetid per natt"></canvas></div></div>
 
-  const isoWeek=(d)=>{
-    const t=new Date(d);t.setHours(0,0,0,0);
-    t.setDate(t.getDate()+3-((t.getDay()+6)%7));
-    const w1=new Date(t.getFullYear(),0,4);
-    return 1+Math.round(((t-w1)/86400000-3+(w1.getDay()+6)%7)/7);
-  };
+  <div class="section-head">Søvnlengde</div>
+  <div class="chart-card"><div style="height:190px;position:relative"><canvas id="sl-dur" role="img" aria-label="Søvnlengde per natt"></canvas></div></div>
 
-  const TYPE={day:'Dag',evening:'Kveld',night:'Natt',vacation:'Ferie',off:'Fri'};
+  <div class="section-head">Søvnfaser</div>
+  <div class="chart-card"><div style="height:200px;position:relative"><canvas id="sl-stages" role="img" aria-label="Søvnfaser per natt"></canvas></div></div>
 
-  let weeks='';
-  const cur=new Date(start);
-  while(cur<=end){
-    const wkStart=new Date(cur);
-    const weekNum=isoWeek(cur);
-    let days='';
-    for(let d=0;d<7;d++){
-      const ds=fmtIso(cur);
-      const s=shiftMap[ds];
-      const isToday=ds===today;
-      const isFuture=ds>today;
-      const type=s?(s.shiftType||'off'):'';
-      const dd=String(cur.getDate()).padStart(2,'0');
-      const cls=['sc-day'];
-      cls.push(type?'t-'+type:'empty');
-      if(isToday)cls.push('today');
-      if(isFuture)cls.push('future');
-      const label=type?`<span class="sc-label">${TYPE[type]||type}</span>`:'';
-      const time=s&&s.start?`<span class="sc-time">${s.start}–${s.end}</span>`:'';
-      days+=`<div class="${cls.join(' ')}"><span class="sc-dow">${dayNames[d]}</span><span class="sc-date">${dd}</span>${label}${time}</div>`;
-      cur.setDate(cur.getDate()+1);
-    }
-    const wkEnd=new Date(wkStart);wkEnd.setDate(wkEnd.getDate()+6);
-    const isThisWeek=fmtIso(wkStart)<=today&&today<=fmtIso(wkEnd);
-    const cap=wkStart.getMonth()===wkEnd.getMonth()
-      ? `${MON[wkStart.getMonth()]} ${wkStart.getDate()} – ${wkEnd.getDate()}`
-      : `${MON[wkStart.getMonth()]} ${wkStart.getDate()} – ${MON[wkEnd.getMonth()]} ${wkEnd.getDate()}`;
-    weeks+=`<div class="sc-week"${isThisWeek?' id="sc-this-week"':''}><div class="sc-wkcap"><b>Uke ${weekNum}</b><span>${cap}</span>${isThisWeek?' <span style="color:var(--accent);font-weight:600">· denne uka</span>':''}</div><div class="sc-grid">${days}</div></div>`;
+  <div class="section-head">Netter</div>
+  <div class="tbl-wrap"><table class="sl-table"><thead><tr><th>Natt til</th><th>Leggetid</th><th>Våknet</th><th>Søvn</th><th>Dyp</th><th>REM</th><th>Våken</th><th>Score</th><th>HRV</th><th>Hvilepuls</th></tr></thead>
+  <tbody>${[...N].reverse().map(n=>`<tr><td>${ddmmyyyy(n.date)}</td><td>${fmtClock(n.bed)}</td><td>${fmtClock(n.wake)}</td><td>${fmtDur(n.sleepH)}</td><td>${n.deepM!=null?Math.round(n.deepM)+' min':'—'}</td><td>${n.remM!=null?Math.round(n.remM)+' min':'—'}</td><td>${n.awakeM!=null?Math.round(n.awakeM)+' min':'—'}</td><td>${n.d.sleepScore??'—'}</td><td>${n.d.hrvAvg??'—'}</td><td>${n.d.rhr??'—'}</td></tr>`).join('')}</tbody></table></div>`;
+
+  const labels=N.map(n=>ddmm(n.date)),acc=sleepCss('--accent2'),acc1=sleepCss('--accent');
+  const tip={callbacks:{title:c=>ddmmyyyy(N[c[0].dataIndex].date)}};
+  // Sleep window: floating bars [bed, wake+24h] on a minutes axis (18:00 → 16:00)
+  destroyChartById('sl-window');
+  chartInstances['sl-window']=new Chart(document.getElementById('sl-window'),{type:'bar',
+    data:{labels,datasets:[{label:'Søvn',data:N.map(n=>n.bed!=null&&n.wake!=null?[n.bed,n.wake+1440]:null),backgroundColor:acc,borderRadius:4,borderSkipped:false,maxBarThickness:14}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},
+      tooltip:{callbacks:{...tip.callbacks,label:c=>{const n=N[c.dataIndex];return` ${fmtClock(n.bed)} → ${fmtClock(n.wake)} · ${fmtDur(n.sleepH)}`;}}}},
+      scales:{x:sleepAxis({grid:{display:false}}),
+        y:{reverse:true,min:Math.min(1320,Math.floor(Math.min(...N.map(n=>n.bed??1440))/60)*60),max:Math.max(1440+600,Math.ceil(Math.max(...N.map(n=>(n.wake??0)+1440))/60)*60),
+          ticks:{color:chartTick(),font:{size:10},stepSize:120,callback:v=>fmtClock(v)},grid:{color:chartGrid()}}}}});
+  // Duration + 7-night average
+  const avg7=N.map((n,i)=>mean(N.slice(Math.max(0,i-6),i+1).map(x=>x.sleepH)));
+  destroyChartById('sl-dur');
+  chartInstances['sl-dur']=new Chart(document.getElementById('sl-dur'),{type:'bar',
+    data:{labels,datasets:[
+      {type:'line',label:'7-netters snitt',data:avg7,borderColor:acc1,borderWidth:2,pointRadius:0,tension:.35},
+      {label:'Søvn per natt',data:N.map(n=>+n.sleepH.toFixed(2)),backgroundColor:acc+'99',borderRadius:4,maxBarThickness:14}]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:true,labels:{color:chartTick(),boxWidth:12,font:{size:11}}},tooltip:{callbacks:{...tip.callbacks,label:c=>` ${c.dataset.label}: ${fmtDur(c.parsed.y)}`}}},
+      scales:{x:sleepAxis({grid:{display:false}}),y:{min:0,ticks:{color:chartTick(),font:{size:10},callback:v=>v+' t'},grid:{color:chartGrid()}}}}});
+  // Stages (stacked minutes)
+  const st=[['deepM','Dyp','--st-deep'],['lightM','Lett','--st-light'],['remM','REM','--st-rem'],['awakeM','Våken','--st-awake']];
+  destroyChartById('sl-stages');
+  chartInstances['sl-stages']=new Chart(document.getElementById('sl-stages'),{type:'bar',
+    data:{labels,datasets:st.map(([k,l,c])=>({label:l,data:N.map(n=>n[k]!=null?Math.round(n[k]):null),backgroundColor:sleepCss(c),borderColor:sleepCss('--surface'),borderWidth:{top:1,bottom:0,left:0,right:0},maxBarThickness:14}))},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:true,labels:{color:chartTick(),boxWidth:12,font:{size:11}}},tooltip:{callbacks:{...tip.callbacks,label:c=>` ${c.dataset.label}: ${c.parsed.y} min`}}},
+      scales:{x:{...sleepAxis({grid:{display:false}}),stacked:true},y:{stacked:true,ticks:{color:chartTick(),font:{size:10},callback:v=>Math.round(v/60)+' t'},grid:{color:chartGrid()}}}}});
+}
+
+function renderSleepRelation(){
+  const el=document.getElementById('sleep-relation');if(!el)return;
+  const N=sleepNights(sleepRangeFrom());
+  const X=SL_SLEEP.find(m=>m.k===slX),Y=SL_HEALTH.find(m=>m.k===slY);
+  const chips=(list,cur,fn)=>`<div class="ins-pills">${list.map(m=>`<button class="ins-pill${m.k===cur?' active':''}" onclick="${fn}('${m.k}')">${m.l}</button>`).join('')}</div>`;
+  // Overview: every sleep × health pair, strongest first
+  const pairs=[];
+  SL_SLEEP.forEach(x=>SL_HEALTH.forEach(y=>{const p=N.map(n=>({x:x.f(n),y:y.f(n)})).filter(p=>p.x!=null&&p.y!=null);if(p.length>=8)pairs.push({x,y,n:p.length,r:insReg(p).r});}));
+  pairs.sort((a,b)=>Math.abs(b.r)-Math.abs(a.r));
+  const top=pairs.filter(p=>Math.abs(p.r)>=.25).slice(0,5);
+  const pts=N.map(n=>({x:X.f(n),y:Y.f(n),date:n.date})).filter(p=>p.x!=null&&p.y!=null);
+  let head='For få netter med begge målingene i perioden (trenger minst 8).',reg=null;
+  if(pts.length>=8){
+    reg=insReg(pts);const [lab]=insStrength(reg.r),a=Math.abs(reg.r);
+    const lc=t=>/^[A-ZÆØÅ]{2}/.test(t)?t:t.charAt(0).toLowerCase()+t.slice(1);
+    const dir=reg.r>0?'høyere':'lavere',xl=lc(X.l),yl=lc(Y.l);
+    const xMore=X.clock?(X.k==='bed'?'senere leggetid':'senere oppvåkning'):`mer/høyere ${xl}`;
+    head=a<.25?`Ingen tydelig sammenheng mellom <b>${xl}</b> og <b>${yl}</b> i perioden.`
+      :`Netter med <b>${xMore}</b> henger sammen med <b>${dir} ${yl}</b> — en ${lab.toLowerCase()} sammenheng (r = ${reg.r.toFixed(2)}, ${pts.length} netter).`;
   }
-
-  const legend=[['day','Dag'],['evening','Kveld'],['night','Natt'],['vacation','Ferie'],['off','Fri']];
-  el.innerHTML=`
-    <style>
-    .sc-top{display:flex;justify-content:space-between;align-items:center;gap:12px 18px;flex-wrap:wrap;margin-bottom:16px}
-    .sc-legend{display:flex;gap:6px 14px;flex-wrap:wrap}
-    .sc-lg{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);font-weight:500}
-    .sc-lg i{width:9px;height:9px;border-radius:3px;background:var(--sc-c);display:inline-block}
-    .t-day{--sc-c:#c9a84c}.t-evening{--sc-c:#7c6dfa}.t-night{--sc-c:#3f74c9}.t-vacation{--sc-c:#1fb39e}.t-off{--sc-c:#7aab88}.empty{--sc-c:transparent}
-    .sc-colhead{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;padding:0 2px 8px}
-    .sc-colhead span{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);text-align:center}
-    .sc-cal{display:flex;flex-direction:column;gap:18px}
-    .sc-wkcap{display:flex;align-items:baseline;gap:8px;margin-bottom:7px;font-size:11px}
-    .sc-wkcap b{font-weight:600;color:var(--text)}.sc-wkcap span{color:var(--muted)}
-    .sc-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
-    .sc-day{position:relative;min-height:66px;border:1px solid var(--border);border-radius:12px;padding:8px 9px;display:flex;flex-direction:column;gap:3px;background:var(--surface);overflow:hidden}
-    .sc-day::before{content:"";position:absolute;inset:0;background:var(--sc-c);opacity:.1;pointer-events:none}
-    .sc-day.empty{background:transparent;border-style:dashed;opacity:.45}
-    .sc-day.empty::before{display:none}
-    .sc-day.future{opacity:.72}
-    .sc-dow{display:none}
-    .sc-date{font-size:11px;font-weight:600;color:var(--muted);position:relative}
-    .sc-label{font-size:12px;font-weight:600;position:relative;display:flex;align-items:center;gap:6px;line-height:1.2}
-    .sc-label::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--sc-c);flex:0 0 auto}
-    .sc-time{font-size:10px;color:var(--muted);position:relative;font-variant-numeric:tabular-nums}
-    .sc-day.today{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
-    .sc-day.today .sc-date{color:var(--accent)}
-    @media(max-width:600px){
-      .sc-colhead{display:none}
-      .sc-cal{gap:20px}
-      .sc-grid{grid-template-columns:1fr;gap:6px}
-      .sc-day{flex-direction:row;align-items:center;min-height:0;padding:11px 14px;gap:11px}
-      .sc-day.empty{display:none}
-      .sc-dow{display:block;font-size:11px;font-weight:600;color:var(--muted);width:32px;position:relative;flex:0 0 auto}
-      .sc-date{font-size:15px;color:var(--text);width:24px;flex:0 0 auto}
-      .sc-label{margin-left:auto;font-size:13px}
-      .sc-time{min-width:104px;text-align:right;font-size:11px}
-    }
-    </style>
-    <div class="sc-top">
-      <div class="section-head inline" style="margin:0">Turnus</div>
-      <div class="sc-legend">${legend.map(([t,n])=>`<span class="sc-lg t-${t}"><i></i>${n}</span>`).join('')}</div>
-    </div>
-    <div class="sc-colhead">${dayNames.map(d=>`<span>${d}</span>`).join('')}</div>
-    <div class="sc-cal">${weeks}</div>
-  `;
+  el.innerHTML=`${rangeChips(slDays,'setSleepDays')}
+  ${top.length?`<div class="chart-card" style="margin-bottom:1.25rem"><div class="stat-label" style="margin-bottom:8px">Tydeligste sammenhenger i perioden</div>
+    ${top.map(p=>`<button class="sl-pair" onclick="slX='${p.x.k}';slY='${p.y.k}';renderSleep()"><span>${p.x.l} → ${p.y.l}</span><span class="sl-r">r ${p.r>0?'+':''}${p.r.toFixed(2)}</span></button>`).join('')}
+    <div class="range-note" style="margin:8px 0 0;text-align:left">r går fra −1 til +1. Over ±0,25 er verdt å se på, over ±0,5 er tydelig. Sammenheng betyr ikke nødvendigvis årsak.</div></div>`:''}
+  <div class="chart-card">
+    <div class="stat-label">Søvn</div>${chips(SL_SLEEP,slX,'setSleepX')}
+    <div class="stat-label" style="margin-top:8px">Helse samme dag</div>${chips(SL_HEALTH,slY,'setSleepY')}
+    <div class="ins-head" style="margin:12px 0">${head}</div>
+    <div style="height:260px;position:relative"><canvas id="sl-scatter" role="img" aria-label="${X.l} mot ${Y.l}"></canvas></div>
+  </div>`;
+  destroyChartById('sl-scatter');
+  if(!reg)return;
+  const line=[{x:reg.mnx,y:reg.intercept+reg.slope*reg.mnx},{x:reg.mxx,y:reg.intercept+reg.slope*reg.mxx}];
+  chartInstances['sl-scatter']=new Chart(document.getElementById('sl-scatter'),{type:'scatter',
+    data:{datasets:[{data:pts,backgroundColor:sleepCss('--accent')+'cc',borderColor:sleepCss('--surface'),borderWidth:2,pointRadius:5,pointHoverRadius:7},
+      {type:'line',data:line,borderColor:sleepCss('--muted'),borderWidth:1.5,pointRadius:0}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},
+      tooltip:{callbacks:{label:c=>c.raw.date?` ${ddmmyyyy(c.raw.date)}: ${X.l} ${X.fmt(c.raw.x)}, ${Y.l} ${Y.fmt(c.raw.y)}`:''}}},
+      scales:{x:{title:{display:true,text:X.l,color:chartTick()},ticks:{color:chartTick(),font:{size:10},callback:v=>X.clock?fmtClock(v):X.k==='sleepH'?v+' t':v},grid:{color:chartGrid()}},
+        y:{title:{display:true,text:Y.l,color:chartTick()},ticks:{color:chartTick(),font:{size:10}},grid:{color:chartGrid()}}}}});
 }
 
+// Period comparison. Defaults: A = last 14 days, B = the 14 days before.
+function slPreset(days){slA=[daysAgoIso(days-1),daysAgoIso(0)];slB=[daysAgoIso(2*days-1),daysAgoIso(days)];renderSleep();}
+function slSetDate(which,i,v){if(!v)return;(which==='A'?slA:slB)[i]=v;renderSleep();}
+function renderSleepCompare(){
+  const el=document.getElementById('sleep-compare');if(!el)return;
+  if(!slA){slA=[daysAgoIso(13),daysAgoIso(0)];slB=[daysAgoIso(27),daysAgoIso(14)];}
+  const A=sleepNights(slA[0],slA[1]),B=sleepNights(slB[0],slB[1]);
+  const inp=(w,i,v)=>`<input type="date" value="${v}" onchange="slSetDate('${w}',${i},this.value)" class="sl-date">`;
+  const rows=[...SL_SLEEP,...SL_HEALTH].map(m=>{
+    const a=mean(A.map(m.f)),b=mean(B.map(m.f));
+    let diff='—',cls='';
+    if(a!=null&&b!=null){
+      const d=a-b;
+      if(m.clock){const mins=Math.round(d);diff=mins===0?'likt':`${Math.abs(mins)} min ${mins<0?'tidligere':'senere'}`;}
+      else if(m.k==='sleepH'){const mins=Math.round(d*60);diff=`${mins>0?'+':mins<0?'−':''}${Math.abs(mins)} min`;}
+      else{const sg=d>0?'+':d<0?'−':'',rel=b?Math.abs(d/b*100):0;diff=`${sg}${m.fmt(Math.abs(d))} (${sg}${rel.toFixed(0)} %)`;}
+      const good=m.better*d;cls=m.better&&Math.abs(d)>1e-9?(good>0?'good':'bad'):'';
+    }
+    return `<tr><td>${m.l}</td><td>${a!=null?m.fmt(a):'—'}</td><td>${b!=null?m.fmt(b):'—'}</td><td class="sl-diff ${cls}">${diff}</td></tr>`;
+  }).join('');
+  el.innerHTML=`<div class="chart-card" style="margin-bottom:1.25rem">
+    <div class="range-note" style="text-align:left;margin:0 0 10px">Har du endret noe — tidligere leggetid, mindre skjerm, ingen koffein etter kl. 14? Sett <b>A</b> til perioden etter endringen og <b>B</b> til perioden før.</div>
+    <div class="sl-periods">
+      <div><div class="stat-label">A (etter)</div>${inp('A',0,slA[0])} – ${inp('A',1,slA[1])}<div class="stat-sub">${A.length} netter</div></div>
+      <div><div class="stat-label">B (før)</div>${inp('B',0,slB[0])} – ${inp('B',1,slB[1])}<div class="stat-sub">${B.length} netter</div></div>
+    </div>
+    <div class="range-chips" style="justify-content:flex-start;margin:10px 0 0">
+      <button class="range-chip" onclick="slPreset(7)">7 d mot 7 d før</button><button class="range-chip" onclick="slPreset(14)">14 d mot 14 d før</button><button class="range-chip" onclick="slPreset(30)">30 d mot 30 d før</button></div>
+  </div>
+  ${A.length&&B.length?`<div class="tbl-wrap"><table class="sl-table sl-compare"><thead><tr><th>Måling</th><th>A</th><th>B</th><th>Endring A mot B</th></tr></thead><tbody>${rows}</tbody></table></div>
+  <div class="range-note" style="margin-top:8px">Grønt = bedre, rødt = dårligere. Små forskjeller over få netter kan være tilfeldige; se etter endringer som holder seg over minst 1–2 uker.</div>`
+  :'<div class="empty-note">Begge periodene må ha søvndata.</div>'}`;
+}
 
 function renderActSummary(){
   const runs=activities.filter(a=>a.type==='running').sort((a,b)=>a.date.localeCompare(b.date));
@@ -1594,19 +1543,25 @@ function getCompRows(){
   return all.filter(r=>r.date>=start&&r.date<=end);
 }
 
+let compDays=30;                            // Kropp: standard siste måned
 function initCompDates(){
-  const d=new Date();
-  compEndDate=d.toISOString().slice(0,10);
-  compStartDate='2026-06-01';
+  compEndDate=daysAgoIso(0);
+  compStartDate=daysAgoIso(compDays-1);
+}
+function setCompDays(d){
+  compDays=d;compEndDate=daysAgoIso(0);
+  const first=[...healthData].filter(r=>r.weight!=null).sort((a,b)=>a.date.localeCompare(b.date))[0];
+  compStartDate=d?daysAgoIso(d-1):(first?first.date:compEndDate);
+  renderHealthComp();
 }
 
 function applyCompStart(){
   const d=parseDate(document.getElementById('comp-start').value);
-  if(d){compStartDate=d;renderHealth();}
+  if(d){compStartDate=d;compDays=null;renderHealthComp();}
 }
 function applyCompEnd(){
   const d=parseDate(document.getElementById('comp-end').value);
-  if(d){compEndDate=d;renderHealth();}
+  if(d){compEndDate=d;compDays=null;renderHealthComp();}
 }
 
 function initHealthDates(){
@@ -1661,41 +1616,31 @@ function renderHealth(){
 
   const scoreColor=v=>v>=80?'var(--green)':v>=60?'var(--amber)':'var(--red)';
   const readBadge=v=>v>=70?'badge-good':v>=40?'badge-warn':'badge-bad';
+  // Garmin readiness feedback code, e.g. "POOR_RT_HIGH_SS_GOOD_OR_MOD_SLEEP_HISTORY_NEG":
+  //   <readiness level> RT <recovery time left> SS <sleep score> [modifiers]
+  // or <level> HRV <LOW|UNBALANCED>, <level> NAP. Translated into plain Norwegian.
   const readinessFeedback=t=>{
     if(!t)return'';
     const c=t.toUpperCase().replace(/ /g,'_');
     if(c==='UNKNOWN')return'Data ikke tilgjengelig ennå';
-
     const parts=[];
-
-    // Recovery time
-    if(c.startsWith('LOW_RT'))parts.push('Lav restitusjon');
-    else if(c.startsWith('MOD_RT'))parts.push('Moderat restitusjon');
-    else if(c.startsWith('HIGH_RT'))parts.push('God restitusjon');
-
-    // Sleep score
-    if(c.includes('MOD_OR_LOW_SS'))parts.push('moderat til lav Sleep Score');
-    else if(c.includes('HIGH_SS'))parts.push('høy Sleep Score');
-    else if(c.includes('GOOD_SS'))parts.push('god Sleep Score');
-    else if(c.includes('MOD_SS'))parts.push('moderat Sleep Score');
-    else if(c.includes('LOW_SS'))parts.push('lav Sleep Score');
-    else if(c.includes('SS_UNKNOWN')||c.includes('AVAILABLE_SS_UNKNOWN')||c.includes('UNKNOWN_SLEEP'))parts.push('søvndata venter');
-
-    // Standalone overall quality (at end, not part of RT/SS tokens)
-    if(/_(POOR|GOOD|MOD)$/.test(c)){
-      const q=c.match(/_(POOR|GOOD|MOD)$/)[1];
-      parts.push(q==='POOR'?'dårlig totalkvalitet':q==='GOOD'?'god totalkvalitet':'moderat totalkvalitet');
+    const rt=(c.match(/_RT_(HIGHEST|HIGH|MOD_OR_LOW|MOD|LOW)(?=_SS|_|$)/)||[])[1];
+    const ss=(c.match(/_SS_(GOOD_OR_MOD|MOD_OR_LOW|AVAILABLE|UNKNOWN|GOOD|MOD|POOR|LOW)(?=_|$)/)||[])[1];
+    if(rt==='HIGHEST'&&ss==='AVAILABLE')parts.push('godt restituert og god søvn');
+    else{
+      if(rt)parts.push({HIGH:'mye restitusjonstid igjen',MOD:'noe restitusjonstid igjen',MOD_OR_LOW:'lite til noe restitusjonstid igjen',LOW:'lite restitusjonstid igjen',HIGHEST:'godt restituert'}[rt]);
+      if(ss)parts.push({GOOD:'god søvn',GOOD_OR_MOD:'grei søvn',MOD:'middels søvn',MOD_OR_LOW:'middels til dårlig søvn',POOR:'dårlig søvn',LOW:'dårlig søvn',UNKNOWN:'søvndata mangler',AVAILABLE:'søvndata klar'}[ss]);
     }
-
-    // Modifiers
-    if(c.includes('AWAKE_NEG'))parts.push('⚠ tung ved oppvåkning');
-    if(c.includes('ACWR_NEG'))parts.push('⚠ høy Training Load');
-    if(c.includes('SLEEP_HISTORY_NEG'))parts.push('⚠ dårlig søvntrend i det siste');
-    if(c.includes('SLEEP_HISTORY_POS'))parts.push('god søvntrend i det siste');
-
-    if(parts.length)return parts.join(' · ');
-
-    // Last resort: clean split
+    if(/_HRV_LOW/.test(c))parts.push('HRV lavere enn normalt');
+    if(/_HRV_UNBALANCED/.test(c))parts.push('HRV i ubalanse');
+    if(/_NAP/.test(c))parts.push('løftet av en høneblund');
+    if(c.includes('ACWR_NEG'))parts.push('⚠ høy belastning siste uke (ACWR)');
+    if(c.includes('ACWR_POS'))parts.push('belastningen er i god balanse');
+    if(c.includes('SLEEP_HISTORY_NEG'))parts.push('⚠ for lite søvn siste netter');
+    if(c.includes('SLEEP_HISTORY_POS'))parts.push('god søvn siste netter');
+    if(c.includes('STRESS_HISTORY_NEG'))parts.push('⚠ mye stress siste dager');
+    if(c.includes('AWAKE_NEG'))parts.push('⚠ lenge siden du våknet');
+    if(parts.length){const s0=parts.join(' · ');return s0.charAt(0).toUpperCase()+s0.slice(1);}
     return c.split('_').map(w=>w.charAt(0)+w.slice(1).toLowerCase()).join(' ');
   };
   const stressBadge=v=>v<=25?'badge-good':v<=50?'badge-warn':'badge-bad';
@@ -1753,7 +1698,7 @@ function renderHealth(){
   }
 
   // Endurance score scale: 3570 (base) to 10560 (max), classes at 5100/5800/6600/7300/8100/8800
-  const endClass=d.enduranceScore>=8800?'Elite':d.enduranceScore>=8100?'Superior':d.enduranceScore>=7300?'Expert':d.enduranceScore>=6600?'Well-trained':d.enduranceScore>=5800?'Trained':d.enduranceScore>=5100?'Intermediate':'Beginner';
+  const endClass=ENDCLASS_NB[(d.enduranceScore>=8800?'Elite':d.enduranceScore>=8100?'Superior':d.enduranceScore>=7300?'Expert':d.enduranceScore>=6600?'Well-trained':d.enduranceScore>=5800?'Trained':d.enduranceScore>=5100?'Intermediate':'Beginner')]||'—';
 
   // kcal donut data
   const activeKcal=isToday?d.activeKcal:Math.round(avgg(hrows,'activeKcal'));
@@ -1798,7 +1743,7 @@ function renderHealth(){
       const sign=diff>0?'+':'';
       return`<div class="delta-card"><div class="stat-label">${label}</div><div class="delta-val">${cur}${unit}</div>${diff!==null&&diff!==0?`<div class="delta-chg" style="color:${clr}">${sign}${diff}${unit} vs forrige uke</div>`:'<div class="delta-chg" style="color:var(--muted)">Ingen tidligere data</div>'}</div>`;
     };
-    const deltaHtmlBlock=`<div class="section-head">Denne uka vs forrige uke</div><div class="delta-grid">${deltaHtml('rhr','Hvilepuls','',true)}${deltaHtml('hrvAvg','HRV','')}${deltaHtml('sleepScore','Sleep Score','')}${deltaHtml('steps','Skritt','')}${deltaHtml('bbHigh','Body Battery høy','')}${deltaHtml('avgStress','Snitt Stress','',true)}</div>`;
+    const deltaHtmlBlock=`<div class="section-head">Denne uka vs forrige uke</div><div class="delta-grid">${deltaHtml('rhr','Hvilepuls','',true)}${deltaHtml('hrvAvg','HRV','')}${deltaHtml('sleepScore','Søvnscore','')}${deltaHtml('steps','Skritt','')}${deltaHtml('bbHigh','Body Battery høy','')}${deltaHtml('avgStress','Snitt Stress','',true)}</div>`;
   // Render new trend sections into sub-tab
   setTimeout(()=>{
     renderHealthTrends();
@@ -1810,7 +1755,7 @@ function renderHealth(){
     <div class="sleep-card">
       <div class="sleep-top">
         <div>
-          <div style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">Sleep Score</div>
+          <div style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">Søvnscore</div>
           <div class="sleep-score-big" style="color:${scoreColor(d.sleepScore)}">${d.sleepScore}</div>
         </div>
         <div>
@@ -1839,11 +1784,11 @@ function renderHealth(){
         <span><span class="sleep-dot" style="background:#7aab88"></span>REM ${remPct}%</span>
         <span><span class="sleep-dot" style="background:#60a5fa"></span>Lett ${lightPct}%</span>
         <span><span class="sleep-dot" style="background:#444"></span>Våken ${awakePct}%</span>
-        <span style="margin-left:6px">Pust: ${n(d.avgResp)} brpm</span>
+        <span style="margin-left:6px">Pust: ${n(d.avgResp)} /min</span>
       </div>
     </div>`:`
     <div class="stat-grid">
-      <div class="stat-card"><div class="stat-label">Sleep Score (snitt)</div><div class="stat-value">${A('sleepScore')}</div></div>
+      <div class="stat-card"><div class="stat-label">Søvnscore (snitt)</div><div class="stat-value">${A('sleepScore')}</div></div>
       <div class="stat-card"><div class="stat-label">Søvnlengde (snitt)</div><div class="stat-value" style="font-size:18px">${(()=>{const v=avgg(hrows,'sleepSec');return v?`${Math.floor(v/3600)}h ${Math.round((v%3600)/60)}m`:'—'})()}</div></div>
     </div>`}
 
@@ -1861,7 +1806,7 @@ function renderHealth(){
         <div class="rf-main">
           <div class="stat-label">Training Readiness</div>
           <div class="rf-score" style="color:${clr}">${A('trainingReadiness')}<span class="rf-of"> / 100</span></div>
-          <div class="rf-level">${isToday&&d.trainingReadinessLevel?d.trainingReadinessLevel:'Restitusjonsstatus'}</div>
+          <div class="rf-level">${isToday&&d.trainingReadinessLevel?readinessNb(d.trainingReadinessLevel):'Restitusjonsstatus'}</div>
         </div>
         <div class="rf-meter">
           <div class="rf-bar"><i style="width:${Math.max(3,Math.min(100,v))}%;background:${rc}"></i></div>
@@ -1876,7 +1821,7 @@ function renderHealth(){
         <div class="stat-label">HRV i natt</div>
         <div class="stat-value" style="color:var(--accent2)">${A('hrvAvg')}</div>
         <div class="stat-sub">Ukesnitt: ${A('hrvWeeklyAvg')}</div>
-        ${isToday&&d.hrvStatus?`<div class="stat-badge ${d.hrvStatus==='BALANCED'?'badge-good':'badge-warn'}">${d.hrvStatus}</div>`:''}
+        ${isToday&&d.hrvStatus?`<div class="stat-badge ${d.hrvStatus==='BALANCED'?'badge-good':'badge-warn'}">${nbLabel(HRVSTATUS_NB,d.hrvStatus)}</div>`:''}
       </div>
       <div class="stat-card">
         <div class="stat-label">Body Battery</div>
@@ -1885,14 +1830,14 @@ function renderHealth(){
         <div class="stat-sub" style="margin-top:4px">+${A('bbCharged')} ladet  /  -${A('bbDrained')} tappet</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Recovery Time</div>
+        <div class="stat-label">Restitusjonstid</div>
         <div class="stat-value">${A('recoveryTimeHrs')}<span style="font-size:14px;color:var(--muted)">h</span></div>
         <div class="stat-sub">Til neste harde økt</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Snitt Stress</div>
         <div class="stat-value" style="color:${isToday?scoreColor(100-d.avgStress):'var(--text)'}">${A('avgStress')}</div>
-        ${isToday&&d.avgStress!=null?`<div class="stat-badge ${stressBadge(d.avgStress)}">${d.avgStress<=25?'LOW':d.avgStress<=50?'MODERATE':'HIGH'}</div>`:''}
+        ${isToday&&d.avgStress!=null?`<div class="stat-badge ${stressBadge(d.avgStress)}">${d.avgStress<=25?'Lavt':d.avgStress<=50?'Moderat':'Høyt'}</div>`:''}
       </div>
       <div class="stat-card">
         <div class="stat-label">Hvilepuls</div>
@@ -1901,7 +1846,7 @@ function renderHealth(){
       </div>
     </div>
 
-    <div class="section-head">Aktivitet & Load</div>
+    <div class="section-head">Aktivitet og belastning</div>
     ${(()=>{
       const sv=stepsVal!=null?stepsVal:0;
       const pct=stepsGoal?Math.max(2,Math.min(100,Math.round(sv/stepsGoal*100))):0;
@@ -1945,47 +1890,47 @@ function renderHealth(){
         </div>
       </div>
       <div class="intensity-card">
-        <div class="stat-label">Intensity Minutes</div>
+        <div class="stat-label">Intensitetsminutter</div>
         <div class="im-num" style="color:${(imWeekly||0)>=imGoal?'var(--green)':(imWeekly||0)>=(imGoal*0.6)?'var(--amber)':'var(--text)'}">${imWeekly!=null?imWeekly:imToday_}</div>
         <div class="im-bar-track"><div class="im-bar-fill" style="width:${imPct}%"></div></div>
-        <div style="font-size:11px;color:var(--muted)">Weekly: ${imWeekly!=null?imWeekly:'—'} / ${imGoal} ${imPct>=100?'✓':''}</div>
+        <div style="font-size:11px;color:var(--muted)">Denne uka: ${imWeekly!=null?imWeekly:'—'} / ${imGoal} ${imPct>=100?'✓':''}</div>
         <div style="font-size:11px;color:var(--muted);margin-top:2px">I dag: ${imToday_} min</div>
       </div>
     </div>
 
-    <div class="section-head">Training Status</div>
+    <div class="section-head">Treningsstatus</div>
     ${(()=>{
       const ts=(()=>{const t=d.trainingStatus||gLatest('trainingStatus');if(!t)return'—';return typeof t==='object'?t.trainingStatusKey||'—':t;})();
       return `<div class="metric-hero">
         <div class="rf-main">
-          <div class="stat-label">Training Status</div>
-          <div class="rf-score rf-word" style="color:${/PRODUCTIVE|PEAKING|MAINTAINING/.test(ts)&&!/UNPRODUCTIVE/.test(ts)?'var(--green)':/STRAINED|OVERREACHING/.test(ts)?'var(--red)':/UNPRODUCTIVE|DETRAINING/.test(ts)?'var(--amber)':'var(--text)'}">${(''+ts).replace(/_/g,' ')}</div>
+          <div class="stat-label">Treningsstatus</div>
+          <div class="rf-score rf-word" style="color:${/PRODUCTIVE|PEAKING|MAINTAINING/.test(ts)&&!/UNPRODUCTIVE/.test(ts)?'var(--green)':/STRAINED|OVERREACHING/.test(ts)?'var(--red)':/UNPRODUCTIVE|DETRAINING/.test(ts)?'var(--amber)':'var(--text)'}">${nbLabel(TSTATUS_NB,ts)}</div>
           <div class="rf-level">Sport: Løping</div>
         </div>
         <div class="hero-pair">
           <div><div class="stat-label">VO₂ Max</div><div class="hero-pair-v" style="color:var(--accent2)">${GL('vo2max')}<span> ml/kg/min</span></div></div>
-          <div><div class="stat-label">Fitness Age</div><div class="hero-pair-v" style="color:var(--green)">${GL('fitnessAge',1)}<span> vs ${ageNow()} faktisk</span></div></div>
+          <div><div class="stat-label">Kondisjonsalder</div><div class="hero-pair-v" style="color:var(--green)">${GL('fitnessAge',1)}<span> vs ${ageNow()} faktisk</span></div></div>
         </div>
       </div>`;
     })()}
     <div class="stat-grid training-support">
       <div class="stat-card">
-        <div class="stat-label">Endurance Score</div>
+        <div class="stat-label">Utholdenhetsscore</div>
         <div class="stat-value" style="font-size:20px">${GL('enduranceScore')}</div>
         <div class="stat-sub" style="color:var(--accent2);font-weight:600">${endClass}</div>
 
       </div>
       <div class="stat-card">
-        <div class="stat-label">ACWR</div>
+        <div class="stat-label">ACWR · belastningsbalanse</div>
         <div class="stat-value" style="color:${isToday&&d.acwr>1.5?'var(--red)':isToday&&d.acwr>1.3?'var(--amber)':'var(--text)'}">${isToday?n(d.acwr,2):n(avgg(hrows,'acwr'),2)}</div>
-        <div class="stat-sub">Acute ${A('acuteLoad')}  /  Chronic ${A('chronicLoad')}</div>
-        <div class="acwr-explain">&lt;0.8 undertrening  /  0.8-1.3 optimalt  /  &gt;1.5 skaderisiko</div>
+        <div class="stat-sub">Akutt (7 d) ${A('acuteLoad')} / kronisk (28 d) ${A('chronicLoad')}</div>
+        <div class="acwr-explain">Siste ukes belastning delt på snittet for siste 4 uker. Under 0,8 = lite belastning · 0,8–1,3 = god balanse · over 1,5 = økt skaderisiko.</div>
       </div>
       <div class="stat-card" style="grid-column:span 2">
-        <div class="stat-label">Lactate Threshold</div>
+        <div class="stat-label">Laktatterskel</div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-top:6px">
           <div>
-            <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px">HR</div>
+            <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px">Puls</div>
             <div style="font-size:20px;font-weight:700">${GL('lactateHR')}<span style="font-size:12px;color:var(--muted)"> bpm</span></div>
           </div>
           <div>
@@ -2004,13 +1949,13 @@ function renderHealth(){
       </div>
     </div>
 
-    <div class="section-head">Training Load Focus</div>
+    <div class="section-head">Belastningsfokus · siste 4 uker</div>
     <div class="load-section">
       ${(()=>{
         const vals=[
-          {lbl:'Aerobic Low',val:(d.aerobicLowLoad??gLatest('aerobicLowLoad')??avgg(hrows,'aerobicLowLoad')),min:130,max:342},
-          {lbl:'Aerobic High',val:(d.aerobicHighLoad??gLatest('aerobicHighLoad')??avgg(hrows,'aerobicHighLoad')),min:256,max:467},
-          {lbl:'Anaerobic',val:(d.anaerobicLoad??gLatest('anaerobicLoad')??avgg(hrows,'anaerobicLoad')),min:0,max:211}
+          {lbl:'Lav aerob',val:(d.aerobicLowLoad??gLatest('aerobicLowLoad')??avgg(hrows,'aerobicLowLoad')),min:gLatest('aerobicLowMin')??130,max:gLatest('aerobicLowMax')??342},
+          {lbl:'Høy aerob',val:(d.aerobicHighLoad??gLatest('aerobicHighLoad')??avgg(hrows,'aerobicHighLoad')),min:gLatest('aerobicHighMin')??256,max:gLatest('aerobicHighMax')??467},
+          {lbl:'Anaerob',val:(d.anaerobicLoad??gLatest('anaerobicLoad')??avgg(hrows,'anaerobicLoad')),min:gLatest('anaerobicMin')??0,max:gLatest('anaerobicMax')??211}
         ];
         const cap=700;
         return vals.map(v=>{
@@ -2032,7 +1977,7 @@ function renderHealth(){
             '<div style="position:absolute;top:-3px;bottom:-3px;left:'+rangeLow+'%;width:2px;background:var(--text);opacity:.5;z-index:3"></div>'+
             '<div style="position:absolute;top:-3px;bottom:-3px;left:'+rangeHigh+'%;width:2px;background:var(--text);opacity:.5;z-index:3"></div>'+
             '</div><span class="load-val" style="color:'+statusColor+'">'+(vv!=null?vv:'—')+' <span style="color:var(--muted);font-size:10px">('+v.min+'\u2013'+v.max+')</span></span></div>';
-        }).join('')+'<div class="load-legend2"><span><i style="background:var(--muted);opacity:.5"></i>Under</span><span><i style="background:var(--score-good)"></i>Optimalt</span><span><i style="background:var(--z5)"></i>Over</span></div>'+'<div class="load-focus-label" style="text-align:center">Fokus: '+(isToday&&d.loadFocus?d.loadFocus.replace(/_/g,' '):'—')+'</div>';
+        }).join('')+'<div class="load-legend2"><span><i style="background:var(--muted);opacity:.5"></i>Under</span><span><i style="background:var(--score-good)"></i>Optimalt</span><span><i style="background:var(--z5)"></i>Over</span></div>'+'<div class="load-focus-label" style="text-align:center">Fokus: '+(isToday&&d.loadFocus?loadFocusNb(d.loadFocus):'—')+'</div>';
       })()}
     </div>
 
@@ -2047,7 +1992,7 @@ function renderHealth(){
       const bcDateLbl=bcEntry.date.split('-').reverse().slice(0,2).join('/');
       const bv=(k,dec=1)=>bcEntry[k]!=null?(+bcEntry[k]).toFixed(dec):'—';
       return`
-      <div class="section-head" style="margin-top:1.5rem">Body Composition
+      <div class="section-head" style="margin-top:1.5rem">Kroppssammensetning
         ${bcStale?`<span style="font-size:10px;font-weight:400;color:var(--muted);margin-left:8px">siste måling ${bcDateLbl}</span>`:''}
       </div>
       <div class="stat-grid">
@@ -2064,10 +2009,10 @@ function renderHealth(){
     ${!isToday&&hrows.length>1?`
     <div class="section-head" style="margin-top:1.5rem">Helsetrender</div>
     <div class="chart-card" style="margin-bottom:10px">
-      <div style="font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px">HRV &amp; Sleep Score</div>
+      <div style="font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px">HRV &amp; søvnscore</div>
       <div style="height:160px;position:relative"><canvas id="chartHrvSleep" role="img" aria-label="HRV- og søvntrend">HRV- og søvntrend.</canvas></div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+    <div class="chart-pair" style="margin-bottom:10px">
       <div class="chart-card">
         <div style="font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px">Body Battery — morgen</div>
         <div style="height:120px;position:relative"><canvas id="chartBB" role="img" aria-label="Body Battery-trend">Body Battery-trend.</canvas></div>
@@ -2141,16 +2086,31 @@ function renderHealth(){
 const INS_ZLBL=()=>[1,2,3,4,5].map(i=>`Z${i} ${zRange(i)}`);
 const INS_ZVAR=['--z1','--z2','--z3','--z4','--z5'];
 const INS_DRIVERS=[
-  {key:'hrvAvg',label:'HRV',unit:' ms'},{key:'avgStress',label:'Snitt Stress',unit:''},
-  {key:'sleepScore',label:'Sleep score',unit:''},{key:'sleepH',label:'Søvntimer',unit:' h'},
-  {key:'remH',label:'REM-søvn',unit:' h'},{key:'rhr',label:'Hvilepuls',unit:' bpm'},
-  {key:'shift',label:'Vakt (dagen før)',cat:true}
+  {key:'hrvAvg',label:'HRV',unit:' ms'},{key:'rhr',label:'Hvilepuls',unit:' bpm'},
+  {key:'prevLoad',label:'Belastning dagen før',unit:''},{key:'sleepH',label:'Søvntimer',unit:' t'},
+  {key:'sleepScore',label:'Søvnscore',unit:''},{key:'avgStress',label:'Snitt stress (dagen før)',unit:''}
 ];
-const INS_SHIFT_NICE={day:'Dag',evening:'Kveld',night:'Natt',off:'Fri',vacation:'Ferie'};
-const INS_SHIFT_COL={day:'#c9a84c',evening:'#7c6dfa',night:'#3f74c9',off:'#7aab88',vacation:'#1fb39e'};
+// Garmin readiness levels → Norwegian
+const READINESS_NB={PRIME:'Topp',HIGH:'Høy',MODERATE:'Moderat',LOW:'Lav',POOR:'Dårlig'};
+const TSTATUS_NB={PRODUCTIVE:'Produktiv',MAINTAINING:'Vedlikehold',PEAKING:'Toppform',RECOVERY:'Restitusjon',UNPRODUCTIVE:'Uproduktiv',OVERREACHING:'Overbelastet',STRAINED:'Anstrengt',DETRAINING:'Formtap',NO_STATUS:'Ingen status'};
+const HRVSTATUS_NB={BALANCED:'Balansert',UNBALANCED:'Ubalansert',LOW:'Lav',POOR:'Dårlig'};
+const ENDCLASS_NB={Beginner:'Nybegynner',Intermediate:'Middels',Trained:'Trent','Well-trained':'Godt trent',Expert:'Ekspert',Superior:'Overlegen',Elite:'Elite'};
+const nbLabel=(map,v)=>v==null?'—':(map[String(v).toUpperCase().replace(/ /g,'_')]||map[v]||String(v).replace(/_/g,' ').toLowerCase());
+// Garmin load-focus feedback → Norwegian
+const LOADFOCUS_NB={'AEROBIC LOW SHORTAGE':'for lite lav aerob trening','AEROBIC HIGH SHORTAGE':'for lite høy aerob trening','ANAEROBIC SHORTAGE':'for lite anaerob trening','AEROBIC LOW FOCUS':'fokus på lav aerob','AEROBIC HIGH FOCUS':'fokus på høy aerob','ANAEROBIC FOCUS':'fokus på anaerob','BALANCED':'balansert','ABOVE TARGETS':'over målområdene','BELOW TARGETS':'under målområdene'};
+const loadFocusNb=v=>v?(LOADFOCUS_NB[String(v).toUpperCase().replace(/_/g,' ')]||String(v).replace(/_/g,' ').toLowerCase()):'—';
+const readinessNb=l=>l?(READINESS_NB[String(l).toUpperCase().replace(/ /g,'_')]||String(l).toLowerCase()):'';
+let insDays=90,insIntDays=30,insDriver='hrvAvg';
+function setInsDays(d){insDays=d;renderInsights();}
+function setInsIntDays(d){insIntDays=d;renderInsights();}
+const prevIso=ds=>{const t=new Date(ds+'T12:00');t.setDate(t.getDate()-1);return isoDate(t);};
+let _loadByDate=null;
+function loadByDate(){if(!_loadByDate){_loadByDate={};activities.forEach(a=>{if(a.date&&a.load)_loadByDate[a.date]=(_loadByDate[a.date]||0)+a.load;});}return _loadByDate;}
 function insCss(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
 function insVal(r,key){
   if(key==='sleepH')return r.sleepSec?r.sleepSec/3600:null;
+  if(key==='prevLoad')return loadByDate()[prevIso(r.date)]||0;
+  if(key==='avgStress'){const p=healthData.find(h=>h.date===prevIso(r.date));return p&&p.avgStress!=null?p.avgStress:null;}
   if(key==='remH')return r.remSec!=null?r.remSec/3600:null;
   return r[key]!=null?r[key]:null;
 }
@@ -2167,38 +2127,13 @@ function insRenderDriver(key){
   const el=document.getElementById('ins-d-chart');
   const meterEl=document.querySelector('#nav-insights .ins-meter');
 
-  // Categorical driver: shift type the day before (night-before shift → morning readiness)
-  if(drv.cat){
-    if(meterEl)meterEl.style.display='none';
-    const sm={};(typeof shiftsData!=='undefined'?shiftsData:[]).forEach(s=>{sm[s.date]=s.shiftType;});
-    const prevDay=ds=>{const t=new Date(ds+'T00:00:00');t.setDate(t.getDate()-1);return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;};
-    const groups={};
-    healthData.forEach(d=>{if(d.trainingReadiness==null)return;const stp=sm[prevDay(d.date)];if(!stp)return;(groups[stp]=groups[stp]||[]).push(d.trainingReadiness);});
-    const order=['day','evening','night','off','vacation'];
-    const labels=order.filter(t=>groups[t]&&groups[t].length);
-    const avgs=labels.map(t=>groups[t].reduce((a,b)=>a+b,0)/groups[t].length);
-    const counts=labels.map(t=>groups[t].length);
-    if(labels.length>=2){
-      const pr=labels.map((t,i)=>({t,a:avgs[i]}));
-      const best=pr.reduce((m,p)=>p.a>m.a?p:m),worst=pr.reduce((m,p)=>p.a<m.a?p:m);
-      document.getElementById('ins-d-head').innerHTML=`Readiness morgenen etter en <b class="good">${INS_SHIFT_NICE[best.t].toLowerCase()}</b>-vakt er i snitt <b>${best.a.toFixed(0)}</b>, mot <b class="bad">${worst.a.toFixed(0)}</b> etter ${worst.t==='off'?'en fridag':'en '+INS_SHIFT_NICE[worst.t].toLowerCase()+'svakt'}. Få målinger så langt — verdt å følge med på etter hvert som flere netter logges.`;
-    }else{
-      document.getElementById('ins-d-head').textContent='Ikke nok readiness-data koblet til vakter ennå.';
-    }
-    if(chartInstances.insD){try{chartInstances.insD.destroy()}catch(e){}}
-    chartInstances.insD=new Chart(el,{type:'bar',
-      data:{labels:labels.map(t=>INS_SHIFT_NICE[t]),datasets:[{data:avgs,backgroundColor:labels.map(t=>INS_SHIFT_COL[t]),borderWidth:0,borderRadius:6,maxBarThickness:90}]},
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},
-        tooltip:{callbacks:{label:c=>`snitt readiness ${c.parsed.y.toFixed(0)} · ${counts[c.dataIndex]} dag${counts[c.dataIndex]===1?'':'er'}`}}},
-        scales:{x:{grid:{display:false},ticks:{color:tick}},y:{min:0,max:100,grid:{color:grid},ticks:{color:tick},title:{display:true,text:'Snitt readiness (morgenen etter)',color:tick}}}}});
-    return;
-  }
-
   if(meterEl)meterEl.style.display='';
-  const pts=healthData.filter(d=>insVal(d,key)!=null&&d.trainingReadiness!=null)
-    .map(d=>({x:insVal(d,key),y:d.trainingReadiness,date:d.date}));
-  if(pts.length<3)return;
-  const s=insReg(pts),st=insStrength(s.r),sLab=st[0],a=Math.abs(s.r),name=drv.label.toLowerCase();
+  insDriver=key;
+  const from=insDays?daysAgoIso(insDays-1):'';
+  const pts=healthData.filter(d=>d.date>=from&&insVal(d,key)!=null&&morningReadiness(d)!=null)
+    .map(d=>({x:insVal(d,key),y:morningReadiness(d),date:d.date}));
+  if(pts.length<5){document.getElementById('ins-d-head').textContent='For få dager med data i perioden.';if(chartInstances.insD){try{chartInstances.insD.destroy()}catch(e){}}return;}
+  const s=insReg(pts),st=insStrength(s.r),sLab=st[0],a=Math.abs(s.r),name=/^[A-ZÆØÅ]{2}/.test(drv.label)?drv.label:drv.label.charAt(0).toLowerCase()+drv.label.slice(1);
   document.getElementById('ins-d-dot').style.left=((s.r+1)/2*100)+'%';
   let h;
   if(a<.25)h=`Morgener der <b>${name}</b> er høyere, er readiness omtrent den samme — <b class="bad">den sier nesten ingenting</b> om hvor restituert du er.`;
@@ -2213,9 +2148,9 @@ function insRenderDriver(key){
       {type:'line',data:line,borderColor:insCss('--muted'),borderWidth:1.5,borderDash:[5,4],pointRadius:0}
     ]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},
-      tooltip:{callbacks:{label:c=>c.raw.date?`${fmtDate(c.raw.date)}: ${drv.label} ${(+c.raw.x).toFixed(drv.key==='sleepH'||drv.key==='remH'?1:0)}${drv.unit}, readiness ${c.raw.y}`:''}}},
+      tooltip:{callbacks:{label:c=>c.raw.date?`${fmtDate(c.raw.date)}: ${drv.label} ${(+c.raw.x).toFixed(drv.key==='sleepH'?1:0)}${drv.unit}, readiness ${c.raw.y}`:''}}},
       scales:{x:{title:{display:true,text:drv.label+drv.unit,color:tick},grid:{color:grid},ticks:{color:tick}},
-              y:{title:{display:true,text:'Training readiness',color:tick},min:0,max:100,grid:{color:grid},ticks:{color:tick}}}}});
+              y:{title:{display:true,text:'Readiness (morgen)',color:tick},min:0,max:100,grid:{color:grid},ticks:{color:tick}}}}});
 }
 function insMakeCall(level,readiness,recovHrs){
   if(level==='HIGH'||readiness>=65)return{cls:'push',label:'Kjør på',sm:`God dag for kvalitet — intervaller eller terskel. Sikt på Z4 (${zRange(4)}), gjerne litt Z5.`};
@@ -2230,32 +2165,35 @@ function renderInsights(){
 
   // DRIVERS pills
   const pillBox=document.getElementById('ins-pills');pillBox.innerHTML='';
-  INS_DRIVERS.forEach((d,i)=>{const b=document.createElement('button');b.className='ins-pill'+(i===0?' active':'');b.textContent=d.label;
+  document.getElementById('ins-d-range').innerHTML=rangeChips(insDays,'setInsDays',[[30,'30 d'],[90,'3 mnd'],[0,'Alt']]);
+  INS_DRIVERS.forEach((d,i)=>{const b=document.createElement('button');b.className='ins-pill'+(d.key===insDriver?' active':'');b.textContent=d.label;
     b.onclick=function(){document.querySelectorAll('#ins-pills .ins-pill').forEach(x=>x.classList.remove('active'));b.classList.add('active');insRenderDriver(d.key);};
     pillBox.appendChild(b);});
-  insRenderDriver('hrvAvg');
+  insRenderDriver(insDriver);
 
   // READINESS CALL
   const rdays=H.filter(d=>d.trainingReadiness!=null);
   if(rdays.length){
     const latest=rdays[rdays.length-1],c=insMakeCall(latest.trainingReadinessLevel,latest.trainingReadiness,latest.recoveryTimeHrs||0);
     document.getElementById('ins-call-box').className='ins-call '+c.cls;
-    document.getElementById('ins-call-big').textContent=`${fmtDate(latest.date)} · readiness ${latest.trainingReadiness} (${latest.trainingReadinessLevel}) → ${c.label}`;
+    document.getElementById('ins-call-big').textContent=`${fmtDate(latest.date)} · readiness ${latest.trainingReadiness} (${readinessNb(latest.trainingReadinessLevel)}) → ${c.label}`;
     document.getElementById('ins-call-sm').textContent=c.sm;
     const tb=document.querySelector('#ins-call-table tbody');tb.innerHTML='';
     rdays.slice(-6).reverse().forEach(d=>{const cc=insMakeCall(d.trainingReadinessLevel,d.trainingReadiness,d.recoveryTimeHrs||0);
       const col=cc.cls==='push'?insCss('--green'):cc.cls==='rest'?insCss('--red'):insCss('--accent');
-      tb.insertAdjacentHTML('beforeend',`<tr><td class="ins-mono">${fmtDate(d.date)}</td><td class="ins-mono">${d.trainingReadiness} <span style="color:var(--muted)">${d.trainingReadinessLevel||''}</span></td><td class="ins-mono">${d.recoveryTimeHrs!=null?Math.round(d.recoveryTimeHrs)+'h':'—'}</td><td><span class="ins-dot" style="background:${col}"></span>${cc.label}</td></tr>`);
+      tb.insertAdjacentHTML('beforeend',`<tr><td class="ins-mono">${fmtDate(d.date)}</td><td class="ins-mono">${d.trainingReadiness} <span style="color:var(--muted)">${readinessNb(d.trainingReadinessLevel)}</span></td><td class="ins-mono">${d.recoveryTimeHrs!=null?Math.round(d.recoveryTimeHrs)+'h':'—'}</td><td><span class="ins-dot" style="background:${col}"></span>${cc.label}</td></tr>`);
     });
   }
 
   // INTENSITY
   if(activities&&activities.length){
-    const dates=activities.map(a=>a.date).filter(Boolean).sort(),last=dates[dates.length-1];
-    const cut=new Date(new Date(last).getTime()-6*864e5).toISOString().slice(0,10);
+    const cut=daysAgoIso(insIntDays-1);
     const win=activities.filter(a=>a.date>=cut),z=[0,0,0,0,0];
+    document.getElementById('ins-i-range').innerHTML=rangeChips(insIntDays,'setInsIntDays',[[7,'7 d'],[30,'30 d'],[90,'3 mnd']]);
+    document.getElementById('ins-i-title').textContent=`Intensitetsfordeling · siste ${insIntDays===90?'3 måneder':insIntDays+' dager'}`;
     win.forEach(a=>{for(let i=0;i<5;i++)z[i]+=(a['z'+(i+1)]||0);});
     const tot=z.reduce((s,x)=>s+x,0),pct=z.map(v=>tot?Math.round(v/tot*100):0);
+    if(!tot){document.getElementById('ins-i-head').textContent=`Ingen økter med pulssoner i perioden (${win.length} økter).`;document.getElementById('ins-zbar').innerHTML='';document.getElementById('ins-zleg').innerHTML='';return;}
     const easy=pct[0]+pct[1],hard=pct[2]+pct[3]+pct[4];
     document.getElementById('ins-i-head').innerHTML= easy>=70
       ? `Fint polarisert — <b class="good">${easy}% rolig</b> (Z1–Z2). God aerob base, og de harde dagene forblir harde.`
@@ -2289,7 +2227,6 @@ function showSubTab(sect, tab, el) {
   if(sect==='health'&&tab==='trends'){renderHealthTrends();}
   if(sect==='health'&&tab==='composition'){renderHealthComp();}
   if(sect==='health'&&tab==='goal'){renderGoalProjection();}
-  if(sect==='work'&&tab==='schedule'){setTimeout(()=>{const w=document.getElementById('sc-this-week');if(w)w.scrollIntoView({behavior:'smooth',block:'center'});},60);}
   if(sect==='reviews'&&tab==='coach'){renderCoachReviews();}
 }
 
@@ -2299,7 +2236,7 @@ function showNav(id,el){
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('nav-'+id).classList.add('active');
   el.classList.add('active');
-  if(id==='work'){setTimeout(renderWork,50);}
+  if(id==='sleep'){renderSleep();}
   if(id==='calendar'){renderCalendar();}
   if(id==='nutrition'){
     // Reset to daily sub-tab to avoid stale insights content
@@ -2326,13 +2263,25 @@ function showSub(id,el){
 let nutrStartDate = null;
 let nutrEndDate = null;
 let nutrSingleDay = true;
+let nutrRangeDays = 14;                     // active chip (null = custom dates)
+
+function setNutrRange(days){
+  const sorted=[...nutritionData].sort((a,b)=>a.date.localeCompare(b.date));
+  nutrEndDate=daysAgoIso(0);
+  nutrStartDate=days?daysAgoIso(days-1):(sorted.length?sorted[0].date:nutrEndDate);
+  nutrRangeDays=days;nutrSingleDay=false;
+  const s=document.getElementById('nutr-start');if(s)s.value=toDisplay(nutrStartDate);
+  const e=document.getElementById('nutr-end');if(e)e.value=toDisplay(nutrEndDate);
+  renderNutrition();
+}
 
 function initNutrDates() {
   if (!nutritionData.length) return;
   const end = new Date();
   const fmt = d => [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
   nutrEndDate = fmt(end);
-  nutrStartDate = '2026-06-01';
+  nutrStartDate = daysAgoIso(13);          // standard: siste 14 dager
+  nutrRangeDays = 14;
   nutrSingleDay = false;
   const s = document.getElementById('nutr-start'); if(s) s.value = toDisplay(nutrStartDate);
   const e = document.getElementById('nutr-end');   if(e) e.value = toDisplay(nutrEndDate);
@@ -2343,6 +2292,7 @@ function applyNutrStart() {
   const d = parseDate(document.getElementById('nutr-start').value);
   if (!d) return;
   nutrStartDate = d;
+  nutrRangeDays = null;
   nutrSingleDay = nutrStartDate === nutrEndDate;
   renderNutrition();
 }
@@ -2351,6 +2301,7 @@ function applyNutrEnd() {
   const d = parseDate(document.getElementById('nutr-end').value);
   if (!d) return;
   nutrEndDate = d;
+  nutrRangeDays = null;
   nutrSingleDay = nutrStartDate === nutrEndDate;
   renderNutrition();
 }
@@ -2667,9 +2618,12 @@ function macroBar(val, target, color) {
 
 function renderNutrition() {
   destroyCharts();
+  const chips=document.getElementById('nutr-range-chips');
+  if(chips)chips.innerHTML=rangeChips(nutrRangeDays,'setNutrRange');
   const rows = getFilteredNutr();
   if (!rows.length) {
-    document.getElementById('nutrition-content').innerHTML = '<div style="padding:3rem;text-align:center;color:var(--muted)">Ingen kostholdsdata ennå.</div>';
+    const last=[...nutritionData].sort((a,b)=>b.date.localeCompare(a.date))[0];
+    document.getElementById('nutrition-content').innerHTML = `<div class="empty-note">Ingen kostholdsdata i valgt periode.${last?`<br>Siste registrering: <b>${ddmmyyyy(last.date)}</b> — sjekk at Health Auto Export sender data.`:''}</div>`;
     return;
   }
   const isToday = nutrSingleDay;
@@ -2835,7 +2789,7 @@ function renderNutrition() {
       <div style="font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px">Spist vs forbrent (kcal/dag)</div>
       <div style="height:160px;position:relative"><canvas id="balanceChart" role="img" aria-label="Spist vs forbrent">Spist vs forbrent.</canvas></div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.5rem">
+    <div class="chart-pair" style="margin-bottom:1.5rem">
       <div class="chart-card">
         <div style="font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px">Protein (g)</div>
         <div style="height:120px;position:relative"><canvas id="proChart" role="img" aria-label="Proteintrend">Proteintrend.</canvas></div>
@@ -2945,16 +2899,14 @@ function renderNutrition() {
 // Fetches all data files (cache-busted) and assigns the globals.
 async function loadData() {
   const nc = '?nc=' + Date.now();
-  const [acts, health, nutr, reviews, shifts] = await Promise.all([
+  const [acts, health, nutr, reviews] = await Promise.all([
     fetch(ACT_URL + nc).then(r => r.json()),
     fetch(HEALTH_URL + nc).then(r => r.json()),
     fetch(NUTR_URL + nc).then(r => r.json()),
-    fetch(REVIEWS_URL + nc).then(r => r.json()),
-    fetch(SHIFTS_URL + nc).then(r => r.json()).catch(() => [])
+    fetch(REVIEWS_URL + nc).then(r => r.json())
   ]);
   activities = acts || []; healthData = health || []; setHRZones();
   nutritionData = nutr || []; reviewsData = reviews || [];
-  shiftsData = shifts || [];
   // Floor daily RESTING burn to BURN_FLOOR. On days the watch is off for a long
   // stretch (or recorded no burn at all), the total comes out artificially low
   // (e.g. 1470 on a ~17h day). For those days, set resting burn to the floor and
@@ -3159,9 +3111,9 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')calClose();});
 
 // Deep link: ...WiggenApp/#kalender opens the Kalender tab (used by the
 // Scriptable home-screen widget). Other tabs: #helse, #innsikt, #aktiviteter,
-// #kosthold, #mal, #jobb.
+// #kosthold, #sovn, #mal.
 function openTabFromHash(){
-  const map={kalender:'calendar',helse:'health',innsikt:'insights',aktiviteter:'activities',kosthold:'nutrition',mal:'reviews',jobb:'work'};
+  const map={kalender:'calendar',helse:'health',innsikt:'insights',aktiviteter:'activities',kosthold:'nutrition',mal:'reviews',sovn:'sleep',søvn:'sleep'};
   const id=map[decodeURIComponent(location.hash.slice(1)).toLowerCase()];if(!id)return;
   const btn=[...document.querySelectorAll('.nav-tab')].find(b=>(b.getAttribute('onclick')||'').includes(`'${id}'`));
   if(btn){showNav(id,btn);btn.scrollIntoView({block:'nearest',inline:'center'});}
