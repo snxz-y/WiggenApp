@@ -1,10 +1,10 @@
 # WiggenApp — Project Reference
 
 ## What it is
-Personal health & training dashboard. Live at **https://snxz-y.github.io/WiggenApp/**. GitHub repo: `snxz-y/WiggenApp`. Single-page app (`index.html`) with four tabs: Activities, Health, Nutrition, Reviews. Dark theme, lime (`#c8f53a`) + purple (`#7c6dfa`) accents.
+Personal health & training dashboard. Live at **https://snxz-y.github.io/WiggenApp/**. GitHub repo: `snxz-y/WiggenApp`. Single-page app (`index.html`), **all UI text in Norwegian (bokmål, `lang="nb"`)** — write any new UI text in Norwegian. Six tabs: Helse, Innsikt, Aktiviteter, Kosthold, Målsetninger, Jobb. Dark theme, lime (`#c8f53a`) + purple (`#7c6dfa`) accents.
 
 ## Owner context
-Jørgen, born 18 June 1997 (the app computes age from `BIRTH_DATE` in `index.html`), 171cm, ~76kg, goal 65kg. Shift nurse in Trondheim, Norway. Quit Zyn June 5 2026. Dairy allergy. Garmin Epix Pro Gen 2. HR zones and lactate threshold come from Garmin (see below); nothing zone-related is hardcoded in the app anymore. Nutrition targets: 1600 kcal, 150g protein, 145g carbs, 51g fat.
+Jørgen, born 18 June 1997 (the app computes age from `BIRTH_DATE` in `index.html`), 171cm, ~76kg, goal 65kg. Shift nurse in Trondheim, Norway. Dairy allergy. Garmin Epix Pro Gen 2. HR zones and lactate threshold come from Garmin (see below); nothing zone-related is hardcoded in the app anymore. Nutrition targets: 1600 kcal, 150g protein, 145g carbs, 51g fat.
 
 ## File locations (Windows PC)
 All scripts in `C:\Users\Jørgen\Documents\files\`:
@@ -24,7 +24,7 @@ Garmin MCP tokens: `C:\Users\Jørgen\.garmin-mcp\` (oauth1, oauth2, profile)
 - `activities.json` — workouts
 - `health.json` — daily Garmin metrics (complete from June 14; body-comp only before)
 - `nutrition.json` — macros from Kaloridagboken
-- `reviews.json` — saved weekly reviews
+- `reviews.json` — saved goals (Målsetninger tab; entries with `kind: 'coach'`)
 
 ## Automation
 - **Garmin sync (runs on the Home Assistant box):** As of 22 June 2026 the sync runs on the always-on HA box (HA OS, `192.168.10.103:8123`) via the **Advanced SSH & Web Terminal** add-on (slug `a0d7b954_ssh`). Files live in `/config/garmin/`: `garmin_sync.py`, `ha_garmin.py` (wrapper — sets `USERPROFILE` so `TOKEN_DIR=./.garmin-mcp`, and sets `GH_PAT`), and the `.garmin-mcp/` token files (`oauth1_token.json`, `oauth2_token.json`, `profile.json`). `requests` is pip-installed in the add-on. It runs in **local mode** (reads/refreshes the cached OAuth2 token on disk), so the OAuth1→OAuth2 exchange only happens when the token nears expiry — avoiding Garmin 429 at 15-min frequency.
@@ -37,8 +37,12 @@ Garmin MCP tokens: `C:\Users\Jørgen\.garmin-mcp\` (oauth1, oauth2, profile)
 - **Nutrition:** Health Auto Export iPhone app → Cloudflare Worker → GitHub. Syncs every 6h. Widget on home screen keeps it reliable.
 - **Cloudflare Worker:** `https://nutrition-reciever.margidowiggen.workers.dev` — handles `/` (nutrition), `/save-review`, `/generate-review`, `/sync-garmin` (dispatches the Actions workflow). Secrets: `GITHUB_TOKEN`, `ANTHROPIC_KEY`.
 
-## Reviews
-Reviews tab calls the Worker's `/generate-review` which calls Claude API (claude-sonnet-4-6). Costs ~$0.01-0.03 per review. Past reviews show as collapsible accordions.
+## Målsetninger (formerly Reviews)
+The old AI-generated weekly reviews are gone. The Målsetninger tab lets Jørgen write or paste goals (optional title + text); they are saved via the Worker's `/save-review` to `reviews.json` and shown as collapsible accordions with delete. The app no longer calls `/generate-review` (the Worker endpoint still exists).
+
+## Removed features
+- **Zyn tracking** — removed from the app (Sept 2026). Don't re-add.
+- **In-app "Sync Garmin" button** — removed (see Automation).
 
 ## Key behaviors
 - Dates display DD/MM/YYYY everywhere via custom date picker (pill-shaped button, opens dark calendar popup). Defaults to today minus 1 day.
