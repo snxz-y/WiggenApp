@@ -588,8 +588,8 @@ document.addEventListener('DOMContentLoaded',function(){var t=document.documentE
     <div id="health-sub-trends" class="sub-panel">
       <div id="trend-range"></div>
       <div id="hrv-warning"></div>
-      <div class="section-head">Søvnscore (7-dagers snitt)</div>
-      <div class="chart-card"><div style="height:170px;position:relative"><canvas id="sleep-trend-chart" role="img" aria-label="Søvnscore, 7-dagers snitt"></canvas></div></div>
+      <div class="section-head">Sleep Score (7-dagers snitt)</div>
+      <div class="chart-card"><div style="height:170px;position:relative"><canvas id="sleep-trend-chart" role="img" aria-label="Sleep Score, 7-dagers snitt"></canvas></div></div>
       <div class="section-head">HRV (7-dagers snitt)</div>
       <div class="chart-card"><div style="height:170px;position:relative"><canvas id="hrv-trend-chart" role="img" aria-label="HRV, 7-dagers snitt"></canvas></div></div>
       <div class="section-head">Hvilepuls (7-dagers snitt)</div>
@@ -644,7 +644,7 @@ document.addEventListener('DOMContentLoaded',function(){var t=document.documentE
     <div class="section-head">Readiness</div>
     <div class="chart-card">
       <div class="ins-title">Hva påvirker Training Readiness?</div>
-      <div class="ins-note" id="ins-d-note">Hvert punkt er én morgen (første readiness-måling den dagen). Velg en måling for å se hvor tett den følger readiness. Søvn i detalj finner du under Søvn → Sammenheng.</div>
+      <div class="ins-note" id="ins-d-note">Hvert punkt er én morgen (første Training Readiness-måling den dagen). Velg en måling for å se hvor tett den følger readiness. Søvn i detalj finner du under Søvn → Sammenheng.</div>
       <div id="ins-d-range"></div>
       <div class="ins-pills" id="ins-pills"></div>
       <div class="ins-head" id="ins-d-head"></div>
@@ -656,9 +656,9 @@ document.addEventListener('DOMContentLoaded',function(){var t=document.documentE
     </div>
     <div class="chart-card">
       <div class="ins-title">Dagens treningsråd</div>
-      <div class="ins-note">Kun veiledende — leser Training Readiness og restitusjonstid fra Garmin og foreslår hvor hardt du bør trene.</div>
+      <div class="ins-note">Kun veiledende — leser Training Readiness og Recovery Time fra Garmin og foreslår hvor hardt du bør trene.</div>
       <div class="ins-call" id="ins-call-box"><div class="big" id="ins-call-big"></div><div class="sm" id="ins-call-sm"></div></div>
-      <div class="tbl-wrap"><table id="ins-call-table"><thead><tr><th>Dato</th><th>Readiness</th><th>Restitusjon igjen</th><th>Råd</th></tr></thead><tbody></tbody></table></div>
+      <div class="tbl-wrap"><table id="ins-call-table"><thead><tr><th>Dato</th><th>Readiness</th><th>Recovery Time</th><th>Råd</th></tr></thead><tbody></tbody></table></div>
     </div>
 
     <div class="section-head">Trening</div>
@@ -725,14 +725,14 @@ const fmtEffect=t=>{
   // benefit messages ("MINOR_AEROBIC_BENEFIT_6") — into one short category.
   // Order matters (ANAEROBIC before AEROBIC; NO_ before AEROBIC).
   const k=t.toString().toUpperCase().replace(/\s+/g,'_').replace(/_\d+$/,'');
-  if(k.startsWith('NO_'))return'Restitusjon';
+  if(k.startsWith('NO_'))return'Recovery';
   if(k.includes('SPRINT'))return'Sprint';
-  if(k.includes('ANAEROBIC'))return'Anaerob';
+  if(k.includes('ANAEROBIC'))return'Anaerobic';
   if(k.includes('VO2'))return'VO2 Max';
-  if(k.includes('LACTATE')||k.includes('THRESHOLD'))return'Terskel';
+  if(k.includes('LACTATE')||k.includes('THRESHOLD'))return'Lactate Threshold';
   if(k.includes('TEMPO'))return'Tempo';
-  if(k.includes('AEROBIC')||k.includes('BASE'))return'Aerob base';
-  if(k.includes('RECOVERY'))return'Restitusjon';
+  if(k.includes('AEROBIC')||k.includes('BASE'))return'Aerobic Base';
+  if(k.includes('RECOVERY'))return'Recovery';
   return k.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
 };
 const fmtDate=d=>{
@@ -949,7 +949,7 @@ function renderHealthTrends(){
   if(sorted.length<3)return;
   const r=document.getElementById('trend-range');if(r)r.innerHTML=rangeChips(trendDays,'setTrendDays',[[30,'30 d'],[90,'3 mnd'],[180,'6 mnd'],[0,'Alt']]);
   const from=trendDays?daysAgoIso(trendDays-1):'';
-  renderRollingChart('sleep-trend-chart','sleepScore',sorted,'Søvnscore','#6f7fb8',from);
+  renderRollingChart('sleep-trend-chart','sleepScore',sorted,'Sleep Score','#6f7fb8',from);
   renderRollingChart('hrv-trend-chart','hrvAvg',sorted,'HRV (ms)','#5f8c6a',from);
   renderRollingChart('rhr-trend-chart','rhr',sorted,'Hvilepuls (bpm)','#b5544a',from);
   renderRollingChart('bb-trend-chart','bbHigh',sorted,'Body Battery-topp','#b56a45',from);
@@ -1264,7 +1264,7 @@ const SL_SLEEP=[
   {k:'sleepH',l:'Søvnlengde',f:n=>n.sleepH,fmt:fmtDur,better:1},
   {k:'bed',l:'Leggetid',f:n=>n.bed,fmt:fmtClock,better:0,clock:true},
   {k:'wake',l:'Våknetid',f:n=>n.wake,fmt:fmtClock,better:0,clock:true},
-  {k:'sleepScore',l:'Søvnscore',f:n=>n.d.sleepScore,fmt:v=>Math.round(v),better:1},
+  {k:'sleepScore',l:'Sleep Score',f:n=>n.d.sleepScore,fmt:v=>Math.round(v),better:1},
   {k:'deepM',l:'Dyp søvn',f:n=>n.deepM,fmt:v=>`${Math.round(v)} min`,better:1},
   {k:'remM',l:'REM-søvn',f:n=>n.remM,fmt:v=>`${Math.round(v)} min`,better:1},
   {k:'awakeM',l:'Våken i natt',f:n=>n.awakeM,fmt:v=>`${Math.round(v)} min`,better:-1},
@@ -1273,9 +1273,9 @@ const SL_HEALTH=[
   {k:'hrvAvg',l:'HRV (natt)',f:n=>n.d.hrvAvg,fmt:v=>`${Math.round(v)} ms`,better:1},
   {k:'rhr',l:'Hvilepuls',f:n=>n.d.rhr,fmt:v=>`${Math.round(v)} bpm`,better:-1},
   {k:'bbWake',l:'Body Battery morgen',f:n=>n.d.bbWake,fmt:v=>Math.round(v),better:1},
-  {k:'readiness',l:'Readiness morgen',f:n=>morningReadiness(n.d),fmt:v=>Math.round(v),better:1},
+  {k:'readiness',l:'Training Readiness (morgen)',f:n=>morningReadiness(n.d),fmt:v=>Math.round(v),better:1},
   {k:'avgStress',l:'Snitt stress',f:n=>n.d.avgStress,fmt:v=>Math.round(v),better:-1},
-  {k:'avgResp',l:'Pustefrekvens',f:n=>n.d.avgResp,fmt:v=>`${v.toFixed(1)}/min`,better:0},
+  {k:'avgResp',l:'Respiration',f:n=>n.d.avgResp,fmt:v=>`${v.toFixed(1)} brpm`,better:0},
 ];
 
 function setSleepDays(d){slDays=d;renderSleep();}
@@ -1311,7 +1311,7 @@ function renderSleepOverview(){
     <div class="stat-card"><div class="stat-label">Snitt leggetid</div><div class="stat-value">${fmtClock(bedAvg)}</div><div class="stat-sub">± ${bedSd!=null?Math.round(bedSd):'—'} min · ${regTxt}</div></div>
     <div class="stat-card"><div class="stat-label">Snitt våknetid</div><div class="stat-value">${fmtClock(wakeAvg)}</div><div class="stat-sub">± ${sd(N.map(n=>n.wake))!=null?Math.round(sd(N.map(n=>n.wake))):'—'} min</div></div>
     <div class="stat-card"><div class="stat-label">Snitt søvn</div><div class="stat-value">${fmtDur(hAvg)}</div><div class="stat-sub">${over7} % av nettene ≥ 7 t</div></div>
-    <div class="stat-card"><div class="stat-label">Søvnscore</div><div class="stat-value">${score!=null?Math.round(score):'—'}</div><div class="stat-sub">snitt av ${N.length} netter</div></div>
+    <div class="stat-card"><div class="stat-label">Sleep Score</div><div class="stat-value">${score!=null?Math.round(score):'—'}</div><div class="stat-sub">snitt av ${N.length} netter</div></div>
     <div class="stat-card"><div class="stat-label">Dyp søvn</div><div class="stat-value">${pct('deepM')??'—'} %</div><div class="stat-sub">av søvnen (ofte 13–23 %)</div></div>
     <div class="stat-card"><div class="stat-label">REM-søvn</div><div class="stat-value">${pct('remM')??'—'} %</div><div class="stat-sub">av søvnen (ofte 20–25 %)</div></div>
   </div>
@@ -1626,19 +1626,19 @@ function renderHealth(){
     const parts=[];
     const rt=(c.match(/_RT_(HIGHEST|HIGH|MOD_OR_LOW|MOD|LOW)(?=_SS|_|$)/)||[])[1];
     const ss=(c.match(/_SS_(GOOD_OR_MOD|MOD_OR_LOW|AVAILABLE|UNKNOWN|GOOD|MOD|POOR|LOW)(?=_|$)/)||[])[1];
-    if(rt==='HIGHEST'&&ss==='AVAILABLE')parts.push('godt restituert og god søvn');
+    if(rt==='HIGHEST'&&ss==='AVAILABLE')parts.push('Recovery Time og Sleep Score på topp');
     else{
-      if(rt)parts.push({HIGH:'mye restitusjonstid igjen',MOD:'noe restitusjonstid igjen',MOD_OR_LOW:'lite til noe restitusjonstid igjen',LOW:'lite restitusjonstid igjen',HIGHEST:'godt restituert'}[rt]);
-      if(ss)parts.push({GOOD:'god søvn',GOOD_OR_MOD:'grei søvn',MOD:'middels søvn',MOD_OR_LOW:'middels til dårlig søvn',POOR:'dårlig søvn',LOW:'dårlig søvn',UNKNOWN:'søvndata mangler',AVAILABLE:'søvndata klar'}[ss]);
+      if(rt)parts.push({HIGH:'lang Recovery Time igjen',MOD:'middels Recovery Time igjen',MOD_OR_LOW:'kort til middels Recovery Time igjen',LOW:'kort Recovery Time igjen',HIGHEST:'Recovery Time på topp'}[rt]);
+      if(ss)parts.push({GOOD:'god Sleep Score',GOOD_OR_MOD:'god til middels Sleep Score',MOD:'middels Sleep Score',MOD_OR_LOW:'middels til lav Sleep Score',POOR:'lav Sleep Score',LOW:'lav Sleep Score',UNKNOWN:'Sleep Score mangler',AVAILABLE:'Sleep Score klar'}[ss]);
     }
-    if(/_HRV_LOW/.test(c))parts.push('HRV lavere enn normalt');
-    if(/_HRV_UNBALANCED/.test(c))parts.push('HRV i ubalanse');
-    if(/_NAP/.test(c))parts.push('løftet av en høneblund');
-    if(c.includes('ACWR_NEG'))parts.push('⚠ høy belastning siste uke (ACWR)');
-    if(c.includes('ACWR_POS'))parts.push('belastningen er i god balanse');
-    if(c.includes('SLEEP_HISTORY_NEG'))parts.push('⚠ for lite søvn siste netter');
-    if(c.includes('SLEEP_HISTORY_POS'))parts.push('god søvn siste netter');
-    if(c.includes('STRESS_HISTORY_NEG'))parts.push('⚠ mye stress siste dager');
+    if(/_HRV_LOW/.test(c))parts.push('HRV Status: Low');
+    if(/_HRV_UNBALANCED/.test(c))parts.push('HRV Status: Unbalanced');
+    if(/_NAP/.test(c))parts.push('løftet av en Nap');
+    if(c.includes('ACWR_NEG'))parts.push('⚠ høy Acute Load');
+    if(c.includes('ACWR_POS'))parts.push('Acute Load i balanse');
+    if(c.includes('SLEEP_HISTORY_NEG'))parts.push('⚠ svak Sleep History');
+    if(c.includes('SLEEP_HISTORY_POS'))parts.push('god Sleep History');
+    if(c.includes('STRESS_HISTORY_NEG'))parts.push('⚠ høy Stress History');
     if(c.includes('AWAKE_NEG'))parts.push('⚠ lenge siden du våknet');
     if(parts.length){const s0=parts.join(' · ');return s0.charAt(0).toUpperCase()+s0.slice(1);}
     return c.split('_').map(w=>w.charAt(0)+w.slice(1).toLowerCase()).join(' ');
@@ -1698,7 +1698,7 @@ function renderHealth(){
   }
 
   // Endurance score scale: 3570 (base) to 10560 (max), classes at 5100/5800/6600/7300/8100/8800
-  const endClass=ENDCLASS_NB[(d.enduranceScore>=8800?'Elite':d.enduranceScore>=8100?'Superior':d.enduranceScore>=7300?'Expert':d.enduranceScore>=6600?'Well-trained':d.enduranceScore>=5800?'Trained':d.enduranceScore>=5100?'Intermediate':'Beginner')]||'—';
+  const endClass=d.enduranceScore>=8800?'Elite':d.enduranceScore>=8100?'Superior':d.enduranceScore>=7300?'Expert':d.enduranceScore>=6600?'Well-trained':d.enduranceScore>=5800?'Trained':d.enduranceScore>=5100?'Intermediate':'Beginner';
 
   // kcal donut data
   const activeKcal=isToday?d.activeKcal:Math.round(avgg(hrows,'activeKcal'));
@@ -1743,7 +1743,7 @@ function renderHealth(){
       const sign=diff>0?'+':'';
       return`<div class="delta-card"><div class="stat-label">${label}</div><div class="delta-val">${cur}${unit}</div>${diff!==null&&diff!==0?`<div class="delta-chg" style="color:${clr}">${sign}${diff}${unit} vs forrige uke</div>`:'<div class="delta-chg" style="color:var(--muted)">Ingen tidligere data</div>'}</div>`;
     };
-    const deltaHtmlBlock=`<div class="section-head">Denne uka vs forrige uke</div><div class="delta-grid">${deltaHtml('rhr','Hvilepuls','',true)}${deltaHtml('hrvAvg','HRV','')}${deltaHtml('sleepScore','Søvnscore','')}${deltaHtml('steps','Skritt','')}${deltaHtml('bbHigh','Body Battery høy','')}${deltaHtml('avgStress','Snitt Stress','',true)}</div>`;
+    const deltaHtmlBlock=`<div class="section-head">Denne uka vs forrige uke</div><div class="delta-grid">${deltaHtml('rhr','Hvilepuls','',true)}${deltaHtml('hrvAvg','HRV','')}${deltaHtml('sleepScore','Sleep Score','')}${deltaHtml('steps','Skritt','')}${deltaHtml('bbHigh','Body Battery høy','')}${deltaHtml('avgStress','Snitt Stress','',true)}</div>`;
   // Render new trend sections into sub-tab
   setTimeout(()=>{
     renderHealthTrends();
@@ -1755,7 +1755,7 @@ function renderHealth(){
     <div class="sleep-card">
       <div class="sleep-top">
         <div>
-          <div style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">Søvnscore</div>
+          <div style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">Sleep Score</div>
           <div class="sleep-score-big" style="color:${scoreColor(d.sleepScore)}">${d.sleepScore}</div>
         </div>
         <div>
@@ -1784,11 +1784,11 @@ function renderHealth(){
         <span><span class="sleep-dot" style="background:#7aab88"></span>REM ${remPct}%</span>
         <span><span class="sleep-dot" style="background:#60a5fa"></span>Lett ${lightPct}%</span>
         <span><span class="sleep-dot" style="background:#444"></span>Våken ${awakePct}%</span>
-        <span style="margin-left:6px">Pust: ${n(d.avgResp)} /min</span>
+        <span style="margin-left:6px">Pust: ${n(d.avgResp)} brpm</span>
       </div>
     </div>`:`
     <div class="stat-grid">
-      <div class="stat-card"><div class="stat-label">Søvnscore (snitt)</div><div class="stat-value">${A('sleepScore')}</div></div>
+      <div class="stat-card"><div class="stat-label">Sleep Score (snitt)</div><div class="stat-value">${A('sleepScore')}</div></div>
       <div class="stat-card"><div class="stat-label">Søvnlengde (snitt)</div><div class="stat-value" style="font-size:18px">${(()=>{const v=avgg(hrows,'sleepSec');return v?`${Math.floor(v/3600)}h ${Math.round((v%3600)/60)}m`:'—'})()}</div></div>
     </div>`}
 
@@ -1821,7 +1821,7 @@ function renderHealth(){
         <div class="stat-label">HRV i natt</div>
         <div class="stat-value" style="color:var(--accent2)">${A('hrvAvg')}</div>
         <div class="stat-sub">Ukesnitt: ${A('hrvWeeklyAvg')}</div>
-        ${isToday&&d.hrvStatus?`<div class="stat-badge ${d.hrvStatus==='BALANCED'?'badge-good':'badge-warn'}">${nbLabel(HRVSTATUS_NB,d.hrvStatus)}</div>`:''}
+        ${isToday&&d.hrvStatus?`<div class="stat-badge ${d.hrvStatus==='BALANCED'?'badge-good':'badge-warn'}">${garminLabel(d.hrvStatus)}</div>`:''}
       </div>
       <div class="stat-card">
         <div class="stat-label">Body Battery</div>
@@ -1830,14 +1830,14 @@ function renderHealth(){
         <div class="stat-sub" style="margin-top:4px">+${A('bbCharged')} ladet  /  -${A('bbDrained')} tappet</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Restitusjonstid</div>
+        <div class="stat-label">Recovery Time</div>
         <div class="stat-value">${A('recoveryTimeHrs')}<span style="font-size:14px;color:var(--muted)">h</span></div>
         <div class="stat-sub">Til neste harde økt</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Snitt Stress</div>
         <div class="stat-value" style="color:${isToday?scoreColor(100-d.avgStress):'var(--text)'}">${A('avgStress')}</div>
-        ${isToday&&d.avgStress!=null?`<div class="stat-badge ${stressBadge(d.avgStress)}">${d.avgStress<=25?'Lavt':d.avgStress<=50?'Moderat':'Høyt'}</div>`:''}
+        ${isToday&&d.avgStress!=null?`<div class="stat-badge ${stressBadge(d.avgStress)}">${d.avgStress<=25?'Low':d.avgStress<=50?'Medium':'High'}</div>`:''}
       </div>
       <div class="stat-card">
         <div class="stat-label">Hvilepuls</div>
@@ -1846,7 +1846,7 @@ function renderHealth(){
       </div>
     </div>
 
-    <div class="section-head">Aktivitet og belastning</div>
+    <div class="section-head">Aktivitet & Load</div>
     ${(()=>{
       const sv=stepsVal!=null?stepsVal:0;
       const pct=stepsGoal?Math.max(2,Math.min(100,Math.round(sv/stepsGoal*100))):0;
@@ -1890,7 +1890,7 @@ function renderHealth(){
         </div>
       </div>
       <div class="intensity-card">
-        <div class="stat-label">Intensitetsminutter</div>
+        <div class="stat-label">Intensity Minutes</div>
         <div class="im-num" style="color:${(imWeekly||0)>=imGoal?'var(--green)':(imWeekly||0)>=(imGoal*0.6)?'var(--amber)':'var(--text)'}">${imWeekly!=null?imWeekly:imToday_}</div>
         <div class="im-bar-track"><div class="im-bar-fill" style="width:${imPct}%"></div></div>
         <div style="font-size:11px;color:var(--muted)">Denne uka: ${imWeekly!=null?imWeekly:'—'} / ${imGoal} ${imPct>=100?'✓':''}</div>
@@ -1898,39 +1898,39 @@ function renderHealth(){
       </div>
     </div>
 
-    <div class="section-head">Treningsstatus</div>
+    <div class="section-head">Training Status</div>
     ${(()=>{
       const ts=(()=>{const t=d.trainingStatus||gLatest('trainingStatus');if(!t)return'—';return typeof t==='object'?t.trainingStatusKey||'—':t;})();
       return `<div class="metric-hero">
         <div class="rf-main">
-          <div class="stat-label">Treningsstatus</div>
-          <div class="rf-score rf-word" style="color:${/PRODUCTIVE|PEAKING|MAINTAINING/.test(ts)&&!/UNPRODUCTIVE/.test(ts)?'var(--green)':/STRAINED|OVERREACHING/.test(ts)?'var(--red)':/UNPRODUCTIVE|DETRAINING/.test(ts)?'var(--amber)':'var(--text)'}">${nbLabel(TSTATUS_NB,ts)}</div>
+          <div class="stat-label">Training Status</div>
+          <div class="rf-score rf-word" style="color:${/PRODUCTIVE|PEAKING|MAINTAINING/.test(ts)&&!/UNPRODUCTIVE/.test(ts)?'var(--green)':/STRAINED|OVERREACHING/.test(ts)?'var(--red)':/UNPRODUCTIVE|DETRAINING/.test(ts)?'var(--amber)':'var(--text)'}">${garminLabel(ts)}</div>
           <div class="rf-level">Sport: Løping</div>
         </div>
         <div class="hero-pair">
           <div><div class="stat-label">VO₂ Max</div><div class="hero-pair-v" style="color:var(--accent2)">${GL('vo2max')}<span> ml/kg/min</span></div></div>
-          <div><div class="stat-label">Kondisjonsalder</div><div class="hero-pair-v" style="color:var(--green)">${GL('fitnessAge',1)}<span> vs ${ageNow()} faktisk</span></div></div>
+          <div><div class="stat-label">Fitness Age</div><div class="hero-pair-v" style="color:var(--green)">${GL('fitnessAge',1)}<span> vs ${ageNow()} faktisk</span></div></div>
         </div>
       </div>`;
     })()}
     <div class="stat-grid training-support">
       <div class="stat-card">
-        <div class="stat-label">Utholdenhetsscore</div>
+        <div class="stat-label">Endurance Score</div>
         <div class="stat-value" style="font-size:20px">${GL('enduranceScore')}</div>
         <div class="stat-sub" style="color:var(--accent2);font-weight:600">${endClass}</div>
 
       </div>
       <div class="stat-card">
-        <div class="stat-label">ACWR · belastningsbalanse</div>
+        <div class="stat-label">ACWR · Load Ratio</div>
         <div class="stat-value" style="color:${isToday&&d.acwr>1.5?'var(--red)':isToday&&d.acwr>1.3?'var(--amber)':'var(--text)'}">${isToday?n(d.acwr,2):n(avgg(hrows,'acwr'),2)}</div>
-        <div class="stat-sub">Akutt (7 d) ${A('acuteLoad')} / kronisk (28 d) ${A('chronicLoad')}</div>
-        <div class="acwr-explain">Siste ukes belastning delt på snittet for siste 4 uker. Under 0,8 = lite belastning · 0,8–1,3 = god balanse · over 1,5 = økt skaderisiko.</div>
+        <div class="stat-sub">Acute Load ${A('acuteLoad')} / Chronic Load ${A('chronicLoad')}</div>
+        <div class="acwr-explain">Acute Load (7 d) delt på Chronic Load (28 d). Under 0,8 = lite belastning · 0,8–1,3 = god balanse · over 1,5 = økt skaderisiko.</div>
       </div>
       <div class="stat-card" style="grid-column:span 2">
-        <div class="stat-label">Laktatterskel</div>
+        <div class="stat-label">Lactate Threshold</div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-top:6px">
           <div>
-            <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px">Puls</div>
+            <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px">HR</div>
             <div style="font-size:20px;font-weight:700">${GL('lactateHR')}<span style="font-size:12px;color:var(--muted)"> bpm</span></div>
           </div>
           <div>
@@ -1949,13 +1949,13 @@ function renderHealth(){
       </div>
     </div>
 
-    <div class="section-head">Belastningsfokus · siste 4 uker</div>
+    <div class="section-head">Training Load Focus · siste 4 uker</div>
     <div class="load-section">
       ${(()=>{
         const vals=[
-          {lbl:'Lav aerob',val:(d.aerobicLowLoad??gLatest('aerobicLowLoad')??avgg(hrows,'aerobicLowLoad')),min:gLatest('aerobicLowMin')??130,max:gLatest('aerobicLowMax')??342},
-          {lbl:'Høy aerob',val:(d.aerobicHighLoad??gLatest('aerobicHighLoad')??avgg(hrows,'aerobicHighLoad')),min:gLatest('aerobicHighMin')??256,max:gLatest('aerobicHighMax')??467},
-          {lbl:'Anaerob',val:(d.anaerobicLoad??gLatest('anaerobicLoad')??avgg(hrows,'anaerobicLoad')),min:gLatest('anaerobicMin')??0,max:gLatest('anaerobicMax')??211}
+          {lbl:'Low Aerobic',val:(d.aerobicLowLoad??gLatest('aerobicLowLoad')??avgg(hrows,'aerobicLowLoad')),min:gLatest('aerobicLowMin')??130,max:gLatest('aerobicLowMax')??342},
+          {lbl:'High Aerobic',val:(d.aerobicHighLoad??gLatest('aerobicHighLoad')??avgg(hrows,'aerobicHighLoad')),min:gLatest('aerobicHighMin')??256,max:gLatest('aerobicHighMax')??467},
+          {lbl:'Anaerobic',val:(d.anaerobicLoad??gLatest('anaerobicLoad')??avgg(hrows,'anaerobicLoad')),min:gLatest('anaerobicMin')??0,max:gLatest('anaerobicMax')??211}
         ];
         const cap=700;
         return vals.map(v=>{
@@ -1992,7 +1992,7 @@ function renderHealth(){
       const bcDateLbl=bcEntry.date.split('-').reverse().slice(0,2).join('/');
       const bv=(k,dec=1)=>bcEntry[k]!=null?(+bcEntry[k]).toFixed(dec):'—';
       return`
-      <div class="section-head" style="margin-top:1.5rem">Kroppssammensetning
+      <div class="section-head" style="margin-top:1.5rem">Body Composition
         ${bcStale?`<span style="font-size:10px;font-weight:400;color:var(--muted);margin-left:8px">siste måling ${bcDateLbl}</span>`:''}
       </div>
       <div class="stat-grid">
@@ -2087,19 +2087,17 @@ const INS_ZLBL=()=>[1,2,3,4,5].map(i=>`Z${i} ${zRange(i)}`);
 const INS_ZVAR=['--z1','--z2','--z3','--z4','--z5'];
 const INS_DRIVERS=[
   {key:'hrvAvg',label:'HRV',unit:' ms'},{key:'rhr',label:'Hvilepuls',unit:' bpm'},
-  {key:'prevLoad',label:'Belastning dagen før',unit:''},{key:'sleepH',label:'Søvntimer',unit:' t'},
-  {key:'sleepScore',label:'Søvnscore',unit:''},{key:'avgStress',label:'Snitt stress (dagen før)',unit:''}
+  {key:'prevLoad',label:'Training Load dagen før',unit:''},{key:'sleepH',label:'Søvntimer',unit:' t'},
+  {key:'sleepScore',label:'Sleep Score',unit:''},{key:'avgStress',label:'Stress dagen før',unit:''}
 ];
-// Garmin readiness levels → Norwegian
-const READINESS_NB={PRIME:'Topp',HIGH:'Høy',MODERATE:'Moderat',LOW:'Lav',POOR:'Dårlig'};
-const TSTATUS_NB={PRODUCTIVE:'Produktiv',MAINTAINING:'Vedlikehold',PEAKING:'Toppform',RECOVERY:'Restitusjon',UNPRODUCTIVE:'Uproduktiv',OVERREACHING:'Overbelastet',STRAINED:'Anstrengt',DETRAINING:'Formtap',NO_STATUS:'Ingen status'};
-const HRVSTATUS_NB={BALANCED:'Balansert',UNBALANCED:'Ubalansert',LOW:'Lav',POOR:'Dårlig'};
-const ENDCLASS_NB={Beginner:'Nybegynner',Intermediate:'Middels',Trained:'Trent','Well-trained':'Godt trent',Expert:'Ekspert',Superior:'Overlegen',Elite:'Elite'};
-const nbLabel=(map,v)=>v==null?'—':(map[String(v).toUpperCase().replace(/ /g,'_')]||map[v]||String(v).replace(/_/g,' ').toLowerCase());
-// Garmin load-focus feedback → Norwegian
-const LOADFOCUS_NB={'AEROBIC LOW SHORTAGE':'for lite lav aerob trening','AEROBIC HIGH SHORTAGE':'for lite høy aerob trening','ANAEROBIC SHORTAGE':'for lite anaerob trening','AEROBIC LOW FOCUS':'fokus på lav aerob','AEROBIC HIGH FOCUS':'fokus på høy aerob','ANAEROBIC FOCUS':'fokus på anaerob','BALANCED':'balansert','ABOVE TARGETS':'over målområdene','BELOW TARGETS':'under målområdene'};
-const loadFocusNb=v=>v?(LOADFOCUS_NB[String(v).toUpperCase().replace(/_/g,' ')]||String(v).replace(/_/g,' ').toLowerCase()):'—';
-const readinessNb=l=>l?(READINESS_NB[String(l).toUpperCase().replace(/ /g,'_')]||String(l).toLowerCase()):'';
+// Garmin status values are shown in Garmin's own English wording, title-cased
+// (e.g. "OVERREACHING" → "Overreaching", "AEROBIC LOW SHORTAGE" → "Low Aerobic Shortage").
+const GARMIN_WORDING={AEROBIC_LOW_SHORTAGE:'Low Aerobic Shortage',AEROBIC_HIGH_SHORTAGE:'High Aerobic Shortage',ANAEROBIC_SHORTAGE:'Anaerobic Shortage',
+  AEROBIC_LOW_FOCUS:'Low Aerobic Focus',AEROBIC_HIGH_FOCUS:'High Aerobic Focus',ANAEROBIC_FOCUS:'Anaerobic Focus',NO_STATUS:'No Status'};
+const garminLabel=v=>{if(v==null||v==='')return'—';const k=String(v).toUpperCase().replace(/[ -]/g,'_');
+  return GARMIN_WORDING[k]||k.split('_').map(w=>w.charAt(0)+w.slice(1).toLowerCase()).join(' ');};
+const readinessNb=l=>l?garminLabel(l):'';
+const loadFocusNb=garminLabel;
 let insDays=90,insIntDays=30,insDriver='hrvAvg';
 function setInsDays(d){insDays=d;renderInsights();}
 function setInsIntDays(d){insIntDays=d;renderInsights();}
@@ -2150,7 +2148,7 @@ function insRenderDriver(key){
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},
       tooltip:{callbacks:{label:c=>c.raw.date?`${fmtDate(c.raw.date)}: ${drv.label} ${(+c.raw.x).toFixed(drv.key==='sleepH'?1:0)}${drv.unit}, readiness ${c.raw.y}`:''}}},
       scales:{x:{title:{display:true,text:drv.label+drv.unit,color:tick},grid:{color:grid},ticks:{color:tick}},
-              y:{title:{display:true,text:'Readiness (morgen)',color:tick},min:0,max:100,grid:{color:grid},ticks:{color:tick}}}}});
+              y:{title:{display:true,text:'Training Readiness (morgen)',color:tick},min:0,max:100,grid:{color:grid},ticks:{color:tick}}}}});
 }
 function insMakeCall(level,readiness,recovHrs){
   if(level==='HIGH'||readiness>=65)return{cls:'push',label:'Kjør på',sm:`God dag for kvalitet — intervaller eller terskel. Sikt på Z4 (${zRange(4)}), gjerne litt Z5.`};
