@@ -400,6 +400,14 @@ th{font-family:var(--font-body);letter-spacing:.04em}
 .sl-periods{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
 .sl-date{font:inherit;font-size:13px;padding:5px 8px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);margin-top:4px}
 .sl-diff{font-weight:600}.sl-diff.good{color:var(--green)}.sl-diff.bad{color:var(--red)}
+
+/* Training Status explanation */
+.ts-why{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin:-6px 0 1.25rem}
+.ts-why-title{font-size:13px;font-weight:700;margin-bottom:4px}
+.ts-why-def{font-size:13px;line-height:1.5;color:var(--text);margin-bottom:10px}
+.ts-why-row{display:grid;grid-template-columns:22px 1fr;gap:6px;font-size:12px;line-height:1.45;color:var(--muted2);padding:4px 0;border-top:1px solid var(--border)}
+.ts-why-row b{color:var(--text)}
+.ts-why-note{font-size:11px;color:var(--muted);margin-top:8px}
 </style>
 <script>
 (function(){try{var t=localStorage.getItem('wiggen-theme')||'light';document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','light');}})();
@@ -1648,52 +1656,46 @@ function renderHealth(){
   // Intraday timeline: plots how Body Battery and Training Readiness moved
   // through the day, so a single value can be backtracked to a time of day
   // (e.g. readiness was 96 at 12:49 before a ride, 13 at 17:51 after).
+  // Intraday timeline: Body Battery and Training Readiness through the day as
+  // two plain lines (no point markers). Tapping anywhere shows both values at
+  // the nearest time (so a value can still be backtracked to a time of day).
   const intradayTimeline=(d)=>{
-    const bb=Array.isArray(d.bodyBatterySeries)?d.bodyBatterySeries.filter(p=>p&&p.time!=null&&p.level!=null):[];
-    const tr=Array.isArray(d.trainingReadinessSeries)?d.trainingReadinessSeries.filter(p=>p&&p.time!=null&&p.score!=null):[];
+    const toMin=t=>{const m=/^(\d{1,2}):(\d{2})/.exec(t||'');return m?(+m[1])*60+(+m[2]):null;};
+    const bb=(Array.isArray(d.bodyBatterySeries)?d.bodyBatterySeries:[]).filter(p=>p&&p.level!=null&&toMin(p.time)!=null).map(p=>({m:toMin(p.time),v:p.level,t:p.time})).sort((a,b)=>a.m-b.m);
+    const tr=(Array.isArray(d.trainingReadinessSeries)?d.trainingReadinessSeries:[]).filter(p=>p&&p.score!=null&&toMin(p.time)!=null).map(p=>({m:toMin(p.time),v:p.score,t:p.time})).sort((a,b)=>a.m-b.m);
     if(!bb.length&&tr.length<2)return'';
-    const toMin=t=>{const m=/^(\d{1,2}):(\d{2})/.exec(t);return m?(+m[1])*60+(+m[2]):null;};
     const W=340,H=140,L=30,R=8,T=14,B=22;
     const px=m=>L+(m/1440)*(W-L-R);
     const py=v=>T+(1-Math.max(0,Math.min(100,v))/100)*(H-T-B);
-    const grid=[0,6,12,18,24].map(h=>`<line x1="${px(h*60).toFixed(1)}" y1="${T}" x2="${px(h*60).toFixed(1)}" y2="${H-B}" stroke="rgba(255,255,255,.06)"/><text x="${px(h*60).toFixed(1)}" y="${H-6}" fill="var(--muted)" font-size="9" text-anchor="middle">${String(h).padStart(2,'0')}</text>`).join('');
-    let bbPath='';
-    if(bb.length){
-      const pts=bb.map(p=>({m:toMin(p.time),v:p.level,t:p.time})).filter(p=>p.m!=null).sort((a,b)=>a.m-b.m);
-      if(pts.length){
-        const esc=s=>String(s).replace(/'/g,"\\'");
-        bbPath=`<polyline fill="none" stroke="#c49078" stroke-width="2" stroke-linejoin="round" points="${pts.map(p=>`${px(p.m).toFixed(1)},${py(p.v).toFixed(1)}`).join(' ')}"/>`+
-          pts.map(p=>`<circle cx="${px(p.m).toFixed(1)}" cy="${py(p.v).toFixed(1)}" r="7" fill="transparent" style="cursor:pointer" onclick="iTip(event,'${esc(p.t)} · Body Battery ${p.v}')"/><circle cx="${px(p.m).toFixed(1)}" cy="${py(p.v).toFixed(1)}" r="2.5" fill="#c49078" pointer-events="none"/>`).join('');
-      }
-    }
-    const esc=s=>String(s).replace(/'/g,"\\'");
-    const dotColor=s=>s>=70?'var(--green)':s>=40?'var(--amber)':'var(--red)';
-    const trDots=tr.map(p=>{const m=toMin(p.time);if(m==null)return'';const x=px(m),y=py(p.score);
-      const label=`${esc(p.time)} · Readiness ${p.score}${p.level?' ('+esc(p.level)+')':''}`;
-      return `<g style="cursor:pointer" onclick="iTip(event,'${label}')"><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="11" fill="transparent"/><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4.5" fill="${dotColor(p.score)}" stroke="#0d0d0f" stroke-width="1.5" pointer-events="none"/><text x="${x.toFixed(1)}" y="${(y-8).toFixed(1)}" fill="var(--text)" font-size="10" font-weight="600" text-anchor="middle" pointer-events="none">${p.score}</text></g>`;}).join('');
+    const grid=[0,6,12,18,24].map(h=>`<line x1="${px(h*60).toFixed(1)}" y1="${T}" x2="${px(h*60).toFixed(1)}" y2="${H-B}" stroke="var(--chart-grid)"/><text x="${px(h*60).toFixed(1)}" y="${H-6}" fill="var(--muted)" font-size="9" text-anchor="middle">${String(h).padStart(2,'0')}</text>`).join('')
+      +[0,50,100].map(v=>`<text x="${L-6}" y="${(py(v)+3).toFixed(1)}" fill="var(--muted)" font-size="8" text-anchor="end">${v}</text>`).join('');
+    const line=(pts,color,w)=>pts.length>1?`<polyline fill="none" stroke="${color}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round" points="${pts.map(p=>`${px(p.m).toFixed(1)},${py(p.v).toFixed(1)}`).join(' ')}"/>`:'';
+    const data=encodeURIComponent(JSON.stringify({bb:bb.map(p=>[p.m,p.v]),tr:tr.map(p=>[p.m,p.v]),L,R,W}));
     return `<div class="intraday-wrap" style="margin:10px 0 4px;position:relative">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
         <span style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Gjennom dagen</span>
-        <span style="font-size:10px;color:var(--muted)"><span style="color:#c49078">●</span> Body Battery &nbsp; Readiness <span style="color:var(--green)">●</span><span style="color:var(--amber)">●</span><span style="color:var(--red)">●</span></span>
+        <span style="font-size:10px;color:var(--muted)"><span style="display:inline-block;width:12px;height:2px;background:#c49078;vertical-align:middle"></span> Body Battery &nbsp; <span style="display:inline-block;width:12px;height:2px;background:#7c6dfa;vertical-align:middle"></span> Training Readiness</span>
       </div>
-      <svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block">${grid}${bbPath}${trDots}</svg>
-      <div class="intraday-tip" style="position:absolute;display:none;transform:translateX(-50%);background:#1a1a1f;border:1px solid rgba(255,255,255,.15);color:var(--text);font-size:11px;padding:4px 8px;border-radius:6px;white-space:nowrap;pointer-events:none;z-index:20;box-shadow:0 4px 12px rgba(0,0,0,.5)"></div>
-      <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:2px">Trykk på et punkt for nøyaktig verdi og tidspunkt · Readiness-punktene er <span style="color:var(--green)">grønne</span>/<span style="color:var(--amber)">gule</span>/<span style="color:var(--red)">røde</span> etter nivå</div>
+      <svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block;cursor:crosshair" data-series="${data}" onclick="iScrub(event)" role="img" aria-label="Body Battery og Training Readiness gjennom dagen">${grid}${line(bb,'#c49078',2)}${line(tr,'#7c6dfa',1.75)}<line class="iscrub-x" x1="0" x2="0" y1="${T}" y2="${H-B}" stroke="var(--muted)" stroke-width="1" style="display:none"/></svg>
+      <div class="intraday-tip" style="position:absolute;display:none;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);color:var(--text);font-size:11px;padding:4px 8px;border-radius:6px;white-space:nowrap;pointer-events:none;box-shadow:var(--shadow)"></div>
+      <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:2px">Trykk i grafen for verdiene på et klokkeslett</div>
     </div>`;
   };
-  if(typeof window.iTip!=='function'){
-    window.iTip=function(e,txt){
+  if(typeof window.iScrub!=='function'){
+    window.iScrub=function(e){
       e.stopPropagation();
-      const wrap=e.currentTarget.closest('.intraday-wrap');if(!wrap)return;
-      const tip=wrap.querySelector('.intraday-tip');if(!tip)return;
-      const rect=wrap.getBoundingClientRect();
-      const cx=(e.touches&&e.touches[0]?e.touches[0].clientX:e.clientX)-rect.left;
-      const cy=(e.touches&&e.touches[0]?e.touches[0].clientY:e.clientY)-rect.top;
-      tip.textContent=txt;tip.style.display='block';
-      tip.style.left=Math.max(40,Math.min(rect.width-40,cx))+'px';
-      tip.style.top=Math.max(0,cy-32)+'px';
-      clearTimeout(window._iTipT);
-      window._iTipT=setTimeout(()=>{tip.style.display='none';},2800);
+      const svg=e.currentTarget,wrap=svg.closest('.intraday-wrap'),tip=wrap&&wrap.querySelector('.intraday-tip');if(!tip)return;
+      const S=JSON.parse(decodeURIComponent(svg.dataset.series)),r=svg.getBoundingClientRect();
+      const vx=(e.clientX-r.left)/r.width*S.W,m=Math.max(0,Math.min(1440,(vx-S.L)/(S.W-S.L-S.R)*1440));
+      const near=a=>a.length?a.reduce((b,p)=>Math.abs(p[0]-m)<Math.abs(b[0]-m)?p:b):null;
+      const fmtM=x=>`${String(Math.floor(x/60)).padStart(2,'0')}:${String(x%60).padStart(2,'0')}`;
+      const b=near(S.bb),t=near(S.tr);
+      const parts=[];if(b)parts.push(`Body Battery ${b[1]} (${fmtM(b[0])})`);if(t&&Math.abs(t[0]-m)<240)parts.push(`Readiness ${t[1]} (${fmtM(t[0])})`);
+      tip.textContent=parts.join(' · ')||'Ingen data her';tip.style.display='block';
+      const cx=e.clientX-wrap.getBoundingClientRect().left;
+      tip.style.left=Math.max(70,Math.min(wrap.clientWidth-70,cx))+'px';tip.style.top='18px';
+      const xl=svg.querySelector('.iscrub-x');if(xl){const xx=S.L+(m/1440)*(S.W-S.L-S.R);xl.setAttribute('x1',xx);xl.setAttribute('x2',xx);xl.style.display='';}
+      clearTimeout(window._iTipT);window._iTipT=setTimeout(()=>{tip.style.display='none';if(xl)xl.style.display='none';},3500);
     };
   }
 
@@ -1911,7 +1913,7 @@ function renderHealth(){
           <div><div class="stat-label">VO₂ Max</div><div class="hero-pair-v" style="color:var(--accent2)">${GL('vo2max')}<span> ml/kg/min</span></div></div>
           <div><div class="stat-label">Fitness Age</div><div class="hero-pair-v" style="color:var(--green)">${GL('fitnessAge',1)}<span> vs ${ageNow()} faktisk</span></div></div>
         </div>
-      </div>`;
+      </div>${trainingStatusWhy(ts)}`;
     })()}
     <div class="stat-grid training-support">
       <div class="stat-card">
@@ -1990,13 +1992,15 @@ function renderHealth(){
       if(!bcEntry)return'';
       const bcStale=bcEntry.date!==_sd;
       const bcDateLbl=bcEntry.date.split('-').reverse().slice(0,2).join('/');
+      const bcDays=Math.round((Date.parse(_sd)-Date.parse(bcEntry.date))/864e5);
+      const bcAgo=bcDays<=0?'veid i dag':bcDays===1?'veid i går':`veid ${bcDateLbl} · ${bcDays} dager siden`;
       const bv=(k,dec=1)=>bcEntry[k]!=null?(+bcEntry[k]).toFixed(dec):'—';
       return`
       <div class="section-head" style="margin-top:1.5rem">Body Composition
         ${bcStale?`<span style="font-size:10px;font-weight:400;color:var(--muted);margin-left:8px">siste måling ${bcDateLbl}</span>`:''}
       </div>
       <div class="stat-grid">
-        <div class="stat-card"><div class="stat-label">Vekt</div><div class="stat-value" style="font-size:22px">${bv('weight',1)}<span style="font-size:14px;color:var(--muted)">kg</span></div><div class="stat-sub">Mål: 65 kg</div></div>
+        <div class="stat-card"><div class="stat-label">Vekt</div><div class="stat-value" style="font-size:22px">${bv('weight',1)}<span style="font-size:14px;color:var(--muted)">kg</span></div><div class="stat-sub" style="${bcDays>7?'color:var(--amber)':''}">${bcAgo}</div><div class="stat-sub">Mål: 65 kg</div></div>
         <div class="stat-card"><div class="stat-label">BMI</div><div class="stat-value" style="font-size:22px">${bv('bmi',1)}</div><div class="stat-sub">Normal: 18.5–24.9</div></div>
         <div class="stat-card"><div class="stat-label">Kroppsfett</div><div class="stat-value" style="color:var(--amber);font-size:22px">${bv('bodyFat',1)}<span style="font-size:14px;color:var(--muted)">%</span></div><div class="stat-sub">Mål: &lt;20%</div></div>
         <div class="stat-card"><div class="stat-label">Muskelmasse</div><div class="stat-value" style="font-size:22px;color:var(--green)">${bv('muscleMass',1)}<span style="font-size:14px;color:var(--muted)">kg</span></div></div>
@@ -2090,6 +2094,57 @@ const INS_DRIVERS=[
   {key:'prevLoad',label:'Training Load dagen før',unit:''},{key:'sleepH',label:'Søvntimer',unit:' t'},
   {key:'sleepScore',label:'Sleep Score',unit:''},{key:'avgStress',label:'Stress dagen før',unit:''}
 ];
+// ── Training Status explanation ──
+// Garmin decides Training Status from (1) Acute Load vs your optimal range /
+// Chronic Load, (2) the VO2 Max trend and (3) recovery (HRV). We show Garmin's
+// definition of the status plus those inputs from the user's own data.
+const TSTATUS_WHY={
+  DETRAINING:'Du har trent klart mindre enn vanlig i en uke eller mer, og formen begynner å gå ned. Kommer du i gang igjen med jevne økter, snur det.',
+  PRODUCTIVE:'Belastningen bygger form: du trener jevnt og VO2 Max går opp eller holder seg.',
+  MAINTAINING:'Belastningen er nok til å holde formen ved like, men ikke til å bygge den videre.',
+  RECOVERY:'Lettere belastning gir kroppen tid til å hente seg inn — fint etter en hard periode.',
+  UNPRODUCTIVE:'Belastningen er på et greit nivå, men VO2 Max går ned. Ofte et tegn på at restitusjonen halter (søvn, stress, mat).',
+  PEAKING:'Ideell konkurranseform: nylig redusert belastning har latt kroppen restituere.',
+  OVERREACHING:'Belastningen er svært høy og virker mot sin hensikt. Kroppen trenger hvile.',
+  STRAINED:'Dårlig restitusjon (lav HRV) begrenser hvor mye du bør trene nå. Ta det rolig.',
+  NO_STATUS:'Garmin trenger flere økter med puls og VO2 Max-estimat for å gi en status.'
+};
+function trainingStatusWhy(ts){
+  const key=String(ts||'').toUpperCase().replace(/ /g,'_');
+  if(!TSTATUS_WHY[key])return'';
+  const H=[...healthData].sort((a,b)=>b.date.localeCompare(a.date));
+  const g=k=>{const r=H.find(x=>x[k]!=null);return r?r[k]:null;};
+  const acute=g('acuteLoad'),chronic=g('chronicLoad'),tMin=g('loadTunnelMin'),tMax=g('loadTunnelMax');
+  const rows=[];
+  // 1) Load
+  if(acute!=null||chronic!=null){
+    let t=`Acute Load (7 d) <b>${acute!=null?Math.round(acute):'—'}</b> mot Chronic Load (28 d) <b>${chronic!=null?Math.round(chronic):'—'}</b>`;
+    if(tMin!=null&&tMax!=null)t+=` · optimalt område ${Math.round(tMin)}–${Math.round(tMax)}`;
+    else if(acute!=null&&chronic)t+=` · ACWR ${(acute/chronic).toFixed(2).replace('.',',')}`;
+    rows.push(['📊',t]);
+  }
+  // 2) Recent training
+  const acts=[...activities].filter(a=>a.date).sort((a,b)=>b.date.localeCompare(a.date));
+  if(acts.length){
+    const last=acts[0].date,days=Math.round((Date.parse(daysAgoIso(0))-Date.parse(last))/864e5);
+    const n7=acts.filter(a=>a.date>=daysAgoIso(6)).length,n28=acts.filter(a=>a.date>=daysAgoIso(27)).length;
+    rows.push(['🏃',`Siste økt ${ddmm(last)} (${days===0?'i dag':days===1?'i går':days+' dager siden'}) · ${n7} økter siste 7 d, ${n28} siste 28 d`]);
+  }
+  // 3) VO2 Max trend over ~4 weeks
+  const vNow=H.find(x=>x.vo2max!=null),vOld=H.find(x=>x.vo2max!=null&&x.date<=daysAgoIso(28));
+  if(vNow){
+    const d=vOld?vNow.vo2max-vOld.vo2max:null;
+    rows.push(['🫁',`VO2 Max ${vNow.vo2max}${d==null?'':d===0?' · uendret siste 4 uker':` · ${d>0?'+':'−'}${Math.abs(d)} siste 4 uker`}`]);
+  }
+  // 4) Recovery signal
+  const hrv=g('hrvStatus'),focus=g('loadFocus');
+  if(hrv)rows.push(['💓',`HRV Status: ${garminLabel(hrv)}`]);
+  if(focus)rows.push(['🎯',`Training Load Focus: ${garminLabel(focus)}`]);
+  return `<div class="ts-why"><div class="ts-why-title">Hvorfor ${garminLabel(key)}?</div><div class="ts-why-def">${TSTATUS_WHY[key]}</div>
+    ${rows.map(([i,t])=>`<div class="ts-why-row"><span>${i}</span><span>${t}</span></div>`).join('')}
+    <div class="ts-why-note">Tallene er Garmins egne. Garmin vurderer Training Status ut fra belastning, VO2 Max-trend og restitusjon.</div></div>`;
+}
+
 // Garmin status values are shown in Garmin's own English wording, title-cased
 // (e.g. "OVERREACHING" → "Overreaching", "AEROBIC LOW SHORTAGE" → "Low Aerobic Shortage").
 const GARMIN_WORDING={AEROBIC_LOW_SHORTAGE:'Low Aerobic Shortage',AEROBIC_HIGH_SHORTAGE:'High Aerobic Shortage',ANAEROBIC_SHORTAGE:'Anaerobic Shortage',

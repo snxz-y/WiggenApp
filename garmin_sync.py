@@ -201,8 +201,15 @@ def sync_health(hdrs, dn, target_date=None):
     ts_device_map = ts_raw.get("latestTrainingStatusData", {})
     ts_device = next(iter(ts_device_map.values()), {}) if ts_device_map else {}
     ts_num = ts_device.get("trainingStatus")
-    ts_map = {1:"OVERREACHING",2:"MAINTAINING",3:"PRODUCTIVE",4:"RECOVERY",5:"UNPRODUCTIVE",6:"STRAINED",7:"PRODUCTIVE",8:"PEAKING"}
-    ts_status = ts_map.get(ts_num, ts_raw.get("trainingStatusKey")) if ts_num else ts_raw.get("trainingStatusKey")
+    # Garmin's own phrase (e.g. "DETRAINING_1") is authoritative; the numeric
+    # code is only a fallback. Code 1 is DETRAINING: in the history it only ever
+    # appeared with Acute Load ~0 (it was wrongly mapped to OVERREACHING before).
+    ts_phrase = ts_device.get("trainingStatusFeedbackPhrase")
+    ts_map = {1:"DETRAINING",2:"MAINTAINING",3:"PRODUCTIVE",4:"RECOVERY",5:"UNPRODUCTIVE",6:"STRAINED",7:"PRODUCTIVE",8:"PEAKING"}
+    if ts_phrase:
+        ts_status = str(ts_phrase).rsplit("_", 1)[0] if str(ts_phrase).rsplit("_", 1)[-1].isdigit() else str(ts_phrase)
+    else:
+        ts_status = ts_map.get(ts_num, ts_raw.get("trainingStatusKey")) if ts_num else ts_raw.get("trainingStatusKey")
     acute_dto = ts_device.get("acuteTrainingLoadDTO") or {}
     acwr_val = acute_dto.get("dailyAcuteChronicWorkloadRatio")
     acute_val = acute_dto.get("dailyTrainingLoadAcute")
@@ -351,6 +358,16 @@ def sync_health(hdrs, dn, target_date=None):
         "trainingReadinessSeries": rt_series,
         "bodyBatterySeries": bb_series,
         "trainingStatus": ts_status.get("trainingStatusKey") if isinstance(ts_status, dict) else ts_status,
+        # Inputs Garmin uses to explain Training Status (shown in the app)
+        "trainingStatusPhrase": ts_phrase,
+        "trainingStatusCode": ts_num,
+        "fitnessTrend": ts_device.get("fitnessTrend"),
+        "weeklyTrainingLoad": ts_device.get("weeklyTrainingLoad"),
+        "loadTunnelMin": ts_device.get("loadTunnelMin"),
+        "loadTunnelMax": ts_device.get("loadTunnelMax"),
+        "acwrStatus": acute_dto.get("acwrStatus"),
+        "chronicLoadMin": acute_dto.get("minTrainingLoadChronic"),
+        "chronicLoadMax": acute_dto.get("maxTrainingLoadChronic"),
         "acuteLoad": acute_load,
         "chronicLoad": chronic_load,
         "acwr": round(acwr_val, 2) if acwr_val else (round(acute_load/chronic_load, 2) if acute_load and chronic_load else None),
