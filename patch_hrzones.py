@@ -19,8 +19,9 @@ if "hrZones" in src:
     print(f"{TARGET}: allerede patchet, ingen endring.")
     sys.exit(0)
 
-FETCH_ANCHOR = '    race_raw = gget(f"{BASE}/metrics-service/metrics/racepredictions/latest", hdrs) or {}\n'
-FETCH_CODE = FETCH_ANCHOR + '''    hrz_raw  = gget(f"{BASE}/biometric-service/heartRateZones", hdrs) or []
+import re
+
+FETCH_CODE = '''    hrz_raw  = gget(f"{BASE}/biometric-service/heartRateZones", hdrs) or []
 
     # Pulssoner: Garmin gir en rad per sport (DEFAULT, RUNNING, CYCLING ...).
     # Bruk DEFAULT, ellers RUNNING, ellers forste rad. Lagre sonegulvene.
@@ -38,17 +39,19 @@ FETCH_CODE = FETCH_ANCHOR + '''    hrz_raw  = gget(f"{BASE}/biometric-service/he
     except Exception as e:
         print(f"  HR zones parse error: {e}")
     print(f"  HR zones: {hr_zones}")
+
 '''
 
-ENTRY_ANCHOR = '        "recoveryTimeHrs": _recovery_hrs,\n'
-ENTRY_CODE = ENTRY_ANCHOR + '        "hrZones": hr_zones,\n'
-
-for anchor, name in ((FETCH_ANCHOR, "henting"), (ENTRY_ANCHOR, "entry")):
-    if src.count(anchor) != 1:
-        sys.exit(f"{TARGET}: fant ikke ankeret for {name} (antall={src.count(anchor)}). Ingen endring gjort.")
+# Ankeret er starten paa health-oppforingen i sync_health():
+#     entry = {
+#         "date": TARGET,
+ANCHOR = re.compile(r'^(    entry = \{\r?\n)([ \t]+)("date": TARGET,\r?\n)', re.M)
+matches = ANCHOR.findall(src)
+if len(matches) != 1:
+    sys.exit(f"{TARGET}: fant ikke ankeret 'entry = {{ / \"date\": TARGET' (antall={len(matches)}). Ingen endring gjort.")
 
 open(TARGET + ".bak_hrzones", "w", encoding="utf-8").write(src)
-src = src.replace(FETCH_ANCHOR, FETCH_CODE).replace(ENTRY_ANCHOR, ENTRY_CODE)
+src = ANCHOR.sub(lambda m: FETCH_CODE + m.group(1) + m.group(2) + m.group(3) + m.group(2) + '"hrZones": hr_zones,\n', src)
 compile(src, TARGET, "exec")
 open(TARGET, "w", encoding="utf-8").write(src)
 print(f"{TARGET}: patchet OK (backup: {TARGET}.bak_hrzones)")
