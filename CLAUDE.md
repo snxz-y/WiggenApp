@@ -16,6 +16,7 @@ The GitHub repo is the source of truth for all code. The Windows folder `C:\User
 - `shifts_sync.py` — shift calendar (iCal) → `shifts.json`. Must sit next to `garmin_sync.py` on the box.
 - `worker.js` — source of the Cloudflare Worker (must be pasted into Cloudflare manually to deploy).
 - `activities.json`, `health.json`, `nutrition.json`, `reviews.json`, `shifts.json` — data.
+- `scriptable/WiggenKalender.js` — iOS home-screen calendar widget (Scriptable app).
 - `.github/workflows/pages-deploy.yml` — deploys GitHub Pages when site files change.
 
 ## Garmin-derived settings (not hardcoded)
@@ -45,6 +46,8 @@ The GitHub repo is the source of truth for all code. The Windows folder `C:\User
 
 ## Kalender (private calendar overview)
 **The repo and GitHub Pages site are public**, so calendar data must never be written to the repo. The Kalender tab instead calls the Worker's `POST /calendar {key, from, to}`. The Worker fetches every iCal feed in the `CAL_FEEDS` secret (JSON: `[{"name":"Privat","url":"https://calendar.google.com/calendar/ical/.../private-.../basic.ics","color":"#7c6dfa"}, ...]`, `color` optional), expands recurring events (RRULE daily/weekly/monthly/yearly, EXDATE, RECURRENCE-ID overrides), converts to Oslo time and returns only the requested window (max 400 days). It answers only if `key` matches the `CAL_KEY` secret. The app stores the password in localStorage on each device (the «Lås» button forgets it). Two views (choice remembered in localStorage): **Liste** (21-day agenda) and **Måned** (month grid; on phones the cells show coloured dots, on wide screens event chips; tapping a day lists it below). Tapping any event opens a detail sheet with date/time, calendar, location (Google Maps link) and the full description (Google's HTML descriptions are converted to plain text, scripts stripped, URLs made clickable). Per-calendar show/hide chips (hidden set in localStorage). Responses are cached in memory per date range until the page reloads. A feed that fails shows ⚠ on its chip. Google calendars use their «Secret address in iCal format»; calendars subscribed from a URL (the shift calendar, the course timetable) use their original URL; Norwegian holidays use Google's public holiday iCal URL.
+
+**Home-screen widget:** `scriptable/WiggenKalender.js` is a Scriptable (iOS) widget that calls the same `/calendar` endpoint (password in the iOS Keychain, set by running the script once in Scriptable) and shows the list view in app colours; small/medium/large sizes. Tapping it opens `https://snxz-y.github.io/WiggenApp/#kalender`. iOS opens that in Safari, not the home-screen web app, so the password must also be entered once in Safari. The app supports hash deep links: `#kalender`, `#helse`, `#innsikt`, `#aktiviteter`, `#kosthold`, `#mal`, `#jobb`.
 
 ## Målsetninger (formerly Reviews)
 The old AI-generated weekly reviews are gone. The Målsetninger tab lets Jørgen write or paste goals (optional title + text); they are saved via the Worker's `/save-review` to `reviews.json` and shown as collapsible accordions with delete. `/generate-review` (Claude API) was removed from the Worker in Sept 2026.

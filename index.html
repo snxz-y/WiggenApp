@@ -3154,7 +3154,19 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')calClose();});
   try { await loadData(); } catch(e) { console.error('Init load failed:', e); }
   initCompDates(); initHealthDates(); initNutrDates();
   renderHealth(); renderActivities(); renderCoachReviews();
+  openTabFromHash();
 })();
+
+// Deep link: ...WiggenApp/#kalender opens the Kalender tab (used by the
+// Scriptable home-screen widget). Other tabs: #helse, #innsikt, #aktiviteter,
+// #kosthold, #mal, #jobb.
+function openTabFromHash(){
+  const map={kalender:'calendar',helse:'health',innsikt:'insights',aktiviteter:'activities',kosthold:'nutrition',mal:'reviews',jobb:'work'};
+  const id=map[decodeURIComponent(location.hash.slice(1)).toLowerCase()];if(!id)return;
+  const btn=[...document.querySelectorAll('.nav-tab')].find(b=>(b.getAttribute('onclick')||'').includes(`'${id}'`));
+  if(btn){showNav(id,btn);btn.scrollIntoView({block:'nearest',inline:'center'});}
+}
+window.addEventListener('hashchange',openTabFromHash);
 </script>
 </body>
 </html>
