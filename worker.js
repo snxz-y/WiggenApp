@@ -1,33 +1,111 @@
 // Cloudflare Worker — WiggenApp backend
-// Handles: / (nutrition), /save-review, /delete-review, /calendar
-// Secrets: GITHUB_TOKEN; CAL_KEY (calendar password), CAL_FEEDS (JSON list of {name,url,color})
-// Deploy at: https://nutrition-reciever.margidowiggen.workers.dev
+// Deployed at https://nutrition-reciever.margidowiggen.workers.dev
+//
+// Endpoints (all POST):
+//   /               Kosthold: Health Auto Export → nutrition.json
+//   /save-review    Målsetninger: add a goal to reviews.json
+//   /delete-review  Målsetninger: remove a goal from reviews.json
+//   /calendar       Kalender: private overview of the iCal feeds in CAL_FEEDS
+//
+// Secrets (Cloudflare → Settings → Variables and Secrets):
+//   GITHUB_TOKEN  token with write access to snxz-y/WiggenApp
+//   CAL_KEY       password the app sends for /calendar
+//   CAL_FEEDS     JSON list: [{"name":"Privat","url":"https://...ics","color":"#7c6dfa"}, ...]
 
 const REPO = 'snxz-y/WiggenApp';
 const GH = 'https://api.github.com';
 
-async function ghGet(path, token) {
-  const r = await fetch(`${GH}/repos/${REPO}/contents/${path}`, {
-    headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json', 'User-Agent': 'wt' }
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST,OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
+const json = (obj, status = 200) =>
+  new Response(JSON.stringify(obj), { status, headers: { ...CORS, 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
+
+// ── GitHub JSON files ───────────────────────────────────────────────────────
+const b64decode = b64 => new TextDecoder().decode(Uint8Array.from(atob((b64 || '').replace(/\s/g, '')), c => c.charCodeAt(0)));
+const b64encode = str => { let bin = ''; for (const b of new TextEncoder().encode(str)) bin += String.fromCharCode(b); return btoa(bin); };
+
+async function gh(path, token, init = {}) {
+  return fetch(`${GH}/repos/${REPO}/contents/${path}`, {
+    ...init,
+    headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json', 'User-Agent': 'wiggenapp-worker' },
   });
-  return r.json();
 }
 
-// Decode a base64 blob as UTF-8 (plain atob() is Latin-1 and mangles non-ASCII
-// like →, é, etc. — which both breaks matching and re-garbles titles on save).
-function b64utf8(b64) {
-  const bin = atob((b64 || '').replace(/\s/g, ''));
-  const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
-  return new TextDecoder('utf-8').decode(bytes);
+// Read a JSON file from the repo, let `change` modify it, write it back.
+// `change` returns { data, result } (or null to skip writing). Retries if the
+// file changed on GitHub in between (HTTP 409/422 sha mismatch).
+async function updateRepoJson(path, token, message, change) {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const r = await gh(path, token);
+    if (!r.ok) throw new Error(`GitHub read ${path}: HTTP ${r.status}`);
+    const file = await r.json();
+    const out = change(JSON.parse(b64decode(file.content)));
+    if (!out) return null;
+    const w = await gh(path, token, {
+      method: 'PUT',
+      body: JSON.stringify({ message, sha: file.sha, content: b64encode(JSON.stringify(out.data, null, 2)) }),
+    });
+    if (w.ok) return out.result;
+    if (w.status !== 409 && w.status !== 422) throw new Error(`GitHub write ${path}: HTTP ${w.status}`);
+  }
+  throw new Error(`GitHub write ${path}: kept conflicting`);
 }
 
-async function ghPut(path, content, sha, msg, token) {
-  const r = await fetch(`${GH}/repos/${REPO}/contents/${path}`, {
-    method: 'PUT',
-    headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json', 'User-Agent': 'wt' },
-    body: JSON.stringify({ message: msg, content: btoa(unescape(encodeURIComponent(content))), sha })
+// ── Kosthold (Health Auto Export) ──────────────────────────────────────────
+// HAE sends { data: { metrics: [{ name, data: [{ date: "2026-06-15 12:00:00 +0200", qty }] }] } }.
+// Values are summed per day. Older senders posted plain {date, ...} objects.
+const NUTRITION_FIELDS = {
+  dietary_energy: 'calories', protein: 'protein', carbohydrates: 'carbs', total_fat: 'fat',
+  dietary_sugar: 'sugar', fiber: 'fiber', saturated_fat: 'saturatedFat', water: 'water',
+};
+
+function nutritionEntries(body) {
+  if (!body?.data?.metrics) return (Array.isArray(body) ? body : [body]).filter(e => e && e.date);
+  const days = {};
+  for (const metric of body.data.metrics) {
+    const field = NUTRITION_FIELDS[metric.name];
+    if (!field) continue;
+    const kJ = metric.name === 'dietary_energy';            // Apple Health energy is kJ → kcal
+    for (const point of metric.data || []) {
+      const date = point.date?.slice(0, 10);
+      if (!date) continue;
+      days[date] ||= { date };
+      days[date][field] = (days[date][field] || 0) + (kJ ? (point.qty || 0) / 4.184 : (point.qty || 0));
+    }
+  }
+  return Object.values(days).map(({ date, ...v }) =>
+    ({ date, ...Object.fromEntries(Object.entries(v).map(([k, x]) => [k, Math.round(x * 10) / 10])) }));
+}
+
+async function saveNutrition(request, env) {
+  const entries = nutritionEntries(await request.json());
+  if (!entries.length) return json({ ok: true, dates: [] });
+  await updateRepoJson('nutrition.json', env.GITHUB_TOKEN, 'Nutrition sync', current => {
+    const byDate = Object.fromEntries(current.map(e => [e.date, e]));
+    for (const e of entries) byDate[e.date] = { ...byDate[e.date], ...e };
+    return { data: Object.values(byDate).sort((a, b) => b.date.localeCompare(a.date)) };
   });
-  return r.json();
+  return json({ ok: true, dates: entries.map(e => e.date) });
+}
+
+// ── Målsetninger (reviews.json) ────────────────────────────────────────────
+async function saveGoal(request, env) {
+  const goal = await request.json();
+  await updateRepoJson('reviews.json', env.GITHUB_TOKEN, 'Save review', current => ({ data: [goal, ...current] }));
+  return json({ ok: true });
+}
+
+async function deleteGoal(request, env) {
+  const { date, period, content } = await request.json();
+  const found = await updateRepoJson('reviews.json', env.GITHUB_TOKEN, 'Delete review', current => {
+    // Remove only the first exact match (handles duplicates).
+    const i = current.findIndex(r => r.date === date && r.period === period && r.content === content);
+    return i === -1 ? null : { data: current.filter((_, k) => k !== i), result: true };
+  });
+  return found ? json({ ok: true }) : json({ ok: false, error: 'Review not found' }, 404);
 }
 
 // ── Calendar overview (private) ────────────────────────────────────────────
@@ -175,8 +253,7 @@ async function sameSecret(a, b) {
   return diff === 0;
 }
 
-async function handleCalendar(request, env, cors) {
-  const json = (o, status = 200) => new Response(JSON.stringify(o), { status, headers: { ...cors, 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
+async function handleCalendar(request, env) {
   const body = await request.json().catch(() => ({}));
   if (!env.CAL_KEY || !body.key || !(await sameSecret(body.key, env.CAL_KEY))) return json({ error: 'unauthorized' }, 401);
   let feeds;
@@ -204,118 +281,15 @@ async function handleCalendar(request, env, cors) {
 
 export default {
   async fetch(request, env) {
-    const url = new URL(request.url);
-    const token = env.GITHUB_TOKEN;
-
-    const cors = {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    };
-
-    if (request.method === 'OPTIONS') return new Response(null, { headers: cors });
-
-    // ── POST / — save nutrition ────────────────────────────────────────────
-    if (url.pathname === '/' && request.method === 'POST') {
-      try {
-        const body = await request.json();
-
-        // Parse Health Auto Export format: { data: { metrics: [...] } }
-        // Each metric has name + data array of { date: "2026-06-15 12:00:00 +0200", qty: N }
-        let newEntries;
-        if (body?.data?.metrics) {
-          const nameMap = {
-            'dietary_energy': 'calories',
-            'protein': 'protein',
-            'carbohydrates': 'carbs',
-            'total_fat': 'fat',
-            'dietary_sugar': 'sugar',
-            'fiber': 'fiber',
-            'saturated_fat': 'saturatedFat',
-            'water': 'water',
-          };
-          const dayMap = {};
-          for (const metric of body.data.metrics) {
-            const field = nameMap[metric.name];
-            if (!field) continue;
-            // dietary_energy from Apple Health is in kJ — convert to kcal
-            const isEnergy = metric.name === 'dietary_energy';
-            for (const point of (metric.data || [])) {
-              const date = point.date?.slice(0, 10);
-              if (!date) continue;
-              if (!dayMap[date]) dayMap[date] = { date };
-              const qty = isEnergy ? (point.qty || 0) / 4.184 : (point.qty || 0);
-              dayMap[date][field] = (dayMap[date][field] || 0) + qty;
-            }
-          }
-          newEntries = Object.values(dayMap).map(entry => {
-            const out = { date: entry.date };
-            for (const [k, v] of Object.entries(entry)) {
-              if (k !== 'date') out[k] = Math.round(v * 10) / 10;
-            }
-            return out;
-          });
-        } else {
-          // Legacy format: array or single object with date field
-          newEntries = Array.isArray(body) ? body : [body];
-        }
-
-        const existing = await ghGet('nutrition.json', token);
-        const current = JSON.parse(atob(existing.content));
-        const byDate = {};
-        current.forEach(e => byDate[e.date] = e);
-        newEntries.forEach(e => { if (e.date) byDate[e.date] = { ...byDate[e.date], ...e }; });
-        const merged = Object.values(byDate).sort((a, b) => b.date.localeCompare(a.date));
-
-        const putResult = await ghPut('nutrition.json', JSON.stringify(merged, null, 2), existing.sha, 'Nutrition sync', token);
-        if (putResult.content || putResult.commit) {
-          return new Response(JSON.stringify({ ok: true, dates: newEntries.map(e => e.date) }), { headers: { ...cors, 'Content-Type': 'application/json' } });
-        } else {
-          return new Response(JSON.stringify({ error: 'GitHub write failed', detail: putResult.message || JSON.stringify(putResult) }), { status: 500, headers: cors });
-        }
-      } catch (e) {
-        return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: cors });
-      }
+    if (request.method === 'OPTIONS') return new Response(null, { headers: CORS });
+    if (request.method !== 'POST') return json({ error: 'Not found' }, 404);
+    const routes = { '/': saveNutrition, '/save-review': saveGoal, '/delete-review': deleteGoal, '/calendar': handleCalendar };
+    const handler = routes[new URL(request.url).pathname];
+    if (!handler) return json({ error: 'Not found' }, 404);
+    try {
+      return await handler(request, env);
+    } catch (e) {
+      return json({ error: e.message }, 500);
     }
-
-    // ── POST /save-review ─────────────────────────────────────────────────
-    if (url.pathname === '/save-review' && request.method === 'POST') {
-      try {
-        const body = await request.json();
-        const existing = await ghGet('reviews.json', token);
-        const current = JSON.parse(b64utf8(existing.content));
-        current.unshift(body);
-        await ghPut('reviews.json', JSON.stringify(current, null, 2), existing.sha, 'Save review', token);
-        return new Response(JSON.stringify({ ok: true }), { headers: { ...cors, 'Content-Type': 'application/json' } });
-      } catch (e) {
-        return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: cors });
-      }
-    }
-
-    // ── POST /delete-review ───────────────────────────────────────────────
-    if (url.pathname === '/delete-review' && request.method === 'POST') {
-      try {
-        const { date, period, content } = await request.json();
-        const existing = await ghGet('reviews.json', token);
-        const current = JSON.parse(b64utf8(existing.content));
-        // Remove only the first entry that matches exactly (handles duplicates).
-        const idx = current.findIndex(r => r.date === date && r.period === period && r.content === content);
-        if (idx === -1) {
-          return new Response(JSON.stringify({ ok: false, error: 'Review not found' }), { status: 404, headers: { ...cors, 'Content-Type': 'application/json' } });
-        }
-        current.splice(idx, 1);
-        await ghPut('reviews.json', JSON.stringify(current, null, 2), existing.sha, 'Delete review', token);
-        return new Response(JSON.stringify({ ok: true }), { headers: { ...cors, 'Content-Type': 'application/json' } });
-      } catch (e) {
-        return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: cors });
-      }
-    }
-
-    // ── POST /calendar — private calendar overview ─────────────────────────
-    if (url.pathname === '/calendar' && request.method === 'POST') {
-      return handleCalendar(request, env, cors);
-    }
-
-    return new Response('Not found', { status: 404, headers: cors });
-  }
+  },
 };
