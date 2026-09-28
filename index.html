@@ -2278,12 +2278,13 @@ function trainingStatusWhy(ts){
   if(!TSTATUS_WHY[key])return'';
   const H=[...healthData].sort((a,b)=>b.date.localeCompare(a.date));
   const g=k=>{const r=H.find(x=>x[k]!=null);return r?r[k]:null;};
-  const acute=g('acuteLoad'),chronic=g('chronicLoad'),tMin=g('loadTunnelMin'),tMax=g('loadTunnelMax');
+  const acute=g('acuteLoad'),chronic=g('chronicLoad'),tMin=g('loadTunnelMin')??g('chronicLoadMin'),tMax=g('loadTunnelMax')??g('chronicLoadMax'),acwrSt=g('acwrStatus');
   const rows=[];
   // 1) Load
-  if(acute!=null||chronic!=null){
+  if(acute!=null||chronic!=null||tMin!=null){
     let t=`Acute Load (7 d) <b>${acute!=null?Math.round(acute):'—'}</b> mot Chronic Load (28 d) <b>${chronic!=null?Math.round(chronic):'—'}</b>`;
     if(tMin!=null&&tMax!=null)t+=` · optimalt område ${Math.round(tMin)}–${Math.round(tMax)}`;
+    if(acwrSt)t+=` · Load Ratio: ${garminLabel(acwrSt)}`;
     else if(acute!=null&&chronic)t+=` · ACWR ${(acute/chronic).toFixed(2).replace('.',',')}`;
     rows.push(['📊',t]);
   }
