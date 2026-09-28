@@ -562,6 +562,13 @@ if __name__ == "__main__":
         sync_health(hdrs, display_name)        # yesterday (finalized)
         sync_health(hdrs, display_name, TODAY)  # today (live)
         sync_activities(hdrs)
+        try:
+            import sys as _sys
+            _sys.path[:0] = [os.path.dirname(os.path.abspath(globals().get("__file__", "x"))), os.getcwd()]  # works when exec()d by ha_garmin.py too
+            from shifts_sync import sync_shifts
+            sync_shifts(GH_HEADERS)
+        except Exception as e:                     # never let shifts break the Garmin sync
+            print(f"  Shifts sync failed: {e}")
         print(f"\nDone. Synced health for {YESTERDAY}+{TODAY}, activities for {YESTERDAY}-{TODAY}.")
     except Exception as e:
         print(f"\nFailed: {e}")

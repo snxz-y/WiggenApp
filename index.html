@@ -977,7 +977,7 @@ function renderGoalProjection(){
   const daysToYE=Math.max(1,Math.round((yearEnd-now)/86400000));
   const reqPerWk=remaining>0?remaining/(daysToYE/7):0;
   const reqKcal=Math.round(reqPerWk*7700/7);
-  const yeLabel=yearEnd.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+  const yeLabel=yearEnd.toLocaleDateString('no-NO',{day:'2-digit',month:'short',year:'numeric'});
   // Actual recent calorie balance (cross-data: nutrition eaten vs Garmin burned)
   let actualBox='';
   if(typeof nutritionData!=='undefined' && nutritionData && nutritionData.length){
@@ -1148,7 +1148,7 @@ function renderWork(){
   const _now=new Date();
   const _y=_now.getFullYear(), _m=_now.getMonth();
   const _monthKey=`${_y}-${String(_m+1).padStart(2,'0')}`;
-  const _monthName=_now.toLocaleString('en-GB',{month:'long'});
+  const _monthName=_now.toLocaleString('nb-NO',{month:'long'});
   const _lastDay=new Date(_y,_m+1,0).getDate();
   const _mm=String(_m+1).padStart(2,'0');
   const _monthRange=`01/${_mm} – ${_lastDay}/${_mm}`;
