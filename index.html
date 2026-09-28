@@ -320,31 +320,61 @@ th{font-family:var(--font-body);letter-spacing:.04em}
 
 
 /* ── Kalender ── */
-.cal-wrap{max-width:720px;margin:0 auto}
+.cal-wrap{max-width:760px;margin:0 auto}
+.cal-views{display:flex;gap:4px;justify-content:center;margin-bottom:12px}
+.cal-view{background:none;border:1px solid var(--border);color:var(--muted);border-radius:999px;padding:5px 14px;font:inherit;font-size:12px;font-weight:600;cursor:pointer}
+.cal-view.active{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
 .cal-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;flex-wrap:wrap}
 .cal-range{font-family:var(--font-display);font-size:17px;font-weight:600}
 .cal-btns{display:flex;gap:6px}
 .cal-btn{background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 12px;font:inherit;font-size:12px;font-weight:600;cursor:pointer}
 .cal-btn:hover{background:var(--surface2)}
+.cal-btn-primary{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
 .cal-legend{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
 .cal-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:999px;padding:4px 10px;font:inherit;font-size:11px;cursor:pointer}
 .cal-chip.off{opacity:.45;text-decoration:line-through}
-.cal-dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+.cal-dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;display:inline-block}
 .cal-day{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;overflow:hidden}
 .cal-day.today{border-color:var(--accent)}
 .cal-dh{display:flex;justify-content:space-between;align-items:baseline;padding:8px 12px;font-size:12px;font-weight:600;color:var(--muted2)}
 .cal-day.today .cal-dh{color:var(--accent)}
 .cal-day.empty .cal-dh{color:var(--muted);font-weight:500}
-.cal-ev{display:grid;grid-template-columns:4px 88px 1fr;gap:10px;align-items:start;padding:7px 12px;border-top:1px solid var(--border)}
+.cal-ev{display:grid;grid-template-columns:4px 92px 1fr;gap:10px;align-items:start;padding:8px 12px;border:none;border-top:1px solid var(--border);background:none;color:inherit;font:inherit;text-align:left;width:100%;cursor:pointer}
+.cal-ev:hover{background:var(--surface2)}
 .cal-bar-c{align-self:stretch;border-radius:2px}
 .cal-time{font-size:12px;color:var(--muted2);font-variant-numeric:tabular-nums;padding-top:1px;white-space:nowrap}
 .cal-title{font-size:13px;font-weight:600;line-height:1.35;word-break:break-word}
+.cal-has-desc{color:var(--muted);font-weight:400}
 .cal-sub{font-size:11px;color:var(--muted);margin-top:1px}
 .cal-empty{padding:2.5rem 1rem;text-align:center;color:var(--muted)}
 .cal-login{max-width:380px;margin:2rem auto;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem}
 .cal-login input{width:100%;box-sizing:border-box;margin:10px 0;padding:9px 11px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font:inherit;font-size:14px}
 .cal-warn{font-size:11px;color:var(--red);margin:-6px 0 12px}
-@media(max-width:520px){.cal-ev{grid-template-columns:4px 80px 1fr;gap:8px}.cal-time{font-size:11.5px}}
+.cal-month{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;margin-bottom:12px}
+.cal-wd{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:center;padding:2px 0 4px}
+.cal-cell{min-height:92px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:4px;display:flex;flex-direction:column;gap:2px;text-align:left;font:inherit;color:inherit;cursor:pointer;overflow:hidden;min-width:0}
+.cal-cell:hover{background:var(--surface2)}
+.cal-cell.out{opacity:.45}
+.cal-cell.today .cal-num{background:var(--accent);color:var(--on-accent)}
+.cal-cell.sel{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.cal-num{font-size:11px;font-weight:700;width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+.cal-mchips{display:flex;flex-direction:column;gap:2px;min-width:0}
+.cal-mchip{font-size:10px;line-height:1.3;padding:1px 4px;border-radius:3px;border-left:3px solid var(--c);background:var(--surface2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal-mchip b{font-weight:600;color:var(--muted2)}
+.cal-more{font-size:10px;color:var(--muted);padding-left:4px}
+.cal-mdots{display:none;gap:3px;flex-wrap:wrap;margin-top:auto}
+.cal-mdots .cal-dot{width:6px;height:6px}
+.cal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;display:flex;align-items:flex-end;justify-content:center}
+.cal-sheet{position:relative;background:var(--surface);color:var(--text);width:100%;max-width:560px;max-height:85vh;overflow:auto;border-radius:16px 16px 0 0;padding:1.25rem 1.25rem calc(1.25rem + env(safe-area-inset-bottom));box-shadow:0 -8px 30px rgba(0,0,0,.25)}
+@media(min-width:700px){.cal-overlay{align-items:center}.cal-sheet{border-radius:16px}}
+.cal-close{position:absolute;top:10px;right:10px;background:var(--surface2);border:none;color:var(--text);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:13px}
+.cal-sheet-cal{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);margin-bottom:6px;padding-right:36px}
+.cal-sheet-title{font-family:var(--font-display);font-size:21px;font-weight:600;line-height:1.25;margin-bottom:12px;padding-right:36px;word-break:break-word}
+.cal-sheet-row{display:flex;gap:8px;font-size:13px;margin-bottom:8px;line-height:1.4}
+.cal-sheet-row a,.cal-sheet-desc a{color:var(--accent);word-break:break-all}
+.cal-sheet-desc{margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:13px;line-height:1.55;white-space:pre-wrap;word-break:break-word}
+.cal-sheet-none{margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:12px;color:var(--muted)}
+@media(max-width:520px){.cal-ev{grid-template-columns:4px 80px 1fr;gap:8px}.cal-time{font-size:11.5px}.cal-cell{min-height:54px;padding:3px}.cal-mchips{display:none}.cal-mdots{display:flex}.cal-month{gap:2px}}
 </style>
 <script>
 (function(){try{var t=localStorage.getItem('wiggen-theme')||'light';document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','light');}})();
@@ -2951,16 +2981,38 @@ async function loadData() {
 // Private overview of all calendars. Events come from the Worker's /calendar
 // endpoint (feeds + password live as Cloudflare secrets), never from the repo.
 // The password is kept only in this device's localStorage.
+// Two views: "Liste" (21-day agenda) and "Måned" (month grid + selected day).
+// Tapping an event opens a detail sheet with time, place and description.
 const CAL_URL='https://nutrition-reciever.margidowiggen.workers.dev/calendar';
 const CAL_DAYS=21;
 const CAL_PALETTE=['var(--accent)','#7c6dfa','var(--green)','var(--amber)','#4a9fb0','var(--red)','var(--accent2)'];
-let calStart=null,calData=null,calMsg='',calReq=0;
+let calView=null,calStart=null,calMonth=null,calSel=null,calData=null,calMsg='',calReq=0;
+const calCache=new Map();
 const lsGet=(k,d=null)=>{try{const v=localStorage.getItem(k);return v==null?d:v;}catch(e){return d;}};
 const lsSet=(k,v)=>{try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v);}catch(e){}};
 const calIso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const calAdd=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x;};
 const calEsc=v=>String(v==null?'':v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const calHidden=()=>{try{return new Set(JSON.parse(lsGet('calHidden','[]')));}catch(e){return new Set();}};
 const calColor=i=>(calData&&calData.calendars[i]&&calData.calendars[i].color)||CAL_PALETTE[i%CAL_PALETTE.length];
+const calToday=()=>{const t=new Date();t.setHours(0,0,0,0);return t;};
+
+// Events overlapping one day (ds = 'YYYY-MM-DD'), all-day first.
+function calDayEvents(ds){
+  const hidden=calHidden(),ns=calIso(calAdd(new Date(ds+'T00:00'),1));
+  return calData.events.map((e,i)=>({...e,_i:i})).filter(e=>!hidden.has(e.cal)&&(e.allDay?(e.start<=ds&&e.end>ds):(e.start<ns+'T00:00'&&e.end>ds+'T00:00')))
+    .sort((a,b)=>(b.allDay-a.allDay)||a.start.localeCompare(b.start)||a.title.localeCompare(b.title));
+}
+function calTimeLabel(e,ds){
+  if(e.allDay)return'Hele dagen';
+  const sOn=e.start.slice(0,10)===ds,eOn=e.end.slice(0,10)===ds;
+  return sOn&&eOn?`${e.start.slice(11)}–${e.end.slice(11)}`:sOn?`${e.start.slice(11)} →`:eOn?`→ ${e.end.slice(11)}`:'Hele dagen';
+}
+function calRows(list,ds){
+  return list.map(e=>{const cal=calData.calendars[e.cal]||{};
+    return `<button class="cal-ev" onclick="calOpen(${e._i})"><div class="cal-bar-c" style="background:${calColor(e.cal)}"></div><div class="cal-time">${calTimeLabel(e,ds)}</div>
+      <div><div class="cal-title">${calEsc(e.title)}${e.description?' <span class="cal-has-desc" title="Har beskrivelse">≡</span>':''}</div><div class="cal-sub">${calEsc(cal.name||'')}${e.location?' · '+calEsc(e.location):''}</div></div></button>`;}).join('');
+}
 
 function renderCalendar(){
   const el=document.getElementById('cal-content');if(!el)return;
@@ -2969,68 +3021,133 @@ function renderCalendar(){
       <div style="font-size:12px;color:var(--muted);margin-top:4px">Kalenderne dine hentes privat via Workeren. Skriv inn kalenderpassordet (<code>CAL_KEY</code>) — det lagres bare på denne enheten.</div>
       <input type="password" id="cal-key" placeholder="Passord" autocomplete="current-password" onkeydown="if(event.key==='Enter')calLogin()">
       ${calMsg?`<div class="cal-warn">${calEsc(calMsg)}</div>`:''}
-      <button class="cal-btn" style="background:var(--accent);color:var(--on-accent,#fff);border-color:var(--accent)" onclick="calLogin()">Lås opp</button></div>`;
+      <button class="cal-btn cal-btn-primary" onclick="calLogin()">Lås opp</button></div>`;
     return;
   }
-  if(!calStart){calStart=new Date();calStart.setHours(0,0,0,0);}
+  if(!calView)calView=lsGet('calView','list')==='month'?'month':'list';
+  if(!calStart)calStart=calToday();
+  if(!calMonth){const t=calToday();calMonth=new Date(t.getFullYear(),t.getMonth(),1);}
+  if(!calSel)calSel=calIso(calToday());
   loadCalendar();
 }
-function calLogin(){const v=(document.getElementById('cal-key')||{}).value;if(!v)return;lsSet('calKey',v);calMsg='';renderCalendar();}
-function calLogout(){lsSet('calKey',null);calData=null;calMsg='';renderCalendar();}
-function calShift(days){if(days===0){calStart=null;}else{calStart=new Date(calStart);calStart.setDate(calStart.getDate()+days);}renderCalendar();}
+function calLogin(){const v=(document.getElementById('cal-key')||{}).value;if(!v)return;lsSet('calKey',v);calMsg='';calCache.clear();renderCalendar();}
+function calLogout(){lsSet('calKey',null);calData=null;calCache.clear();calMsg='';renderCalendar();}
+function calSetView(v){calView=v;lsSet('calView',v);renderCalendar();}
+function calShift(dir){
+  if(calView==='month'){
+    if(dir===0){const t=calToday();calMonth=new Date(t.getFullYear(),t.getMonth(),1);calSel=calIso(t);}
+    else{calMonth=new Date(calMonth.getFullYear(),calMonth.getMonth()+dir,1);calSel=calIso(calMonth);}
+  }else calStart=dir===0?calToday():calAdd(calStart,dir*CAL_DAYS);
+  renderCalendar();
+}
 function calToggle(i){const h=calHidden();h.has(i)?h.delete(i):h.add(i);lsSet('calHidden',JSON.stringify([...h]));drawCalendar();}
+function calPick(ds){calSel=ds;drawCalendar();const d=document.getElementById('cal-selday');if(d)d.scrollIntoView({behavior:'smooth',block:'nearest'});}
 
+// Visible range: list = calStart..+21 days; month = Monday before the 1st .. 6 weeks.
+function calRange(){
+  if(calView==='month'){const first=calAdd(calMonth,-((calMonth.getDay()+6)%7));return[first,calAdd(first,42)];}
+  return[calStart,calAdd(calStart,CAL_DAYS)];
+}
 function calBar(){
-  const end=new Date(calStart);end.setDate(end.getDate()+CAL_DAYS-1);
-  const f=d=>d.toLocaleDateString('nb-NO',{day:'numeric',month:'short'});
-  return `<div class="cal-bar"><div class="cal-range">${f(calStart)} – ${f(end)}</div>
-    <div class="cal-btns"><button class="cal-btn" onclick="calShift(-${CAL_DAYS})" aria-label="Forrige periode">◀</button>
+  const tabs=`<div class="cal-views"><button class="cal-view${calView==='list'?' active':''}" onclick="calSetView('list')">☰ Liste</button><button class="cal-view${calView==='month'?' active':''}" onclick="calSetView('month')">▦ Måned</button></div>`;
+  let label;
+  if(calView==='month'){const m=calMonth.toLocaleDateString('nb-NO',{month:'long',year:'numeric'});label=m.charAt(0).toUpperCase()+m.slice(1);}
+  else{const f=d=>d.toLocaleDateString('nb-NO',{day:'numeric',month:'short'});label=`${f(calStart)} – ${f(calAdd(calStart,CAL_DAYS-1))}`;}
+  return `${tabs}<div class="cal-bar"><div class="cal-range">${label}</div>
+    <div class="cal-btns"><button class="cal-btn" onclick="calShift(-1)" aria-label="Forrige">◀</button>
     <button class="cal-btn" onclick="calShift(0)">I dag</button>
-    <button class="cal-btn" onclick="calShift(${CAL_DAYS})" aria-label="Neste periode">▶</button>
+    <button class="cal-btn" onclick="calShift(1)" aria-label="Neste">▶</button>
     <button class="cal-btn" onclick="calLogout()" title="Glem passordet på denne enheten">Lås</button></div></div>`;
 }
 async function loadCalendar(){
   const el=document.getElementById('cal-content');if(!el)return;
-  const to=new Date(calStart);to.setDate(to.getDate()+CAL_DAYS);
-  const from=calIso(calStart),toS=calIso(to),my=++calReq;
+  const [a,b]=calRange(),from=calIso(a),to=calIso(b),key=from+'|'+to,my=++calReq;
+  if(calCache.has(key)){calData=calCache.get(key);drawCalendar();return;}
   el.innerHTML=`<div class="cal-wrap">${calBar()}<div class="cal-empty">Henter kalender…</div></div>`;
   try{
-    const r=await fetch(CAL_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:lsGet('calKey'),from,to:toS})});
+    const r=await fetch(CAL_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:lsGet('calKey'),from,to})});
     if(my!==calReq)return;
     if(r.status===401){lsSet('calKey',null);calMsg='Feil passord.';renderCalendar();return;}
     if(!r.ok)throw new Error('HTTP '+r.status);
-    calData=await r.json();
-    if(my===calReq)drawCalendar();
+    const data=await r.json();
+    calCache.set(key,data);
+    if(my===calReq){calData=data;drawCalendar();}
   }catch(e){
     if(my===calReq)el.innerHTML=`<div class="cal-wrap">${calBar()}<div class="cal-empty">Kunne ikke hente kalenderen (${calEsc(e.message)}).</div></div>`;
   }
 }
 function drawCalendar(){
   const el=document.getElementById('cal-content');if(!el||!calData)return;
-  const hidden=calHidden(),todayS=calIso(new Date());
+  const hidden=calHidden();
   const legend=calData.calendars.map((c,i)=>`<button class="cal-chip${hidden.has(i)?' off':''}" onclick="calToggle(${i})" title="${c.error?calEsc('Feil: '+c.error):'Vis/skjul'}"><span class="cal-dot" style="background:${calColor(i)}"></span>${calEsc(c.name)}${c.error?' ⚠':''}</button>`).join('');
-  const evs=calData.events.filter(e=>!hidden.has(e.cal));
-  let days='';
-  for(let k=0;k<CAL_DAYS;k++){
-    const d=new Date(calStart);d.setDate(d.getDate()+k);const ds=calIso(d);
-    const nd=new Date(d);nd.setDate(nd.getDate()+1);const ns=calIso(nd);
-    const list=evs.filter(e=>e.allDay?(e.start<=ds&&e.end>ds):(e.start<ns+'T00:00'&&e.end>ds+'T00:00'&&!(e.end===ds+'T00:00')))
-      .sort((a,b)=>(b.allDay-a.allDay)||a.start.localeCompare(b.start)||a.title.localeCompare(b.title));
-    const wd=d.toLocaleDateString('nb-NO',{weekday:'long',day:'numeric',month:'long'});const head=ds===todayS?wd:wd.charAt(0).toUpperCase()+wd.slice(1);
-    const rows=list.map(e=>{
-      let t='Hele dagen';
-      if(!e.allDay){
-        const sOn=e.start.slice(0,10)===ds,eOn=e.end.slice(0,10)===ds;
-        t=sOn&&eOn?`${e.start.slice(11)}–${e.end.slice(11)}`:sOn?`${e.start.slice(11)} →`:eOn?`→ ${e.end.slice(11)}`:'Hele dagen';
-      }
-      const cal=calData.calendars[e.cal]||{};
-      return `<div class="cal-ev"><div class="cal-bar-c" style="background:${calColor(e.cal)}"></div><div class="cal-time">${t}</div>
-        <div><div class="cal-title">${calEsc(e.title)}</div><div class="cal-sub">${calEsc(cal.name||'')}${e.location?' · '+calEsc(e.location):''}</div></div></div>`;
-    }).join('');
-    days+=`<div class="cal-day${ds===todayS?' today':''}${list.length?'':' empty'}"><div class="cal-dh"><span>${ds===todayS?'I dag · ':''}${head}</span>${list.length?'':'<span>—</span>'}</div>${rows}</div>`;
-  }
-  el.innerHTML=`<div class="cal-wrap">${calBar()}<div class="cal-legend">${legend}</div>${days}</div>`;
+  const body=calView==='month'?calMonthHtml():calListHtml();
+  el.innerHTML=`<div class="cal-wrap">${calBar()}<div class="cal-legend">${legend}</div>${body}</div>`;
 }
+function calDayHeader(ds){
+  const d=new Date(ds+'T00:00'),wd=d.toLocaleDateString('nb-NO',{weekday:'long',day:'numeric',month:'long'});
+  return ds===calIso(calToday())?'I dag · '+wd:wd.charAt(0).toUpperCase()+wd.slice(1);
+}
+function calListHtml(){
+  const todayS=calIso(calToday());let out='';
+  for(let k=0;k<CAL_DAYS;k++){
+    const ds=calIso(calAdd(calStart,k)),list=calDayEvents(ds);
+    out+=`<div class="cal-day${ds===todayS?' today':''}${list.length?'':' empty'}"><div class="cal-dh"><span>${calDayHeader(ds)}</span>${list.length?'':'<span>—</span>'}</div>${calRows(list,ds)}</div>`;
+  }
+  return out;
+}
+function calMonthHtml(){
+  const [first]=calRange(),todayS=calIso(calToday()),mo=calMonth.getMonth();
+  let cells='';
+  for(let k=0;k<42;k++){
+    const d=calAdd(first,k),ds=calIso(d),list=calDayEvents(ds),max=3;
+    const chips=list.slice(0,max).map(e=>`<div class="cal-mchip" style="--c:${calColor(e.cal)}">${e.allDay?'':`<b>${calEsc(e.start.slice(0,10)===ds?e.start.slice(11):'→')}</b> `}${calEsc(e.title)}</div>`).join('');
+    const dots=list.slice(0,4).map(e=>`<span class="cal-dot" style="background:${calColor(e.cal)}"></span>`).join('');
+    cells+=`<button class="cal-cell${d.getMonth()!==mo?' out':''}${ds===todayS?' today':''}${ds===calSel?' sel':''}" onclick="calPick('${ds}')">
+      <span class="cal-num">${d.getDate()}</span><div class="cal-mchips">${chips}${list.length>max?`<div class="cal-more">+${list.length-max}</div>`:''}</div><div class="cal-mdots">${dots}</div></button>`;
+  }
+  const heads=['man','tir','ons','tor','fre','lør','søn'].map(h=>`<div class="cal-wd">${h}</div>`).join('');
+  const sel=calDayEvents(calSel);
+  const selHtml=`<div id="cal-selday" class="cal-day${calSel===todayS?' today':''}${sel.length?'':' empty'}"><div class="cal-dh"><span>${calDayHeader(calSel)}</span>${sel.length?'':'<span>Ingen avtaler</span>'}</div>${calRows(sel,calSel)}</div>`;
+  return `<div class="cal-month">${heads}${cells}</div>${selHtml}`;
+}
+
+// ── Event detail sheet ──
+// Descriptions may be plain text or Google's HTML; convert to plain text
+// (DOMParser never runs scripts), then escape and make URLs clickable.
+function calDescText(s){
+  if(!s)return'';
+  if(/<[a-z][\s\S]*>/i.test(s)){
+    const html=s.replace(/<br\s*\/?>/gi,'\n').replace(/<\/(p|div|li|h\d)>/gi,'\n').replace(/<li[^>]*>/gi,'• ');
+    const doc=new DOMParser().parseFromString(html,'text/html');
+    doc.querySelectorAll('script,style,noscript,template').forEach(n=>n.remove());
+    s=doc.body.textContent||'';
+  }
+  return s.replace(/\n{3,}/g,'\n\n').trim();
+}
+const calLinkify=t=>calEsc(t).replace(/https?:\/\/[^\s<]+[^\s<.,;:!?)\]'"]/g,u=>`<a href="${u}" target="_blank" rel="noopener">${u}</a>`);
+function calOpen(i){
+  const e=calData&&calData.events[i];if(!e)return;
+  const cal=calData.calendars[e.cal]||{};
+  const d=s=>new Date(s.slice(0,10)+'T00:00').toLocaleDateString('nb-NO',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  let when;
+  if(e.allDay){const last=calIso(calAdd(new Date(e.end+'T00:00'),-1));when=last===e.start?`${d(e.start)} · hele dagen`:`${d(e.start)} – ${d(last)}`;}
+  else when=e.start.slice(0,10)===e.end.slice(0,10)?`${d(e.start)} · ${e.start.slice(11)}–${e.end.slice(11)}`:`${d(e.start)} ${e.start.slice(11)} – ${d(e.end)} ${e.end.slice(11)}`;
+  const desc=calDescText(e.description);
+  const map=e.location?`<a href="https://maps.google.com/?q=${encodeURIComponent(e.location)}" target="_blank" rel="noopener">${calEsc(e.location)}</a>`:'';
+  const ov=document.createElement('div');ov.id='cal-sheet';ov.className='cal-overlay';
+  ov.innerHTML=`<div class="cal-sheet" role="dialog" aria-modal="true" aria-label="${calEsc(e.title)}">
+    <button class="cal-close" onclick="calClose()" aria-label="Lukk">✕</button>
+    <div class="cal-sheet-cal"><span class="cal-dot" style="background:${calColor(e.cal)}"></span>${calEsc(cal.name||'')}</div>
+    <div class="cal-sheet-title">${calEsc(e.title)}</div>
+    <div class="cal-sheet-row">🕒 <span>${when.charAt(0).toUpperCase()+when.slice(1)}</span></div>
+    ${map?`<div class="cal-sheet-row">📍 <span>${map}</span></div>`:''}
+    ${desc?`<div class="cal-sheet-desc">${calLinkify(desc)}</div>`:'<div class="cal-sheet-none">Ingen beskrivelse.</div>'}
+  </div>`;
+  ov.addEventListener('click',ev=>{if(ev.target===ov)calClose();});
+  document.body.appendChild(ov);document.body.style.overflow='hidden';
+}
+function calClose(){const o=document.getElementById('cal-sheet');if(o)o.remove();document.body.style.overflow='';}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')calClose();});
 
 // ── INIT ─────────────────────────────────────────────────────────────────────
 (async () => {

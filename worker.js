@@ -163,6 +163,7 @@ function parseIcs(text) {
     else if (name === 'EXDATE') val.split(',').forEach(x => { const r = parseIcsDate(prop, x); if (r) cur.exdates.add(r.d.getTime()); });
     else if (name === 'SUMMARY') cur.title = icsText(val);
     else if (name === 'LOCATION') cur.location = icsText(val);
+    else if (name === 'DESCRIPTION') cur.description = icsText(val);
     else if (name === 'UID') cur.uid = val;
     else if (name === 'RRULE') cur.rrule = val;
     else if (name === 'STATUS') cur.status = val;
@@ -239,6 +240,7 @@ function eventsInRange(text, from, to) {
     for (const t of occurrences(e, from, to)) {
       if (skip && skip.has(t.getTime())) continue;
       out.push({ title: e.title || '(uten tittel)', location: e.location || null, allDay: !!e.allDay,
+                 description: e.description ? e.description.slice(0, 5000) : null,
                  start: fmtNaive(t, e.allDay), end: fmtNaive(new Date(t.getTime() + dur), e.allDay) });
     }
   }
