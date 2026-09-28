@@ -10,8 +10,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="WiggenApp">
   <link rel="apple-touch-icon" href="icon-192.png">
-  <meta name="theme-color" content="#f1ebe0">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" content="#f3eee5">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>Jørgen — Training Hub</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,30 +19,32 @@
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root,[data-theme="light"]{
-  --bg:#f1ebe0;--surface:#fbf8f1;--surface2:#ece4d6;--border:#e0d6c6;
-  --accent:#b56a45;--accent2:#9c7b50;--red:#b5544a;--amber:#a9802a;--green:#5f8c6a;
-  --text:#2c261f;--muted:#8a7d6d;--muted2:#6f6354;
-  --on-accent:#fbf8f1;--marker:rgba(60,40,20,.45);
-  --chart-tick:#8a7d6d;--chart-grid:rgba(70,50,30,.09);
-  --score-good:#5f8c6a;--score-ok:#b07d22;--score-warn:#c2772e;--score-bad:#b5544a;
+  --bg:#f3eee5;--surface:#fcfaf6;--surface2:#efe8dc;--border:#e2d9ca;
+  --accent:#a65b37;--accent2:#8a6a40;--red:#a8463d;--amber:#86661a;--green:#4b7856;
+  --text:#28221b;--muted:#6c6053;--muted2:#584d41;
+  --on-accent:#fcfaf6;--marker:rgba(60,40,20,.5);
+  --chart-tick:#6c6053;--chart-grid:rgba(70,50,30,.08);
+  --score-good:#4b7856;--score-ok:#8f6d18;--score-warn:#a8622a;--score-bad:#a8463d;
   --st-deep:#4a3aa7;--st-rem:#2a78d6;--st-light:#1baf7a;--st-awake:#eb6834;
-  --z1:#4a9fb0;--z2:#5f9e6a;--z3:#c2a015;--z4:#cd5a25;--z5:#a82f2f;
-  --shadow:0 1px 2px rgba(60,40,20,.04),0 8px 24px rgba(60,40,20,.05);
+  --z1:#3d8ea0;--z2:#4f8e5c;--z3:#a88a0c;--z4:#c1531f;--z5:#a02c2c;
+  --shadow:0 1px 1px rgba(60,40,20,.03),0 2px 10px rgba(60,40,20,.045);
   --font-body:'Hanken Grotesk',system-ui,-apple-system,sans-serif;
   --font-serif:'Newsreader',Georgia,'Times New Roman',serif;
   --font-mono:'JetBrains Mono',ui-monospace,monospace;
   --font-display:var(--font-serif);
+  --r-card:16px;--r-inner:12px;--tap:44px;--nav-h:64px;--glass:rgba(252,250,246,.86);
 }
 [data-theme="dark"]{
-  --bg:#1a1611;--surface:#221d17;--surface2:#2c261e;--border:#37301f4d;--border:rgba(255,255,255,.09);
-  --accent:#d49a76;--accent2:#c49a6c;--red:#d68a82;--amber:#d4b56a;--green:#88b596;
-  --text:#ece3d8;--muted:#9b8d7d;--muted2:#b3a596;
-  --on-accent:#211a12;--marker:rgba(255,255,255,.85);
-  --chart-tick:#9b8d7d;--chart-grid:rgba(255,255,255,.05);
-  --score-good:#88b596;--score-ok:#d4b56a;--score-warn:#e0935a;--score-bad:#d68a82;
+  --bg:#16120e;--surface:#201a14;--surface2:#2a231b;--border:rgba(255,236,214,.09);
+  --accent:#dfa07b;--accent2:#cba273;--red:#e3938a;--amber:#dcbd6e;--green:#8fc09c;
+  --text:#f0e7db;--muted:#a99b8a;--muted2:#c4b6a5;
+  --on-accent:#1d160f;--marker:rgba(255,255,255,.85);
+  --chart-tick:#a99b8a;--chart-grid:rgba(255,236,214,.06);
+  --score-good:#8fc09c;--score-ok:#dcbd6e;--score-warn:#e69a62;--score-bad:#e3938a;
   --st-deep:#6250cc;--st-rem:#3a9ae8;--st-light:#1a9e70;--st-awake:#d95926;
-  --z1:#5fc0d2;--z2:#86c08f;--z3:#e6c84a;--z4:#ee8040;--z5:#dc6258;
-  --shadow:0 1px 2px rgba(0,0,0,.2),0 10px 30px rgba(0,0,0,.28);
+  --z1:#5fc0d2;--z2:#86c08f;--z3:#e6c84a;--z4:#ee8040;--z5:#e0665c;
+  --shadow:inset 0 1px 0 rgba(255,236,214,.035),0 8px 24px rgba(0,0,0,.28);
+  --glass:rgba(32,26,20,.86);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{background:var(--bg)}
@@ -298,7 +300,6 @@ th{font-family:var(--font-body);letter-spacing:.04em}
   /* charts a touch shorter */
   .chart-card{padding:14px}
   /* date controls full-width & finger-friendly */
-  #health-date,#nutrition-date,input[readonly][id$="-date"]{font-size:15px!important;width:100%!important;box-sizing:border-box}
   .date-picker{width:min(92vw,300px);left:50%;transform:translateX(-50%)}
   /* big numbers elsewhere */
   .streak-num{font-size:34px}
@@ -408,6 +409,167 @@ th{font-family:var(--font-body);letter-spacing:.04em}
 .ts-why-row{display:grid;grid-template-columns:22px 1fr;gap:6px;font-size:12px;line-height:1.45;color:var(--muted2);padding:4px 0;border-top:1px solid var(--border)}
 .ts-why-row b{color:var(--text)}
 .ts-why-note{font-size:11px;color:var(--muted);margin-top:8px}
+
+/* ═════════════ v2 · felles designsystem (lagt sist, overstyrer eldre regler) ═════════════ */
+html,body{overflow-x:clip}
+body{font-size:14px;line-height:1.45;-webkit-tap-highlight-color:transparent;text-rendering:optimizeLegibility}
+button,select,input,textarea{font-family:var(--font-body)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+a{color:var(--accent)}
+/* Header */
+.header{background:var(--bg);padding:env(safe-area-inset-top) 20px 0;border-bottom:1px solid var(--border)}
+.header-inner{height:60px;max-width:1200px}
+.logo{font-size:23px;letter-spacing:-.015em}
+.icon-btn,.theme-toggle{width:var(--tap)!important;height:var(--tap)!important;padding:0!important;border-radius:50%!important;border:1px solid var(--border)!important;background:var(--surface)!important;color:var(--muted2)!important;font-size:16px!important;display:inline-flex!important;align-items:center;justify-content:center;cursor:pointer;transition:border-color .15s,color .15s}
+.icon-btn:hover,.theme-toggle:hover{border-color:var(--accent)!important;color:var(--accent)!important}
+.header-inner>div:last-child{gap:8px!important}
+/* Hovednavigasjon (desktop: toppmeny) */
+.nav{background:var(--glass);-webkit-backdrop-filter:saturate(1.3) blur(14px);backdrop-filter:saturate(1.3) blur(14px);padding:0 20px}
+.nav-inner{max-width:1200px;gap:4px;padding:8px 0}
+.nav-tab{min-height:40px;padding:0 14px;border-radius:12px;font-size:14px;color:var(--muted2)}
+.nav-tab.active{color:var(--text);background:var(--surface2);font-weight:600}
+.nav-ic{font-size:15px}
+.nav-tab:not(.active) .nav-ic{filter:grayscale(1);opacity:.75}
+.content{max-width:1200px;padding:24px 20px 48px}
+/* Underfaner = segmentkontroll */
+.subnav{display:flex;flex-wrap:nowrap;gap:4px;padding:4px;margin:0 auto 20px;max-width:560px;background:var(--surface2);border:1px solid var(--border);border-radius:16px}
+.subnav-btn{flex:1 1 0;min-width:0;min-height:var(--tap);padding:0 8px;border:0;border-radius:12px;background:transparent;color:var(--muted2);font-size:13px;font-weight:600;letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:background .15s,color .15s,box-shadow .15s}
+.subnav-btn:hover:not(.active){color:var(--text)}
+.subnav-btn.active{background:var(--surface);color:var(--text);border-color:transparent;box-shadow:0 1px 2px rgba(0,0,0,.08),0 2px 8px rgba(0,0,0,.06)}
+.subtabs{margin:0}
+/* Periodevalg (ink) og målevalg (aksent) */
+.range-chips,.period-tabs{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:0 0 16px}
+.range-chip,.period-tab,.subtab,.cal-view,.ins-pill{position:relative;min-height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--muted2);font-size:13px;font-weight:600;letter-spacing:0;line-height:1;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+.range-chip::before,.period-tab::before,.subtab::before,.cal-view::before,.ins-pill::before{content:"";position:absolute;inset:-4px -2px}
+.range-chip:hover:not(.active),.period-tab:hover:not(.active),.cal-view:hover:not(.active),.ins-pill:hover:not(.active){color:var(--text);border-color:var(--muted)}
+.range-chip.active,.period-tab.active,.cal-view.active,.subtab.active{background:var(--text);border-color:var(--text);color:var(--bg)}
+.ins-pill{font-weight:500}
+.ins-pill.active{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:600}
+.range-note{font-size:12px;color:var(--muted)}
+/* Seksjonsoverskrift */
+.section-head{font-size:20px;font-weight:500;letter-spacing:-.01em;justify-content:flex-start;text-align:left;align-items:baseline;gap:10px;margin:36px 0 12px;line-height:1.25}
+.section-head::before,.section-head::after{display:none}
+.section-head:first-child,.subnav+.section-head,.sub-panel>.section-head:first-child{margin-top:4px}
+/* Kort – én stil overalt */
+.stat-card,.chart-card,.sleep-card,.race-card,.pr-card,.delta-card,.corr-card,.kcal-card,.intensity-card,.load-section,.hbar-list,.ts-why,.cal-login,.form-card,.readiness-feature,.metric-hero{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-card);box-shadow:var(--shadow)}
+.stat-card,.race-card,.pr-card,.delta-card,.corr-card,.intensity-card{padding:16px}
+.chart-card,.sleep-card,.kcal-card,.load-section,.hbar-list,.ts-why,.form-card{padding:18px}
+.chart-card{padding:16px 14px 14px;margin-bottom:12px}
+.stat-card:hover,.race-card:hover,.delta-card:hover,.pr-card:hover{transform:none;border-color:var(--border)}
+@media(hover:hover){.stat-card:hover,.race-card:hover,.delta-card:hover,.pr-card:hover{border-color:color-mix(in srgb,var(--accent2) 45%,var(--border))}}
+.stat-grid,.delta-grid,.pr-grid,.corr-grid{gap:12px;margin-bottom:24px}
+.race-pred{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:24px}
+/* Nøkkeltall */
+.stat-label,.race-dist,.sleep-time-label,.kcal-lbl,.rf-level,.ins-stats .k,.eyebrow,.chart-title{font-family:var(--font-body);font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;line-height:1.3}
+.stat-label,.eyebrow,.chart-title{margin-bottom:8px}
+.chart-title{margin-bottom:12px}
+.stat-value,.race-time,.pr-val,.delta-val,.hero-pair-v,.kcal-num,.im-num,.sleep-time-val,.sleep-time{font-family:var(--font-serif);font-weight:500;letter-spacing:-.01em;line-height:1.05;font-variant-numeric:lining-nums tabular-nums}
+.stat-value{font-size:28px}
+.race-time,.pr-val,.delta-val{font-size:26px;color:var(--text);margin-top:4px}
+.stat-sub,.delta-chg{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.4}
+.stat-badge,.type-badge{font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;letter-spacing:.04em}
+.badge-good{background:color-mix(in srgb,var(--green) 15%,transparent);color:var(--green)}
+.badge-warn{background:color-mix(in srgb,var(--amber) 15%,transparent);color:var(--amber)}
+.badge-bad{background:color-mix(in srgb,var(--red) 14%,transparent);color:var(--red)}
+.badge-neutral{background:color-mix(in srgb,var(--accent) 13%,transparent);color:var(--accent)}
+.tb-run{background:color-mix(in srgb,var(--accent) 13%,transparent);color:var(--accent)}
+.tb-bike{background:color-mix(in srgb,var(--green) 14%,transparent);color:var(--green)}
+.tb-walk{background:color-mix(in srgb,var(--amber) 15%,transparent);color:var(--amber)}
+.rf-score{font-size:56px}
+.sleep-score-big{font-size:56px;font-weight:500}
+.sleep-bar{height:10px;gap:3px;border-radius:999px}
+.sleep-seg{border-radius:999px}
+.sleep-legend{flex-wrap:wrap;gap:6px 14px;font-size:12px}
+.sleep-dot{width:9px;height:9px;border-radius:3px}
+.rf-bar,.im-bar-track,.load-track,.hbar-track{background:var(--surface2);border-radius:999px}
+.rf-bar i,.im-bar-fill,.hbar-fill{border-radius:999px}
+/* Innsikt */
+.ins-title{font-size:20px;font-weight:500;letter-spacing:-.01em}
+.ins-note{font-size:12.5px}
+.ins-head{font-size:15px}
+.ins-call{border-radius:var(--r-inner);padding:16px}
+.ins-call.easy{background:color-mix(in srgb,var(--accent) 8%,transparent);border-color:color-mix(in srgb,var(--accent) 30%,transparent)}
+.ins-call.push{background:color-mix(in srgb,var(--green) 9%,transparent);border-color:color-mix(in srgb,var(--green) 32%,transparent)}
+.ins-call.rest{background:color-mix(in srgb,var(--red) 9%,transparent);border-color:color-mix(in srgb,var(--red) 32%,transparent)}
+.ins-call .big{font-size:20px;font-weight:500}
+.ins-zbar{height:30px;border-radius:10px}
+.ins-zbar span{text-shadow:0 1px 2px rgba(0,0,0,.35)}
+/* Tabeller */
+.tbl-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-card);box-shadow:var(--shadow);margin-bottom:24px;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+.chart-card .tbl-wrap{box-shadow:none;border-radius:var(--r-inner);margin-bottom:0}
+th{font-size:11px;font-weight:600;letter-spacing:.06em;padding:12px 14px;color:var(--muted);background:var(--surface)}
+td{font-size:13px;padding:11px 14px;font-variant-numeric:tabular-nums;background:var(--surface)}
+tr:hover td{background:var(--surface2)}
+.tbl-wrap th:first-child,.tbl-wrap td:first-child{position:sticky;left:0;z-index:1;box-shadow:1px 0 0 var(--border)}
+.gc-btn{padding:5px 9px;border-radius:6px;font-size:11px}
+.zone-legend{gap:6px 12px;margin-bottom:14px;font-size:12px}
+.zone-dot{width:10px;height:10px;border-radius:3px}
+/* Skjema, knapper og felt */
+.filters{gap:8px;margin-bottom:14px}
+.filters select,.filters input,.field,.cal-login input,.sl-date{min-height:var(--tap);font-size:15px;padding:0 14px;border:1px solid var(--border);border-radius:var(--r-inner);background:var(--surface);color:var(--text)}
+.field{width:100%;display:block;margin-bottom:10px}
+.field-area{padding:12px 14px;line-height:1.6;resize:vertical;min-height:200px}
+.field::placeholder,.filters input::placeholder{color:var(--muted);opacity:1}
+.date-field{min-height:var(--tap);width:150px;padding:0 14px;border:1px solid var(--border);border-radius:var(--r-inner);background:var(--surface);color:var(--text);font-size:15px;text-align:center;cursor:pointer}
+.date-row{display:flex;align-items:center;gap:8px;margin-bottom:20px;flex-wrap:wrap;justify-content:center}
+.date-row-lbl{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.btn-primary,.cal-btn-primary,.cal-login button{min-height:var(--tap);padding:0 20px;border:0;border-radius:var(--r-inner);background:var(--accent);color:var(--on-accent);font-size:14px;font-weight:600;cursor:pointer}
+.cal-btn{min-height:40px;border-radius:var(--r-inner);padding:0 14px}
+.card-title{font-family:var(--font-serif);font-size:20px;font-weight:500;letter-spacing:-.01em;margin-bottom:4px}
+.card-note{font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.5}
+.form-card{margin-bottom:20px}
+.form-actions{display:flex;align-items:center;gap:12px;margin-top:4px}
+/* Tomme tilstander */
+.empty-note,.cal-empty{background:transparent;border:1.5px dashed var(--border);border-radius:var(--r-card);padding:28px 20px;color:var(--muted2);font-size:14px;line-height:1.55;margin-bottom:24px;text-align:center}
+/* Kalender */
+.cal-day{border-radius:var(--r-inner)}
+.cal-ev{min-height:var(--tap)}
+.cal-chip{min-height:32px}
+.cal-close{width:var(--tap);height:var(--tap)}
+.cal-sheet{border-radius:20px 20px 0 0}
+.date-picker{border-radius:var(--r-card)}
+.date-picker-day{height:36px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ─── Mobil ─── */
+@media(max-width:680px){
+  .header{padding:env(safe-area-inset-top) 16px 0}
+  .header-inner{height:56px}
+  .logo{font-size:21px}
+  /* Fast bunnmeny */
+  .nav{position:fixed;top:auto;left:0;right:0;bottom:0;z-index:900;padding:0 4px env(safe-area-inset-bottom);border-bottom:none;border-top:1px solid var(--border)}
+  .nav-inner{justify-content:space-between;overflow:visible;flex-wrap:nowrap;gap:0;padding:4px 0}
+  .nav-tab{flex:1 1 auto;min-width:0;flex-direction:column;justify-content:center;gap:3px;min-height:56px;padding:4px 1px;border-radius:12px;background:none!important;font-size:10.5px;font-weight:500;letter-spacing:-.01em;color:var(--muted2);white-space:nowrap}
+  .nav-tab .nav-ic{font-size:17px;width:44px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:999px;transition:background .15s}
+  .nav-tab.active{color:var(--text);font-weight:700}
+  .nav-tab.active .nav-ic{background:color-mix(in srgb,var(--accent) 18%,transparent)}
+  .content{padding:16px 16px calc(var(--nav-h) + 32px + env(safe-area-inset-bottom))}
+  .subnav{margin-bottom:18px}
+  .stat-grid,.recovery-support,.activity-support,.training-support,.pr-grid,.delta-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .race-pred{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .stat-card{padding:14px;border-radius:var(--r-card)}
+  .stat-value{font-size:25px}
+  .recovery-support .stat-value{font-size:23px}
+  .race-time,.pr-val,.delta-val{font-size:23px}
+  .rf-score,.sleep-score-big{font-size:48px}
+  .readiness-feature,.metric-hero{padding:18px}
+  .section-head{font-size:19px;margin-top:32px}
+  .chart-card{padding:14px 10px 10px}
+  .chart-card>.ins-title,.chart-card>.ins-note,.chart-card>.chart-title,.chart-card>.eyebrow{padding:0 4px}
+  .filters select,.filters input,.field,.cal-login input,.sl-date{font-size:16px}
+  .filters>*{flex:1 1 0;min-width:0}
+  .date-field{font-size:16px;width:132px}
+  .date-picker{width:min(92vw,320px)}
+}
+@media(max-width:480px){
+  .subnav:not([data-sect="act"]) .subnav-btn{white-space:normal;text-overflow:clip;line-height:1.2;padding:4px 3px;font-size:12px}
+  .subnav[data-sect="act"] .subnav-btn{word-spacing:100vw;white-space:normal;line-height:1.25;min-height:54px;padding:6px 2px;font-size:12px;text-overflow:clip}
+}
+@media(max-width:400px){
+  .content{padding-left:12px;padding-right:12px}
+  .nav-tab{font-size:10px}
+  .nav-tab .nav-ic{width:38px}
+}
 </style>
 <script>
 (function(){try{var t=localStorage.getItem('wiggen-theme')||'light';document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','light');}})();
@@ -425,12 +587,14 @@ function setTheme(t){
   document.documentElement.setAttribute('data-theme',t);
   try{localStorage.setItem('wiggen-theme',t);}catch(e){}
   var btn=document.getElementById('theme-toggle');if(btn)btn.textContent=(t==='light'?'☾':'☀');
-  var meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.setAttribute('content',t==='light'?'#f1ebe0':'#1a1611');
+  var meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.setAttribute('content',t==='light'?'#f3eee5':'#16120e');
   rethemeCharts();
   try{if(document.getElementById('nav-sleep').classList.contains('active'))renderSleep();}catch(e){}
 }
+function applyChartDefaults(){try{if(!window.Chart)return;var d=Chart.defaults;d.font.family="'Hanken Grotesk',system-ui,-apple-system,sans-serif";d.font.size=11;d.color=chartTick();d.borderColor=chartGrid();d.elements.line.borderWidth=2;d.elements.line.borderCapStyle='round';d.elements.line.borderJoinStyle='round';d.elements.point.hoverRadius=5;d.plugins.legend.labels.boxWidth=10;d.plugins.legend.labels.boxHeight=10;d.plugins.legend.labels.padding=14;var tt=d.plugins.tooltip;tt.backgroundColor='rgba(30,24,18,.94)';tt.titleColor='#f3ece2';tt.bodyColor='#f3ece2';tt.padding=10;tt.cornerRadius=10;tt.boxPadding=4;tt.titleFont={weight:'600',size:12};tt.bodyFont={size:12};d.layout.padding={top:6,right:6,bottom:0,left:0};d.scale.ticks.padding=6;d.scale.border.display=false;}catch(e){}}
+applyChartDefaults();
 function toggleTheme(){var cur=document.documentElement.getAttribute('data-theme')||'light';setTheme(cur==='light'?'dark':'light');}
-document.addEventListener('DOMContentLoaded',function(){var t=document.documentElement.getAttribute('data-theme')||'light';var btn=document.getElementById('theme-toggle');if(btn)btn.textContent=(t==='light'?'☾':'☀');var meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.setAttribute('content',t==='light'?'#f1ebe0':'#1a1611');});
+document.addEventListener('DOMContentLoaded',function(){var t=document.documentElement.getAttribute('data-theme')||'light';var btn=document.getElementById('theme-toggle');if(btn)btn.textContent=(t==='light'?'☾':'☀');var meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.setAttribute('content',t==='light'?'#f3eee5':'#16120e');});
 </script>
 </head>
 <body>
@@ -440,7 +604,7 @@ document.addEventListener('DOMContentLoaded',function(){var t=document.documentE
     <div class="logo">Wiggen <span>/ Helse</span></div>
     <div style="display:flex;align-items:center;gap:14px">
       <div id="last-updated" style="display:none"></div>
-      <button onclick="location.href=location.pathname+'?v='+Date.now()" title="Last inn ny versjon" style="background:none;border:1px solid var(--border);color:var(--muted);font-size:13px;padding:4px 10px;border-radius:6px;cursor:pointer;line-height:1" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">↺</button>
+      <button class="icon-btn" onclick="location.href=location.pathname+'?v='+Date.now()" title="Last inn ny versjon" style="background:none;border:1px solid var(--border);color:var(--muted);font-size:13px;padding:4px 10px;border-radius:6px;cursor:pointer;line-height:1" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">↺</button>
       <button id="theme-toggle" class="theme-toggle" onclick="toggleTheme()" title="Bytt lys / mørk" aria-label="Toggle theme">☾</button>
     </div>
   </div>
@@ -588,8 +752,8 @@ document.addEventListener('DOMContentLoaded',function(){var t=document.documentE
       <button class="subnav-btn" onclick="showSubTab('health','goal',this)">🎯 Mål</button>
     </div>
     <div id="health-sub-today" class="sub-panel active">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:1.5rem;flex-wrap:wrap;justify-content:center">
-      <div style="position:relative;display:inline-block"><input type="text" id="health-date" readonly placeholder="DD/MM/YYYY" onclick="togglePicker('health-picker','health-date')" style="font-size:12px;padding:5px 11px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);width:116px;cursor:pointer;font-weight:500;letter-spacing:.02em;text-align:center"><div id="health-picker" class="date-picker" style="display:none"></div></div>
+    <div class="date-row">
+      <div style="position:relative;display:inline-block"><input type="text" id="health-date" class="date-field" readonly placeholder="DD/MM/YYYY" onclick="togglePicker('health-picker','health-date')"><div id="health-picker" class="date-picker" style="display:none"></div></div>
     </div>
     <div id="health-content"></div>
     </div><!-- /health-sub-today -->
@@ -597,18 +761,18 @@ document.addEventListener('DOMContentLoaded',function(){var t=document.documentE
       <div id="trend-range"></div>
       <div id="hrv-warning"></div>
       <div class="section-head">Sleep Score (7-dagers snitt)</div>
-      <div class="chart-card"><div style="height:170px;position:relative"><canvas id="sleep-trend-chart" role="img" aria-label="Sleep Score, 7-dagers snitt"></canvas></div></div>
+      <div class="chart-card"><div style="height:180px;position:relative"><canvas id="sleep-trend-chart" role="img" aria-label="Sleep Score, 7-dagers snitt"></canvas></div></div>
       <div class="section-head">HRV (7-dagers snitt)</div>
-      <div class="chart-card"><div style="height:170px;position:relative"><canvas id="hrv-trend-chart" role="img" aria-label="HRV, 7-dagers snitt"></canvas></div></div>
+      <div class="chart-card"><div style="height:180px;position:relative"><canvas id="hrv-trend-chart" role="img" aria-label="HRV, 7-dagers snitt"></canvas></div></div>
       <div class="section-head">Hvilepuls (7-dagers snitt)</div>
-      <div class="chart-card"><div style="height:170px;position:relative"><canvas id="rhr-trend-chart" role="img" aria-label="Hvilepuls, 7-dagers snitt"></canvas></div></div>
+      <div class="chart-card"><div style="height:180px;position:relative"><canvas id="rhr-trend-chart" role="img" aria-label="Hvilepuls, 7-dagers snitt"></canvas></div></div>
       <div class="section-head">Body Battery-topp (7-dagers snitt)</div>
-      <div class="chart-card"><div style="height:170px;position:relative"><canvas id="bb-trend-chart" role="img" aria-label="Body Battery-topp, 7-dagers snitt"></canvas></div></div>
+      <div class="chart-card"><div style="height:180px;position:relative"><canvas id="bb-trend-chart" role="img" aria-label="Body Battery-topp, 7-dagers snitt"></canvas></div></div>
       <div class="section-head">Vekt og trend</div>
       <div id="weight-goal-info" class="range-note" style="margin:0 0 8px"></div>
       <div class="chart-card"><div style="height:200px;position:relative"><canvas id="weight-trend-chart" role="img" aria-label="Vekt med 7-dagers snitt og trendlinje"></canvas></div></div>
       <div class="section-head">Fettprosent</div>
-      <div class="chart-card"><div style="height:170px;position:relative"><canvas id="bodyfat-trend-chart" role="img" aria-label="Fettprosent"></canvas></div></div>
+      <div class="chart-card"><div style="height:180px;position:relative"><canvas id="bodyfat-trend-chart" role="img" aria-label="Fettprosent"></canvas></div></div>
     </div><!-- /health-sub-trends -->
     <div id="health-sub-composition" class="sub-panel">
       <div id="health-comp-content"></div>
@@ -624,11 +788,11 @@ document.addEventListener('DOMContentLoaded',function(){var t=document.documentE
     </div>
     <div id="nutr-sub-daily" class="sub-panel active">
     <div id="nutr-range-chips"></div>
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:1.5rem;flex-wrap:wrap;justify-content:center">
-      <span style="font-size:12px;color:var(--muted);font-weight:600">Fra</span>
-      <div style="position:relative;display:inline-block"><input type="text" id="nutr-start" readonly placeholder="DD/MM/YYYY" onclick="togglePicker('nutr-start-picker','nutr-start')" style="font-size:14px;padding:7px 14px;border:1px solid var(--accent2);border-radius:20px;background:var(--surface2);color:var(--text);width:140px;cursor:pointer;font-weight:600;letter-spacing:.02em;text-align:center"><div id="nutr-start-picker" class="date-picker" style="display:none"></div></div>
-      <span style="font-size:12px;color:var(--muted);font-weight:600">Til</span>
-      <div style="position:relative;display:inline-block"><input type="text" id="nutr-end" readonly placeholder="DD/MM/YYYY" onclick="togglePicker('nutr-end-picker','nutr-end')" style="font-size:14px;padding:7px 14px;border:1px solid var(--accent2);border-radius:20px;background:var(--surface2);color:var(--text);width:140px;cursor:pointer;font-weight:600;letter-spacing:.02em;text-align:center"><div id="nutr-end-picker" class="date-picker" style="display:none"></div></div>
+    <div class="date-row">
+      <span class="date-row-lbl">Fra</span>
+      <div style="position:relative;display:inline-block"><input type="text" id="nutr-start" class="date-field" readonly placeholder="DD/MM/YYYY" onclick="togglePicker('nutr-start-picker','nutr-start')"><div id="nutr-start-picker" class="date-picker" style="display:none"></div></div>
+      <span class="date-row-lbl">Til</span>
+      <div style="position:relative;display:inline-block"><input type="text" id="nutr-end" class="date-field" readonly placeholder="DD/MM/YYYY" onclick="togglePicker('nutr-end-picker','nutr-end')"><div id="nutr-end-picker" class="date-picker" style="display:none"></div></div>
     </div>
     <div id="nutrition-content"></div>
     </div><!-- /nutr-sub-daily -->
@@ -681,14 +845,14 @@ document.addEventListener('DOMContentLoaded',function(){var t=document.documentE
   </div><!-- /nav-insights -->
   <div id="nav-reviews" class="panel">
     <div id="reviews-sub-coach" class="sub-panel active">
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.25rem;margin-bottom:1.25rem">
-        <div style="font-size:13px;font-weight:600;margin-bottom:4px">Legg til en målsetning</div>
-        <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Skriv eller lim inn en målsetning. Den lagres og synkroniseres mellom enhetene dine.</div>
-        <input type="text" id="coach-title" placeholder="Tittel (valgfritt – hentes automatisk fra første linje)" style="width:100%;box-sizing:border-box;font-size:13px;padding:9px 11px;margin-bottom:10px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text)">
-        <textarea id="coach-text" rows="10" placeholder="Skriv målsetningen her..." style="width:100%;box-sizing:border-box;font-size:13px;line-height:1.6;padding:11px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);resize:vertical;font-family:var(--font-body)"></textarea>
-        <div style="display:flex;align-items:center;gap:12px;margin-top:10px">
-          <button onclick="saveCoachReview()" id="coach-save-btn" style="padding:8px 20px;font-size:13px;font-weight:600;cursor:pointer;border:none;border-radius:6px;background:var(--accent);color:#000;letter-spacing:.02em">Lagre målsetning</button>
-          <span id="coach-save-status" style="font-size:12px;color:var(--muted)"></span>
+      <div class="form-card">
+        <div class="card-title">Legg til en målsetning</div>
+        <div class="card-note">Skriv eller lim inn en målsetning. Den lagres og synkroniseres mellom enhetene dine.</div>
+        <input type="text" id="coach-title" class="field" placeholder="Tittel (valgfritt – hentes automatisk fra første linje)">
+        <textarea id="coach-text" class="field field-area" rows="10" placeholder="Skriv målsetningen her..."></textarea>
+        <div class="form-actions">
+          <button onclick="saveCoachReview()" id="coach-save-btn" class="btn-primary">Lagre målsetning</button>
+          <span id="coach-save-status" style="font-size:13px;color:var(--muted)"></span>
         </div>
       </div>
       <div id="coach-history"></div>
@@ -718,7 +882,7 @@ const ddmm=iso=>iso?`${iso.slice(8,10)}/${iso.slice(5,7)}`:'';            // cha
 const ddmmyyyy=iso=>iso?`${iso.slice(8,10)}/${iso.slice(5,7)}/${iso.slice(0,4)}`:'';
 // Real time axis for irregular data (weigh-ins): x = day number, ticks shown as DD/MM.
 const dayNum=iso=>Math.floor(Date.parse(iso+'T00:00:00Z')/864e5);
-const dayAxis=(extra={})=>({type:'linear',...extra,ticks:{color:chartTick(),font:{size:10},maxTicksLimit:6,maxRotation:0,callback:v=>ddmm(new Date(v*864e5).toISOString().slice(0,10)),...(extra.ticks||{})},grid:{color:chartGrid()}});
+const dayAxis=(extra={})=>({type:'linear',...extra,ticks:{color:chartTick(),font:{size:11},maxTicksLimit:6,maxRotation:0,callback:v=>ddmm(new Date(v*864e5).toISOString().slice(0,10)),...(extra.ticks||{})},grid:{color:chartGrid()}});
 const WEEKDAYS_NB=['Søndag','Mandag','Tirsdag','Onsdag','Torsdag','Fredag','Lørdag'];
 // Period chips. opts: [[days,label],...]; 0 = all data. fn = global function name taking days.
 function rangeChips(active,fn,opts=[[7,'7 d'],[14,'14 d'],[30,'30 d'],[90,'3 mnd'],[0,'Alt']]){
@@ -929,21 +1093,21 @@ function renderHealthComp(){
       <div class="stat-card"><div class="stat-label">Kroppsvann</div><div class="stat-value" style="font-size:22px;color:var(--accent2)">${cV('bodyWater',1)}<span style="font-size:14px;color:var(--muted)">%</span></div></div>
     </div>`;
   if(rows.length>1){
-    const mk=(id,data,color,label)=>{destroyChartById(id);const el2=document.getElementById(id);if(!el2)return;chartInstances[id]=new Chart(el2,{type:'line',data:{datasets:[{label,data:rows.map((r,i)=>({x:dayNum(r.date),y:data[i]})).filter(p=>p.y!=null),borderColor:color,backgroundColor:color+'22',borderWidth:2,fill:true,tension:.3,pointRadius:2,pointBackgroundColor:color}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'nearest',axis:'x',intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{title:c=>ddmmyyyy(new Date(c[0].parsed.x*864e5).toISOString().slice(0,10))}}},scales:{x:dayAxis({ticks:{font:{size:9},maxTicksLimit:5}}),y:{ticks:{color:chartTick(),font:{size:9}},grid:{color:chartGrid()}}}}});};
+    const mk=(id,data,color,label)=>{destroyChartById(id);const el2=document.getElementById(id);if(!el2)return;chartInstances[id]=new Chart(el2,{type:'line',data:{datasets:[{label,data:rows.map((r,i)=>({x:dayNum(r.date),y:data[i]})).filter(p=>p.y!=null),borderColor:color,backgroundColor:color+'22',borderWidth:2,fill:true,tension:.3,pointRadius:2,pointBackgroundColor:color}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'nearest',axis:'x',intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{title:c=>ddmmyyyy(new Date(c[0].parsed.x*864e5).toISOString().slice(0,10))}}},scales:{x:dayAxis({ticks:{font:{size:11},maxTicksLimit:5}}),y:{ticks:{color:chartTick(),font:{size:11}},grid:{color:chartGrid()}}}}});};
     el.innerHTML+=`
-    <div class="chart-card"><div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px">Vekt (kg)</div><div style="height:160px;position:relative"><canvas id="compChartW" height="160"></canvas></div></div>
+    <div class="chart-card"><div class="eyebrow">Vekt (kg)</div><div style="height:180px;position:relative"><canvas id="compChartW" height="180"></canvas></div></div>
     <div class="chart-pair" style="margin-top:10px">
-      <div class="chart-card"><div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">Kroppsfett (%)</div><div style="height:120px;position:relative"><canvas id="compChartF" height="120"></canvas></div></div>
-      <div class="chart-card"><div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">Muskelmasse (kg)</div><div style="height:120px;position:relative"><canvas id="compChartM" height="120"></canvas></div></div>
-      <div class="chart-card"><div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">Kroppsvann (%)</div><div style="height:120px;position:relative"><canvas id="compChartBW" height="120"></canvas></div></div>
-      <div class="chart-card"><div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">BMI</div><div style="height:120px;position:relative"><canvas id="compChartBMI" height="120"></canvas></div></div>
+      <div class="chart-card"><div class="eyebrow">Kroppsfett (%)</div><div style="height:160px;position:relative"><canvas id="compChartF" height="160"></canvas></div></div>
+      <div class="chart-card"><div class="eyebrow">Muskelmasse (kg)</div><div style="height:160px;position:relative"><canvas id="compChartM" height="160"></canvas></div></div>
+      <div class="chart-card"><div class="eyebrow">Kroppsvann (%)</div><div style="height:160px;position:relative"><canvas id="compChartBW" height="160"></canvas></div></div>
+      <div class="chart-card"><div class="eyebrow">BMI</div><div style="height:160px;position:relative"><canvas id="compChartBMI" height="160"></canvas></div></div>
     </div>`;
     setTimeout(()=>{
-      mk('compChartW',rows.map(r=>r.weight),'#c49078','Vekt');
-      mk('compChartF',rows.map(r=>r.bodyFat),'#c9a84c','Kroppsfett');
-      mk('compChartM',rows.map(r=>r.muscleMass),'#7aab88','Muskelmasse');
-      mk('compChartBW',rows.map(r=>r.bodyWater),'#60a5fa','Kroppsvann');
-      mk('compChartBMI',rows.map(r=>r.bmi),'#a89ef8','BMI');
+      mk('compChartW',rows.map(r=>r.weight),'#c07a52','Vekt');
+      mk('compChartF',rows.map(r=>r.bodyFat),'#b48f2c','Kroppsfett');
+      mk('compChartM',rows.map(r=>r.muscleMass),'#5a9a6c','Muskelmasse');
+      mk('compChartBW',rows.map(r=>r.bodyWater),'#4f8fd6','Kroppsvann');
+      mk('compChartBMI',rows.map(r=>r.bmi),'#8a7bd8','BMI');
     },50);
   }
 }
@@ -957,10 +1121,10 @@ function renderHealthTrends(){
   if(sorted.length<3)return;
   const r=document.getElementById('trend-range');if(r)r.innerHTML=rangeChips(trendDays,'setTrendDays',[[30,'30 d'],[90,'3 mnd'],[180,'6 mnd'],[0,'Alt']]);
   const from=trendDays?daysAgoIso(trendDays-1):'';
-  renderRollingChart('sleep-trend-chart','sleepScore',sorted,'Sleep Score','#6f7fb8',from);
-  renderRollingChart('hrv-trend-chart','hrvAvg',sorted,'HRV (ms)','#5f8c6a',from);
-  renderRollingChart('rhr-trend-chart','rhr',sorted,'Hvilepuls (bpm)','#b5544a',from);
-  renderRollingChart('bb-trend-chart','bbHigh',sorted,'Body Battery-topp','#b56a45',from);
+  renderRollingChart('sleep-trend-chart','sleepScore',sorted,'Sleep Score','#647bb0',from);
+  renderRollingChart('hrv-trend-chart','hrvAvg',sorted,'HRV (ms)','#5a9a6c',from);
+  renderRollingChart('rhr-trend-chart','rhr',sorted,'Hvilepuls (bpm)','#c0594e',from);
+  renderRollingChart('bb-trend-chart','bbHigh',sorted,'Body Battery-topp','#c07a52',from);
   renderWeightChart(sorted,from);
   renderBodyFatChart(sorted,from);
 
@@ -993,8 +1157,8 @@ function renderRollingChart(id,key,sorted,label,color,from=''){
   chartInstances[id]=new Chart(el,{
     type:'line',data:{labels,datasets:[{label,data:vals,borderColor:color,backgroundColor:color+'20',borderWidth:2,fill:true,pointRadius:0,pointHoverRadius:4,tension:.4}]},
     options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${label}: ${c.parsed.y}`}}},
-      scales:{x:{ticks:{color:chartTick(),font:{size:10},maxTicksLimit:7,maxRotation:0},grid:{color:chartGrid()}},
-        y:{ticks:{color:chartTick(),font:{size:10}},grid:{color:chartGrid()}}}}
+      scales:{x:{ticks:{color:chartTick(),font:{size:11},maxTicksLimit:7,maxRotation:0},grid:{color:chartGrid()}},
+        y:{ticks:{color:chartTick(),font:{size:11}},grid:{color:chartGrid()}}}}
   });
 }
 
@@ -1030,14 +1194,14 @@ function renderWeightChart(sorted,from=''){
   chartInstances['weight-trend-chart']=new Chart(el,{
     type:'line',
     data:{labels,datasets:[
-      {label:'Veiing',data:pts.map((d,i)=>({x:dayNum(d.date),y:raw[i]})),showLine:false,pointRadius:3,pointBackgroundColor:'#b56a4599',pointBorderWidth:0,fill:false},
-      {label:'7-veiingers snitt',data:pts.map((d,i)=>({x:dayNum(d.date),y:smooth[i]})),borderColor:'#b56a45',borderWidth:2,pointRadius:0,tension:.3,fill:false},
-      {label:'Trend',data:pts.map((d,i)=>({x:dayNum(d.date),y:goalLine[i]})),borderColor:'#7c6dfa',borderWidth:1.5,borderDash:[5,4],pointRadius:0,tension:0,fill:false}
+      {label:'Veiing',data:pts.map((d,i)=>({x:dayNum(d.date),y:raw[i]})),showLine:false,pointRadius:3,pointBackgroundColor:'#c07a5299',pointBorderWidth:0,fill:false},
+      {label:'7-veiingers snitt',data:pts.map((d,i)=>({x:dayNum(d.date),y:smooth[i]})),borderColor:'#c07a52',borderWidth:2,pointRadius:0,tension:.3,fill:false},
+      {label:'Trend',data:pts.map((d,i)=>({x:dayNum(d.date),y:goalLine[i]})),borderColor:'#8a7bd8',borderWidth:1.5,borderDash:[5,4],pointRadius:0,tension:0,fill:false}
     ]},
     options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-      plugins:{legend:{display:true,labels:{color:chartTick(),font:{size:10},boxWidth:10}},tooltip:{callbacks:{title:c=>ddmmyyyy(new Date(c[0].parsed.x*864e5).toISOString().slice(0,10)),label:c=>` ${c.dataset.label}: ${c.parsed.y} kg`}}},
+      plugins:{legend:{display:true,labels:{color:chartTick(),font:{size:11},boxWidth:10}},tooltip:{callbacks:{title:c=>ddmmyyyy(new Date(c[0].parsed.x*864e5).toISOString().slice(0,10)),label:c=>` ${c.dataset.label}: ${c.parsed.y} kg`}}},
       scales:{x:dayAxis(),
-        y:{ticks:{color:chartTick(),font:{size:10}},grid:{color:chartGrid()},
+        y:{ticks:{color:chartTick(),font:{size:11}},grid:{color:chartGrid()},
           min:Math.max(60,Math.min(...raw)-1),max:Math.max(...raw)+1}}}
   });
   const infoEl=document.getElementById('weight-goal-info');
@@ -1109,7 +1273,7 @@ function renderGoalProjection(){
     }
   }
   const card=(label,val,sub,clr)=>`<div style="flex:1;min-width:150px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px">
-    <div style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px">${label}</div>
+    <div class="eyebrow">${label}</div>
     <div style="font-family:var(--font-serif);font-size:26px;font-weight:500;letter-spacing:-.5px;line-height:1;color:${clr||'var(--text)'}">${val}</div>
     ${sub?`<div style="font-size:11px;color:var(--muted);margin-top:6px">${sub}</div>`:''}</div>`;
   el.innerHTML=`
@@ -1146,10 +1310,10 @@ function renderBodyFatChart(sorted,from=''){
   const vals=pts.map(d=>d.bodyFat);
   destroyChartById('bodyfat-trend-chart');
   chartInstances['bodyfat-trend-chart']=new Chart(el,{
-    type:'line',data:{datasets:[{label:'Fettprosent',data:pts.map((d,i)=>({x:dayNum(d.date),y:vals[i]})),borderColor:'#a9802a',backgroundColor:'#a9802a15',borderWidth:2,pointRadius:2,pointBackgroundColor:'#a9802a',tension:.4,fill:true}]},
+    type:'line',data:{datasets:[{label:'Fettprosent',data:pts.map((d,i)=>({x:dayNum(d.date),y:vals[i]})),borderColor:'#b48f2c',backgroundColor:'#b48f2c15',borderWidth:2,pointRadius:2,pointBackgroundColor:'#b48f2c',tension:.4,fill:true}]},
     options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{title:c=>ddmmyyyy(new Date(c[0].parsed.x*864e5).toISOString().slice(0,10)),label:c=>` ${c.parsed.y} %`}}},
       scales:{x:dayAxis(),
-        y:{ticks:{color:chartTick(),font:{size:10}},grid:{color:chartGrid()}}}}
+        y:{ticks:{color:chartTick(),font:{size:11}},grid:{color:chartGrid()}}}}
   });
 }
 
@@ -1212,7 +1376,7 @@ function renderNutritionExtras(){
       <div class="stat-card"><div class="stat-label">Totalt i perioden</div><div class="stat-value" style="color:${defTotal>=0?'var(--green)':'var(--red)'}">${defTotal>=0?'−':'+'}${Math.abs(defTotal).toLocaleString('nb-NO')} kcal</div><div class="stat-sub">${defTotal>=0?'underskudd':'overskudd'} · ≈ ${(Math.abs(defTotal)/7700).toFixed(1)} kg</div></div>
       <div class="stat-card"><div class="stat-label">Snitt per dag</div><div class="stat-value">${defPerDay.toLocaleString('nb-NO')} kcal</div><div class="stat-sub">${defRows.length} dager med mat + Garmin</div></div>
     </div>
-    <div class="chart-card"><div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">Akkumulert underskudd (kcal)</div><div style="height:170px;position:relative"><canvas id="deficit-chart" role="img" aria-label="Akkumulert kaloriunderskudd"></canvas></div></div>`
+    <div class="chart-card"><div class="eyebrow">Akkumulert underskudd (kcal)</div><div style="height:180px;position:relative"><canvas id="deficit-chart" role="img" aria-label="Akkumulert kaloriunderskudd"></canvas></div></div>`
     :`<div class="empty-note">Ingen dager med både kosthold og Garmin-forbruk i perioden.</div>`}
     <div class="range-note">Dager med under ${NX_MIN_KCAL} kcal logget regnes som ufullstendige og er utelatt.</div>
 
@@ -1229,11 +1393,11 @@ function renderNutritionExtras(){
   const ctx=document.getElementById('deficit-chart');
   if(ctx){
     chartInstances['deficit-chart']=new Chart(ctx,{
-      type:'line',data:{labels:defLabels,datasets:[{label:'Akkumulert underskudd',data:defData,borderColor:'#5f8c6a',backgroundColor:'#5f8c6a22',borderWidth:2,fill:true,pointRadius:defData.length>30?0:2.5,tension:.3}]},
+      type:'line',data:{labels:defLabels,datasets:[{label:'Akkumulert underskudd',data:defData,borderColor:'#5a9a6c',backgroundColor:'#5a9a6c22',borderWidth:2,fill:true,pointRadius:defData.length>30?0:2.5,tension:.3}]},
       options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
         plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.parsed.y.toLocaleString('nb-NO')} kcal`}}},
-        scales:{x:{ticks:{color:chartTick(),font:{size:10},maxTicksLimit:7,maxRotation:0},grid:{color:chartGrid()}},
-          y:{ticks:{color:chartTick(),font:{size:10},callback:v=>v.toLocaleString('nb-NO')},grid:{color:chartGrid()}}}}
+        scales:{x:{ticks:{color:chartTick(),font:{size:11},maxTicksLimit:7,maxRotation:0},grid:{color:chartGrid()}},
+          y:{ticks:{color:chartTick(),font:{size:11},callback:v=>v.toLocaleString('nb-NO')},grid:{color:chartGrid()}}}}
     });
   }
 }
@@ -1300,7 +1464,7 @@ function renderSleep(){
 }
 
 function sleepAxis(extra={}){
-  return {...extra,ticks:{color:chartTick(),font:{size:10},maxRotation:0,autoSkipPadding:8},grid:{color:chartGrid(),...(extra.grid||{})}};
+  return {...extra,ticks:{color:chartTick(),font:{size:11},maxRotation:0,autoSkipPadding:8},grid:{color:chartGrid(),...(extra.grid||{})}};
 }
 
 function renderSleepOverview(){
@@ -1329,7 +1493,7 @@ function renderSleepOverview(){
     <div style="height:240px;position:relative"><canvas id="sl-window" role="img" aria-label="Leggetid og våknetid per natt"></canvas></div></div>
 
   <div class="section-head">Søvnlengde</div>
-  <div class="chart-card"><div style="height:190px;position:relative"><canvas id="sl-dur" role="img" aria-label="Søvnlengde per natt"></canvas></div></div>
+  <div class="chart-card"><div style="height:200px;position:relative"><canvas id="sl-dur" role="img" aria-label="Søvnlengde per natt"></canvas></div></div>
 
   <div class="section-head">Søvnfaser</div>
   <div class="chart-card"><div style="height:200px;position:relative"><canvas id="sl-stages" role="img" aria-label="Søvnfaser per natt"></canvas></div></div>
@@ -1348,7 +1512,7 @@ function renderSleepOverview(){
       tooltip:{callbacks:{...tip.callbacks,label:c=>{const n=N[c.dataIndex];return` ${fmtClock(n.bed)} → ${fmtClock(n.wake)} · ${fmtDur(n.sleepH)}`;}}}},
       scales:{x:sleepAxis({grid:{display:false}}),
         y:{reverse:true,min:Math.min(1320,Math.floor(Math.min(...N.map(n=>n.bed??1440))/60)*60),max:Math.max(1440+600,Math.ceil(Math.max(...N.map(n=>(n.wake??0)+1440))/60)*60),
-          ticks:{color:chartTick(),font:{size:10},stepSize:120,callback:v=>fmtClock(v)},grid:{color:chartGrid()}}}}});
+          ticks:{color:chartTick(),font:{size:11},stepSize:120,callback:v=>fmtClock(v)},grid:{color:chartGrid()}}}}});
   // Duration + 7-night average
   const avg7=N.map((n,i)=>mean(N.slice(Math.max(0,i-6),i+1).map(x=>x.sleepH)));
   destroyChartById('sl-dur');
@@ -1358,7 +1522,7 @@ function renderSleepOverview(){
       {label:'Søvn per natt',data:N.map(n=>+n.sleepH.toFixed(2)),backgroundColor:acc+'99',borderRadius:4,maxBarThickness:14}]},
     options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
       plugins:{legend:{display:true,labels:{color:chartTick(),boxWidth:12,font:{size:11}}},tooltip:{callbacks:{...tip.callbacks,label:c=>` ${c.dataset.label}: ${fmtDur(c.parsed.y)}`}}},
-      scales:{x:sleepAxis({grid:{display:false}}),y:{min:0,ticks:{color:chartTick(),font:{size:10},callback:v=>v+' t'},grid:{color:chartGrid()}}}}});
+      scales:{x:sleepAxis({grid:{display:false}}),y:{min:0,ticks:{color:chartTick(),font:{size:11},callback:v=>v+' t'},grid:{color:chartGrid()}}}}});
   // Stages (stacked minutes)
   const st=[['deepM','Dyp','--st-deep'],['lightM','Lett','--st-light'],['remM','REM','--st-rem'],['awakeM','Våken','--st-awake']];
   destroyChartById('sl-stages');
@@ -1366,7 +1530,7 @@ function renderSleepOverview(){
     data:{labels,datasets:st.map(([k,l,c])=>({label:l,data:N.map(n=>n[k]!=null?Math.round(n[k]):null),backgroundColor:sleepCss(c),borderColor:sleepCss('--surface'),borderWidth:{top:1,bottom:0,left:0,right:0},maxBarThickness:14}))},
     options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
       plugins:{legend:{display:true,labels:{color:chartTick(),boxWidth:12,font:{size:11}}},tooltip:{callbacks:{...tip.callbacks,label:c=>` ${c.dataset.label}: ${c.parsed.y} min`}}},
-      scales:{x:{...sleepAxis({grid:{display:false}}),stacked:true},y:{stacked:true,ticks:{color:chartTick(),font:{size:10},callback:v=>Math.round(v/60)+' t'},grid:{color:chartGrid()}}}}});
+      scales:{x:{...sleepAxis({grid:{display:false}}),stacked:true},y:{stacked:true,ticks:{color:chartTick(),font:{size:11},callback:v=>Math.round(v/60)+' t'},grid:{color:chartGrid()}}}}});
 }
 
 function renderSleepRelation(){
@@ -1407,8 +1571,8 @@ function renderSleepRelation(){
       {type:'line',data:line,borderColor:sleepCss('--muted'),borderWidth:1.5,pointRadius:0}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},
       tooltip:{callbacks:{label:c=>c.raw.date?` ${ddmmyyyy(c.raw.date)}: ${X.l} ${X.fmt(c.raw.x)}, ${Y.l} ${Y.fmt(c.raw.y)}`:''}}},
-      scales:{x:{title:{display:true,text:X.l,color:chartTick()},ticks:{color:chartTick(),font:{size:10},callback:v=>X.clock?fmtClock(v):X.k==='sleepH'?v+' t':v},grid:{color:chartGrid()}},
-        y:{title:{display:true,text:Y.l,color:chartTick()},ticks:{color:chartTick(),font:{size:10}},grid:{color:chartGrid()}}}}});
+      scales:{x:{title:{display:true,text:X.l,color:chartTick()},ticks:{color:chartTick(),font:{size:11},callback:v=>X.clock?fmtClock(v):X.k==='sleepH'?v+' t':v},grid:{color:chartGrid()}},
+        y:{title:{display:true,text:Y.l,color:chartTick()},ticks:{color:chartTick(),font:{size:11}},grid:{color:chartGrid()}}}}});
 }
 
 // Period comparison. Defaults: A = last 14 days, B = the 14 days before.
@@ -1508,7 +1672,7 @@ function renderActSummary(){
       ${maxRunDist?`<div class="pr-card"><div class="pr-crown">🏅</div><div class="stat-label">Lengste løpetur</div><div class="pr-val">${(maxRunDist.distanceM/1000).toFixed(2)} km</div><div style="font-size:11px;color:var(--muted);margin-top:3px">${fmtDate(maxRunDist.date)}</div></div>`:''}
       ${fastPace?`<div class="pr-card"><div class="pr-crown">⚡</div><div class="stat-label">Beste tempo</div><div class="pr-val">${pace(1000,fastPace.p)}</div><div style="font-size:11px;color:var(--muted);margin-top:3px">${fmtDate(fastPace.r.date)}</div></div>`:''}
       ${best5k?`<div class="pr-card"><div class="pr-crown">🏃</div><div class="stat-label">Beste 5 km</div><div class="pr-val">${fmt(best5k.fastest5k)}</div><div style="font-size:11px;color:var(--muted);margin-top:3px">${fmtDate(best5k.date)}</div></div>`:''}
-      ${mostRunElev?`<div class="pr-card"><div class="pr-crown">⛰️</div><div class="stat-label">Mest stigning</div><div class="pr-val">${mostRunElev.elevGain}m</div><div style="font-size:11px;color:var(--muted);margin-top:3px">${fmtDate(mostRunElev.date)}</div></div>`:''}
+      ${mostRunElev?`<div class="pr-card"><div class="pr-crown">⛰️</div><div class="stat-label">Mest stigning</div><div class="pr-val">${Math.round(mostRunElev.elevGain)} m</div><div style="font-size:11px;color:var(--muted);margin-top:3px">${fmtDate(mostRunElev.date)}</div></div>`:''}
       ${bestVO2?`<div class="pr-card"><div class="pr-crown">💪</div><div class="stat-label">Beste VO₂max</div><div class="pr-val">${bestVO2.vo2max}</div><div style="font-size:11px;color:var(--muted);margin-top:3px">${fmtDate(bestVO2.date)}</div></div>`:''}
     </div>
     ${bikes.length?`
@@ -1516,7 +1680,7 @@ function renderActSummary(){
     <div class="pr-grid">
       ${maxBikeDist?`<div class="pr-card"><div class="pr-crown">🏅</div><div class="stat-label">Lengste sykkeltur</div><div class="pr-val">${(maxBikeDist.distanceM/1000).toFixed(2)} km</div><div style="font-size:11px;color:var(--muted);margin-top:3px">${fmtDate(maxBikeDist.date)}</div></div>`:''}
       ${fastSpeed?`<div class="pr-card"><div class="pr-crown">⚡</div><div class="stat-label">Toppfart</div><div class="pr-val">${fmtSpd(fastSpeed.s)}</div><div style="font-size:11px;color:var(--muted);margin-top:3px">${fmtDate(fastSpeed.r.date)}</div></div>`:''}
-      ${mostBikeElev?`<div class="pr-card"><div class="pr-crown">⛰️</div><div class="stat-label">Mest stigning</div><div class="pr-val">${mostBikeElev.elevGain}m</div><div style="font-size:11px;color:var(--muted);margin-top:3px">${fmtDate(mostBikeElev.date)}</div></div>`:''}
+      ${mostBikeElev?`<div class="pr-card"><div class="pr-crown">⛰️</div><div class="stat-label">Mest stigning</div><div class="pr-val">${Math.round(mostBikeElev.elevGain)} m</div><div style="font-size:11px;color:var(--muted);margin-top:3px">${fmtDate(mostBikeElev.date)}</div></div>`:''}
     </div>`:''}
   `;
   renderRacePreds();
@@ -1674,9 +1838,9 @@ function renderHealth(){
     return `<div class="intraday-wrap" style="margin:10px 0 4px;position:relative">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
         <span style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Gjennom dagen</span>
-        <span style="font-size:10px;color:var(--muted)"><span style="display:inline-block;width:12px;height:2px;background:#c49078;vertical-align:middle"></span> Body Battery &nbsp; <span style="display:inline-block;width:12px;height:2px;background:#7c6dfa;vertical-align:middle"></span> Training Readiness</span>
+        <span style="font-size:10px;color:var(--muted)"><span style="display:inline-block;width:12px;height:2px;background:#c07a52;vertical-align:middle"></span> Body Battery &nbsp; <span style="display:inline-block;width:12px;height:2px;background:#8a7bd8;vertical-align:middle"></span> Training Readiness</span>
       </div>
-      <svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block;cursor:crosshair" data-series="${data}" onclick="iScrub(event)" role="img" aria-label="Body Battery og Training Readiness gjennom dagen">${grid}${line(bb,'#c49078',2)}${line(tr,'#7c6dfa',1.75)}<line class="iscrub-x" x1="0" x2="0" y1="${T}" y2="${H-B}" stroke="var(--muted)" stroke-width="1" style="display:none"/></svg>
+      <svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block;cursor:crosshair" data-series="${data}" onclick="iScrub(event)" role="img" aria-label="Body Battery og Training Readiness gjennom dagen">${grid}${line(bb,'#c07a52',2)}${line(tr,'#8a7bd8',1.75)}<line class="iscrub-x" x1="0" x2="0" y1="${T}" y2="${H-B}" stroke="var(--muted)" stroke-width="1" style="display:none"/></svg>
       <div class="intraday-tip" style="position:absolute;display:none;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);color:var(--text);font-size:11px;padding:4px 8px;border-radius:6px;white-space:nowrap;pointer-events:none;box-shadow:var(--shadow)"></div>
       <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:2px">Trykk i grafen for verdiene på et klokkeslett</div>
     </div>`;
@@ -1757,11 +1921,11 @@ function renderHealth(){
     <div class="sleep-card">
       <div class="sleep-top">
         <div>
-          <div style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">Sleep Score</div>
+          <div class="eyebrow">Sleep Score</div>
           <div class="sleep-score-big" style="color:${scoreColor(d.sleepScore)}">${d.sleepScore}</div>
         </div>
         <div>
-          <div style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">Total søvn</div>
+          <div class="eyebrow">Total søvn</div>
           <div class="sleep-time">${sleepH}</div>
         </div>
       </div>
@@ -1776,16 +1940,16 @@ function renderHealth(){
         </div>
       </div>
       <div class="sleep-bar">
-        <div class="sleep-seg" style="width:${deepPct}%;background:#8b9cc4"></div>
-        <div class="sleep-seg" style="width:${remPct}%;background:#7aab88"></div>
-        <div class="sleep-seg" style="width:${lightPct}%;background:#60a5fa"></div>
-        <div class="sleep-seg" style="width:${awakePct}%;background:#444"></div>
+        <div class="sleep-seg" style="width:${deepPct}%;background:var(--st-deep)"></div>
+        <div class="sleep-seg" style="width:${remPct}%;background:var(--st-rem)"></div>
+        <div class="sleep-seg" style="width:${lightPct}%;background:var(--st-light)"></div>
+        <div class="sleep-seg" style="width:${awakePct}%;background:var(--st-awake)"></div>
       </div>
       <div class="sleep-legend">
-        <span><span class="sleep-dot" style="background:#8b9cc4"></span>Dyp ${deepPct}%</span>
-        <span><span class="sleep-dot" style="background:#7aab88"></span>REM ${remPct}%</span>
-        <span><span class="sleep-dot" style="background:#60a5fa"></span>Lett ${lightPct}%</span>
-        <span><span class="sleep-dot" style="background:#444"></span>Våken ${awakePct}%</span>
+        <span><span class="sleep-dot" style="background:var(--st-deep)"></span>Dyp ${deepPct}%</span>
+        <span><span class="sleep-dot" style="background:var(--st-rem)"></span>REM ${remPct}%</span>
+        <span><span class="sleep-dot" style="background:var(--st-light)"></span>Lett ${lightPct}%</span>
+        <span><span class="sleep-dot" style="background:var(--st-awake)"></span>Våken ${awakePct}%</span>
         <span style="margin-left:6px">Pust: ${n(d.avgResp)} brpm</span>
       </div>
     </div>`:`
@@ -1881,11 +2045,11 @@ function renderHealth(){
           <div style="display:flex;gap:20px">
             <div>
               <div style="font-size:22px;font-weight:700;letter-spacing:-.5px;color:var(--accent)">${activeKcal!=null?activeKcal.toLocaleString():'—'}</div>
-              <div style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:.06em;text-transform:uppercase">Aktive kcal</div>
+              <div class="eyebrow">Aktive kcal</div>
             </div>
             <div>
-              <div style="font-size:22px;font-weight:700;letter-spacing:-.5px;color:#8b9cc4">${totalKcal!=null?totalKcal.toLocaleString():'—'}</div>
-              <div style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:.06em;text-transform:uppercase">Totalt kcal</div>
+              <div style="font-size:22px;font-weight:700;letter-spacing:-.5px;color:#647bb0">${totalKcal!=null?totalKcal.toLocaleString():'—'}</div>
+              <div class="eyebrow">Totalt kcal</div>
               ${activePct!=null?`<div style="font-size:13px;font-weight:700;color:var(--accent);margin-top:4px">${activePct}% <span style="font-size:10px;font-weight:400;color:var(--muted)">fra aktivitet</span></div>`:''}
             </div>
           </div>
@@ -1932,19 +2096,19 @@ function renderHealth(){
         <div class="stat-label">Lactate Threshold</div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-top:6px">
           <div>
-            <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px">HR</div>
+            <div class="eyebrow">HR</div>
             <div style="font-size:20px;font-weight:700">${GL('lactateHR')}<span style="font-size:12px;color:var(--muted)"> bpm</span></div>
           </div>
           <div>
-            <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px">Tempo</div>
+            <div class="eyebrow">Tempo</div>
             <div style="font-size:20px;font-weight:700">${(()=>{const v=latestt(_gS,'lactatePaceSec');return v?fmt(v):'—';})()}<span style="font-size:12px;color:var(--muted)"> /km</span></div>
           </div>
           <div>
-            <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px">Effekt</div>
+            <div class="eyebrow">Effekt</div>
             <div style="font-size:20px;font-weight:700">${GL('lactatePower')}<span style="font-size:12px;color:var(--muted)"> W</span></div>
           </div>
           <div>
-            <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px">W/kg</div>
+            <div class="eyebrow">W/kg</div>
             <div style="font-size:20px;font-weight:700">${(()=>{const p=latestt(_gS,'lactatePower'),w=latestt(_gS,'weight');return p&&w?(p/w).toFixed(1):'—';})()}<span style="font-size:12px;color:var(--muted)"> W/kg</span></div>
           </div>
         </div>
@@ -2013,17 +2177,17 @@ function renderHealth(){
     ${!isToday&&hrows.length>1?`
     <div class="section-head" style="margin-top:1.5rem">Helsetrender</div>
     <div class="chart-card" style="margin-bottom:10px">
-      <div style="font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px">HRV &amp; søvnscore</div>
-      <div style="height:160px;position:relative"><canvas id="chartHrvSleep" role="img" aria-label="HRV- og søvntrend">HRV- og søvntrend.</canvas></div>
+      <div class="eyebrow">HRV &amp; søvnscore</div>
+      <div style="height:180px;position:relative"><canvas id="chartHrvSleep" role="img" aria-label="HRV- og søvntrend">HRV- og søvntrend.</canvas></div>
     </div>
     <div class="chart-pair" style="margin-bottom:10px">
       <div class="chart-card">
-        <div style="font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px">Body Battery — morgen</div>
-        <div style="height:120px;position:relative"><canvas id="chartBB" role="img" aria-label="Body Battery-trend">Body Battery-trend.</canvas></div>
+        <div class="eyebrow">Body Battery — morgen</div>
+        <div style="height:160px;position:relative"><canvas id="chartBB" role="img" aria-label="Body Battery-trend">Body Battery-trend.</canvas></div>
       </div>
       <div class="chart-card">
-        <div style="font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px">Hvilepuls</div>
-        <div style="height:120px;position:relative"><canvas id="chartRhr" role="img" aria-label="Hvilepulstrend">Hvilepulstrend.</canvas></div>
+        <div class="eyebrow">Hvilepuls</div>
+        <div style="height:160px;position:relative"><canvas id="chartRhr" role="img" aria-label="Hvilepulstrend">Hvilepulstrend.</canvas></div>
       </div>
     </div>`:''}
 
@@ -2052,7 +2216,7 @@ function renderHealth(){
     const donut=document.getElementById('kcalDonut');
     if(donut&&activeKcal&&bmrKcal){
       destroyChartById('kcalDonut');
-      chartInstances['kcalDonut']=new Chart(donut,{type:'doughnut',data:{datasets:[{data:[activeKcal,bmrKcal],backgroundColor:['#c49078','#8b9cc4'],borderWidth:0,hoverOffset:0}]},options:{cutout:'72%',responsive:false,plugins:{legend:{display:false},tooltip:{enabled:false}}}});
+      chartInstances['kcalDonut']=new Chart(donut,{type:'doughnut',data:{datasets:[{data:[activeKcal,bmrKcal],backgroundColor:['#c07a52','#647bb0'],borderWidth:0,hoverOffset:0}]},options:{cutout:'72%',responsive:false,plugins:{legend:{display:false},tooltip:{enabled:false}}}});
     } else if(tries<5){setTimeout(()=>_drawDonut(tries+1),100);}
   };
   setTimeout(()=>{
@@ -2065,22 +2229,22 @@ function renderHealth(){
       const mkW = (id, datasets, ymin, ymax) => {
         const el = document.getElementById(id); if(!el) return;
         destroyChartById(id);
-        chartInstances[id] = new Chart(el, { type:'line', data:{labels:wLabels, datasets}, options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:datasets.length>1,labels:{color:'#a09488',font:{size:10},boxWidth:10,padding:12}},tooltip:{enabled:true}},scales:{x:{...scaleOpts,ticks:{...scaleOpts.ticks,maxTicksLimit:8}},y:{...scaleOpts,min:ymin,max:ymax}}}});
+        chartInstances[id] = new Chart(el, { type:'line', data:{labels:wLabels, datasets}, options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:datasets.length>1,labels:{color:chartTick(),font:{size:11},boxWidth:10,padding:12}},tooltip:{enabled:true}},scales:{x:{...scaleOpts,ticks:{...scaleOpts.ticks,maxTicksLimit:8}},y:{...scaleOpts,min:ymin,max:ymax}}}});
       };
-      const line = (data,color,label,fill=false) => ({data,borderColor:color,backgroundColor:color+'28',borderWidth:1.5,fill,tension:.35,pointRadius:2.5,pointBackgroundColor:color,label});
+      const line = (data,color,label,fill=false) => ({data,borderColor:color,backgroundColor:color+'28',borderWidth:2,fill,tension:.35,pointRadius:2.5,pointBackgroundColor:color,label});
       // HRV + Sleep dual axis
       const hrvEl = document.getElementById('chartHrvSleep'); if(hrvEl){ destroyChartById('chartHrvSleep');
         chartInstances['chartHrvSleep'] = new Chart(hrvEl, { type:'line', data:{labels:wLabels, datasets:[
-          {...line(wRows.map(r=>r.hrvAvg),'#8b9cc4','HRV'),yAxisID:'y'},
-          {...line(wRows.map(r=>r.sleepScore),'#c49078','Søvn'),yAxisID:'y2'}
-        ]}, options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,labels:{color:'#a09488',font:{size:10},boxWidth:10,padding:12}}},scales:{
-          x:{ticks:{color:chartTick(),font:{size:9},maxTicksLimit:8},grid:{color:chartGrid()}},
-          y:{ticks:{color:chartTick(),font:{size:9}},grid:{color:chartGrid()},title:{display:true,text:'HRV',color:chartTick(),font:{size:9}}},
-          y2:{position:'right',ticks:{color:chartTick(),font:{size:9}},grid:{drawOnChartArea:false},title:{display:true,text:'Søvn',color:chartTick(),font:{size:9}}}
+          {...line(wRows.map(r=>r.hrvAvg),'#647bb0','HRV'),yAxisID:'y'},
+          {...line(wRows.map(r=>r.sleepScore),'#c07a52','Søvn'),yAxisID:'y2'}
+        ]}, options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,labels:{color:chartTick(),font:{size:11},boxWidth:10,padding:12}}},scales:{
+          x:{ticks:{color:chartTick(),font:{size:11},maxTicksLimit:8},grid:{color:chartGrid()}},
+          y:{ticks:{color:chartTick(),font:{size:11}},grid:{color:chartGrid()},title:{display:true,text:'HRV',color:chartTick(),font:{size:11}}},
+          y2:{position:'right',ticks:{color:chartTick(),font:{size:11}},grid:{drawOnChartArea:false},title:{display:true,text:'Søvn',color:chartTick(),font:{size:11}}}
         }}});
       }
-      mkW('chartBB',[line(wRows.map(r=>r.bbWake),'#c49078','BB morgen',true)],20,100);
-      mkW('chartRhr',[line(wRows.map(r=>r.rhr),'#c47878','RHR')],35,70);
+      mkW('chartBB',[line(wRows.map(r=>r.bbWake),'#c07a52','BB morgen',true)],20,100);
+      mkW('chartRhr',[line(wRows.map(r=>r.rhr),'#c0594e','RHR')],35,70);
     }
   },100);
 }
@@ -2285,6 +2449,7 @@ function showSubTab(sect, tab, el) {
 
 function showNav(id,el){
   destroyCharts();
+  window.scrollTo(0,0);                       // new tab starts at the top (bottom nav on mobile)
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('nav-'+id).classList.add('active');
@@ -2408,7 +2573,7 @@ function formatCoachReview(text) {
     if ((m = line.match(/^(\d+)\.\s+(.{1,48})$/)) && !/[.,;:]$/.test(line)) {
       closeList();
       html += `<div style="display:flex;align-items:center;gap:9px;margin:18px 0 7px">
-        <span style="flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--accent);color:#0d0d0d;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">${m[1]}</span>
+        <span style="flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--accent);color:var(--on-accent);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">${m[1]}</span>
         <span style="font-weight:700;font-size:14px;color:var(--accent)">${inline(m[2])}</span>
       </div>`;
       continue;
@@ -2446,7 +2611,7 @@ function renderCoachReviews() {
           <div style="display:flex;align-items:center;gap:12px">
             <div style="font-size:11px;color:var(--muted)">${fmtDate(r.date)}</div>
             <div id="coach-chevron-${i}" style="color:var(--muted);font-size:12px;transition:transform .2s">&#9660;</div>
-            <div onclick="event.stopPropagation();confirmDeleteCoach(${i})" title="Slett" style="color:var(--muted);cursor:pointer;font-size:15px;line-height:1;padding:2px 5px;border-radius:6px;transition:color .15s,background .15s" onmouseover="this.style.color='#c47878';this.style.background='rgba(196,120,120,.12)'" onmouseout="this.style.color='var(--muted)';this.style.background='transparent'">&#10005;</div>
+            <div onclick="event.stopPropagation();confirmDeleteCoach(${i})" title="Slett" style="color:var(--muted);cursor:pointer;font-size:15px;line-height:1;padding:2px 5px;border-radius:6px;transition:color .15s,background .15s" onmouseover="this.style.color='#c0594e';this.style.background='rgba(196,120,120,.12)'" onmouseout="this.style.color='var(--muted)';this.style.background='transparent'">&#10005;</div>
           </div>
         </div>
         <div id="coach-body-${i}" style="display:none;padding:16px;font-size:13px;line-height:1.7;color:var(--text);border-top:1px solid var(--border)">${formatCoachReview(r.content)}</div>
@@ -2471,7 +2636,7 @@ async function saveCoachReview() {
   const title = document.getElementById('coach-title').value.trim();
   const status = document.getElementById('coach-save-status');
   const btn = document.getElementById('coach-save-btn');
-  if (!text) { status.textContent = 'Skriv en målsetning først.'; status.style.color = '#c47878'; return; }
+  if (!text) { status.textContent = 'Skriv en målsetning først.'; status.style.color = 'var(--red)'; return; }
   btn.disabled = true; btn.textContent = 'Lagrer...';
   status.style.color = 'var(--muted)'; status.textContent = '';
   const today = new Date().toISOString().slice(0,10);
@@ -2485,10 +2650,10 @@ async function saveCoachReview() {
       status.style.color = 'var(--green)'; status.textContent = '✓ Lagret';
       renderCoachReviews();
     } else {
-      status.style.color = '#c47878'; status.textContent = 'Lagring feilet.';
+      status.style.color = 'var(--red)'; status.textContent = 'Lagring feilet.';
     }
   } catch (e) {
-    status.style.color = '#c47878'; status.textContent = 'Feil: ' + e.message;
+    status.style.color = 'var(--red)'; status.textContent = 'Feil: ' + e.message;
   }
   btn.disabled = false; btn.textContent = 'Lagre målsetning';
 }
@@ -2505,7 +2670,7 @@ function confirmDeleteReview(i, revArg) {
       <div style="font-size:12px;color:var(--muted);margin-bottom:18px">${rev.kind==='coach'?'Målsetning':'Weekly Review'} — ${formatReviewPeriod(rev.period)||rev.period||''}<br>Dette kan ikke angres.</div>
       <div style="display:flex;gap:10px;justify-content:center">
         <button onclick="closeDeleteReview()" style="padding:9px 18px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer;font-size:13px;font-weight:600">Avbryt</button>
-        <button id="del-review-confirm" style="padding:9px 18px;border-radius:20px;border:1px solid #c47878;background:#c47878;color:#fff;cursor:pointer;font-size:13px;font-weight:600">Slett</button>
+        <button id="del-review-confirm" style="padding:9px 18px;border-radius:20px;border:1px solid var(--red);background:var(--red);color:var(--on-accent);cursor:pointer;font-size:13px;font-weight:600">Slett</button>
       </div>
     </div>`;
   ov.onclick = (e) => { if (e.target === ov) closeDeleteReview(); };
@@ -2666,7 +2831,7 @@ function macroBar(val, target, color) {
   const pct = target ? Math.min(100, Math.round((val||0) / target * 100)) : 0;
   const over = val > target;
   return '<div style="height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;margin-top:6px">' +
-    '<div style="height:100%;width:' + pct + '%;background:' + (over ? '#ff4d4d' : color) + ';border-radius:4px;transition:width .3s"></div></div>';
+    '<div style="height:100%;width:' + pct + '%;background:' + (over ? 'var(--red)' : color) + ';border-radius:4px;transition:width .3s"></div></div>';
 }
 
 function renderNutrition() {
@@ -2733,7 +2898,7 @@ function renderNutrition() {
         ${calPct != null ? `<div style="font-size:20px;font-weight:700;color:${cal > TARGETS.calories ? 'var(--red)' : 'var(--green)'};padding-bottom:6px">${calPct}%</div>` : ''}
       </div>
       <div style="height:10px;background:var(--surface2);border-radius:5px;overflow:hidden">
-        <div style="height:100%;width:${Math.min(100, calPct||0)}%;background:${(cal||0) > TARGETS.calories ? '#ff4d4d' : 'var(--accent)'};border-radius:5px"></div>
+        <div style="height:100%;width:${Math.min(100, calPct||0)}%;background:${(cal||0) > TARGETS.calories ? 'var(--red)' : 'var(--accent)'};border-radius:5px"></div>
       </div>
     </div>
 
@@ -2742,17 +2907,17 @@ function renderNutrition() {
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:1.5rem">
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">
         <div>
-          <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px">Spist${!isToday?' (totalt)':''}</div>
+          <div class="eyebrow">Spist${!isToday?' (totalt)':''}</div>
           <div style="font-size:24px;font-weight:700;color:var(--accent)">${Math.round(totalEaten).toLocaleString()}</div>
           ${!isToday && statsRows.length>1 ? `<div style="font-size:11px;color:var(--muted)">${Math.round(totalEaten/statsRows.length).toLocaleString()} snitt/dag</div>` : ''}
         </div>
         <div>
-          <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px">Forbrent${!isToday?' (totalt)':''}</div>
-          <div style="font-size:24px;font-weight:700;color:#8b9cc4">${Math.round(totalBurned).toLocaleString()}</div>
+          <div class="eyebrow">Forbrent${!isToday?' (totalt)':''}</div>
+          <div style="font-size:24px;font-weight:700;color:#647bb0">${Math.round(totalBurned).toLocaleString()}</div>
           ${!isToday && hRange.length>1 ? `<div style="font-size:11px;color:var(--muted)">${avgBurned.toLocaleString()} snitt/dag</div>` : ''}
         </div>
         <div>
-          <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px">${netBalance < 0 ? 'Underskudd' : 'Overskudd'}${!isToday?' (totalt)':''}</div>
+          <div class="eyebrow">${netBalance < 0 ? 'Underskudd' : 'Overskudd'}${!isToday?' (totalt)':''}</div>
           <div style="font-size:24px;font-weight:700;color:${netBalance < 0 ? 'var(--green)' : 'var(--red)'}">${netBalance < 0 ? '' : '+'}${Math.round(netBalance).toLocaleString()}</div>
           ${!isToday && hRange.length>1 ? `<div style="font-size:11px;color:var(--muted)">${Math.round(netBalance/hRange.length) > 0 ? '+' : ''}${Math.round(netBalance/hRange.length).toLocaleString()} snitt/dag</div>` : ''}
         </div>
@@ -2768,9 +2933,9 @@ function renderNutrition() {
     <div class="stat-grid" style="margin-bottom:1.5rem">
       <div class="stat-card">
         <div class="stat-label">Protein</div>
-        <div class="stat-value" style="color:#8b9cc4">${n(pro,1)}<span style="font-size:14px;color:var(--muted)">g</span></div>
+        <div class="stat-value" style="color:#647bb0">${n(pro,1)}<span style="font-size:14px;color:var(--muted)">g</span></div>
         <div class="stat-sub">Mål: ${TARGETS.protein}g · ${proPct != null ? proPct + '%' : '—'}</div>
-        ${macroBar(pro, TARGETS.protein, '#8b9cc4')}
+        ${macroBar(pro, TARGETS.protein, '#647bb0')}
       </div>
       <div class="stat-card">
         <div class="stat-label">Karbohydrater</div>
@@ -2796,34 +2961,34 @@ function renderNutrition() {
     <div class="section-head">Makrofordeling</div>
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:1.5rem;display:flex;align-items:center;gap:24px">
       <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
-        <div style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase">Mål</div>
+        <div class="eyebrow">Mål</div>
         <div style="position:relative;width:100px;height:100px;flex-shrink:0">
           <canvas id="macroPieGoal" width="100" height="100" role="img" aria-label="Goal macro split">Mål-makrofordeling.</canvas>
         </div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
-        <div style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase">Faktisk</div>
+        <div class="eyebrow">Faktisk</div>
         <div style="position:relative;width:100px;height:100px;flex-shrink:0">
           <canvas id="macroPie" width="100" height="100" role="img" aria-label="Actual macro split">Faktisk makrofordeling.</canvas>
         </div>
       </div>
       <div style="display:flex;flex-direction:column;gap:10px">
         <div style="display:flex;align-items:center;gap:8px">
-          <div style="width:12px;height:12px;border-radius:3px;background:#8b9cc4;flex-shrink:0"></div>
+          <div style="width:12px;height:12px;border-radius:3px;background:#647bb0;flex-shrink:0"></div>
           <div>
             <div style="font-size:13px;font-weight:600">Protein ${totalMacroKcal ? Math.round(proKcal/totalMacroKcal*100) : 0}% <span style="font-size:11px;color:var(--muted);font-weight:400">/ mål ${Math.round(TARGETS.protein*4/(TARGETS.protein*4+TARGETS.carbs*4+TARGETS.fat*9)*100)}%</span></div>
             <div style="font-size:11px;color:var(--muted)">${n(pro,1)}g · ${Math.round(proKcal)} kcal</div>
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:8px">
-          <div style="width:12px;height:12px;border-radius:3px;background:#c49078;flex-shrink:0"></div>
+          <div style="width:12px;height:12px;border-radius:3px;background:#c07a52;flex-shrink:0"></div>
           <div>
             <div style="font-size:13px;font-weight:600">Karbo ${totalMacroKcal ? Math.round(carbKcal/totalMacroKcal*100) : 0}% <span style="font-size:11px;color:var(--muted);font-weight:400">/ mål ${Math.round(TARGETS.carbs*4/(TARGETS.protein*4+TARGETS.carbs*4+TARGETS.fat*9)*100)}%</span></div>
             <div style="font-size:11px;color:var(--muted)">${n(carb,1)}g · ${Math.round(carbKcal)} kcal</div>
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:8px">
-          <div style="width:12px;height:12px;border-radius:3px;background:#c9a84c;flex-shrink:0"></div>
+          <div style="width:12px;height:12px;border-radius:3px;background:#b48f2c;flex-shrink:0"></div>
           <div>
             <div style="font-size:13px;font-weight:600">Fett ${totalMacroKcal ? Math.round(fatKcal/totalMacroKcal*100) : 0}% <span style="font-size:11px;color:var(--muted);font-weight:400">/ mål ${Math.round(TARGETS.fat*9/(TARGETS.protein*4+TARGETS.carbs*4+TARGETS.fat*9)*100)}%</span></div>
             <div style="font-size:11px;color:var(--muted)">${n(fat,1)}g · ${Math.round(fatKcal)} kcal</div>
@@ -2835,25 +3000,25 @@ function renderNutrition() {
     ${showCharts ? `
     <div class="section-head">Trender</div>
     <div class="chart-card" style="margin-bottom:10px">
-      <div style="font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px">Kalorier per dag</div>
-      <div style="height:160px;position:relative"><canvas id="calChart" role="img" aria-label="Daglig kaloritrend">Kaloritrend.</canvas></div>
+      <div class="eyebrow">Kalorier per dag</div>
+      <div style="height:180px;position:relative"><canvas id="calChart" role="img" aria-label="Daglig kaloritrend">Kaloritrend.</canvas></div>
     </div>
     <div class="chart-card" style="margin-bottom:10px">
-      <div style="font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px">Spist vs forbrent (kcal/dag)</div>
-      <div style="height:160px;position:relative"><canvas id="balanceChart" role="img" aria-label="Spist vs forbrent">Spist vs forbrent.</canvas></div>
+      <div class="eyebrow">Spist vs forbrent (kcal/dag)</div>
+      <div style="height:180px;position:relative"><canvas id="balanceChart" role="img" aria-label="Spist vs forbrent">Spist vs forbrent.</canvas></div>
     </div>
     <div class="chart-pair" style="margin-bottom:1.5rem">
       <div class="chart-card">
-        <div style="font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px">Protein (g)</div>
-        <div style="height:120px;position:relative"><canvas id="proChart" role="img" aria-label="Proteintrend">Proteintrend.</canvas></div>
+        <div class="eyebrow">Protein (g)</div>
+        <div style="height:160px;position:relative"><canvas id="proChart" role="img" aria-label="Proteintrend">Proteintrend.</canvas></div>
       </div>
       <div class="chart-card">
-        <div style="font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px">Karbo (g)</div>
-        <div style="height:120px;position:relative"><canvas id="carbChart" role="img" aria-label="Karbotrend">Karbotrend.</canvas></div>
+        <div class="eyebrow">Karbo (g)</div>
+        <div style="height:160px;position:relative"><canvas id="carbChart" role="img" aria-label="Karbotrend">Karbotrend.</canvas></div>
       </div>
       <div class="chart-card">
-        <div style="font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px">Fett (g)</div>
-        <div style="height:120px;position:relative"><canvas id="fatChart" role="img" aria-label="Fettrend">Fettrend.</canvas></div>
+        <div class="eyebrow">Fett (g)</div>
+        <div style="height:160px;position:relative"><canvas id="fatChart" role="img" aria-label="Fettrend">Fettrend.</canvas></div>
       </div>
     </div>` : ''}
 
@@ -2886,7 +3051,7 @@ function renderNutrition() {
       destroyChartById('macroPie');
       chartInstances['macroPie'] = new Chart(pie, {
         type: 'doughnut',
-        data: { datasets: [{ data: [proKcal, carbKcal, fatKcal], backgroundColor: ['#8b9cc4','#c49078','#c9a84c'], borderWidth: 0 }] },
+        data: { datasets: [{ data: [proKcal, carbKcal, fatKcal], backgroundColor: ['#647bb0','#c07a52','#b48f2c'], borderWidth: 0 }] },
         options: { cutout: '65%', responsive: false, plugins: { legend: { display: false }, tooltip: { enabled: false } } }
       });
       const goalPie = document.getElementById('macroPieGoal');
@@ -2894,7 +3059,7 @@ function renderNutrition() {
         destroyChartById('macroPieGoal');
         chartInstances['macroPieGoal'] = new Chart(goalPie, {
           type: 'doughnut',
-          data: { datasets: [{ data: [TARGETS.protein*4, TARGETS.carbs*4, TARGETS.fat*9], backgroundColor: ['#8b9cc444','#c4907844','#c9a84c44'], borderColor: ['#8b9cc4','#c49078','#c9a84c'], borderWidth: 2 }] },
+          data: { datasets: [{ data: [TARGETS.protein*4, TARGETS.carbs*4, TARGETS.fat*9], backgroundColor: ['#647bb044','#c07a5244','#b48f2c44'], borderColor: ['#647bb0','#c07a52','#b48f2c'], borderWidth: 2 }] },
           options: { cutout: '65%', responsive: false, plugins: { legend: { display: false }, tooltip: { enabled: false } } }
         });
       }
@@ -2904,21 +3069,21 @@ function renderNutrition() {
       const mkLine = (id, data, color, target) => {
         const el = document.getElementById(id); if (!el) return;
         destroyChartById(id);
-        const datasets = [{ data, borderColor: color, backgroundColor: color+'22', borderWidth: 1.5, fill: true, tension: .3, pointRadius: 2.5, pointBackgroundColor: color }];
-        if (target) datasets.push({ data: chartLabels.map(() => target), borderColor: 'rgba(255,255,255,.15)', borderWidth: 1, borderDash: [4,4], pointRadius: 0, fill: false });
+        const datasets = [{ data, borderColor: color, backgroundColor: color+'22', borderWidth: 2, fill: true, tension: .3, pointRadius: 2.5, pointBackgroundColor: color }];
+        if (target) datasets.push({ data: chartLabels.map(() => target), borderColor: chartTick()+'66', borderWidth: 1, borderDash: [4,4], pointRadius: 0, fill: false });
         chartInstances[id] = new Chart(el, {
           type: 'line',
           data: { labels: chartLabels, datasets },
           options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: {
-            x: { ticks: { color: chartTick(), font: { size: 9 }, maxTicksLimit: 8 }, grid: { color: chartGrid() } },
-            y: { ticks: { color: chartTick(), font: { size: 9 } }, grid: { color: chartGrid() } }
+            x: { ticks: { color: chartTick(), font:{size:11}, maxTicksLimit: 8 }, grid: { color: chartGrid() } },
+            y: { ticks: { color: chartTick(), font:{size:11} }, grid: { color: chartGrid() } }
           }}
         });
       };
-      mkLine('calChart', chartRows.map(r => r.calories), '#c49078', TARGETS.calories);
-      mkLine('proChart', chartRows.map(r => r.protein), '#8b9cc4', TARGETS.protein);
-      mkLine('carbChart', chartRows.map(r => r.carbs), '#c49078', TARGETS.carbs);
-      mkLine('fatChart', chartRows.map(r => r.fat), '#c9a84c', TARGETS.fat);
+      mkLine('calChart', chartRows.map(r => r.calories), '#c07a52', TARGETS.calories);
+      mkLine('proChart', chartRows.map(r => r.protein), '#647bb0', TARGETS.protein);
+      mkLine('carbChart', chartRows.map(r => r.carbs), '#c07a52', TARGETS.carbs);
+      mkLine('fatChart', chartRows.map(r => r.fat), '#b48f2c', TARGETS.fat);
 
       // Eaten vs Burned comparison bar chart
       const bEl = document.getElementById('balanceChart');
@@ -2932,14 +3097,14 @@ function renderNutrition() {
         chartInstances['balanceChart'] = new Chart(bEl, {
           type: 'bar',
           data: { labels: bLabels, datasets: [
-            { label: 'Spist', data: eatData, backgroundColor: '#c4907880', borderColor: '#c49078', borderWidth: 1 },
-            { label: 'Forbrent', data: burnData, backgroundColor: '#7c6dfa80', borderColor: '#7c6dfa', borderWidth: 1 }
+            { label: 'Spist', data: eatData, backgroundColor: '#c07a5280', borderColor: '#c07a52', borderWidth: 1 },
+            { label: 'Forbrent', data: burnData, backgroundColor: '#8a7bd880', borderColor: '#8a7bd8', borderWidth: 1 }
           ]},
           options: { responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: true, labels: { color: chartTick(), font: { size: 9 }, boxWidth: 12 } } },
+            plugins: { legend: { display: true, labels: { color: chartTick(), font:{size:11}, boxWidth: 12 } } },
             scales: {
-              x: { ticks: { color: chartTick(), font: { size: 9 }, maxTicksLimit: 8 }, grid: { color: chartGrid() } },
-              y: { ticks: { color: chartTick(), font: { size: 9 } }, grid: { color: chartGrid() } }
+              x: { ticks: { color: chartTick(), font:{size:11}, maxTicksLimit: 8 }, grid: { color: chartGrid() } },
+              y: { ticks: { color: chartTick(), font:{size:11} }, grid: { color: chartGrid() } }
             }
           }
         });
@@ -2990,7 +3155,7 @@ async function loadData() {
 // Tapping an event opens a detail sheet with time, place and description.
 const CAL_URL='https://nutrition-reciever.margidowiggen.workers.dev/calendar';
 const CAL_DAYS=21;
-const CAL_PALETTE=['var(--accent)','#7c6dfa','var(--green)','var(--amber)','#4a9fb0','var(--red)','var(--accent2)'];
+const CAL_PALETTE=['var(--accent)','#8a7bd8','var(--green)','var(--amber)','#4a9fb0','var(--red)','var(--accent2)'];
 let calView=null,calStart=null,calMonth=null,calSel=null,calData=null,calMsg='',calReq=0;
 const calCache=new Map();
 const lsGet=(k,d=null)=>{try{const v=localStorage.getItem(k);return v==null?d:v;}catch(e){return d;}};

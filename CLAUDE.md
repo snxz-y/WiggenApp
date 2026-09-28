@@ -44,6 +44,13 @@ The GitHub repo is the source of truth for all code. The Windows folder `C:\User
 - **Nutrition:** Health Auto Export iPhone app → Cloudflare Worker → GitHub. Syncs every 6h. Widget on home screen keeps it reliable.
 - **Cloudflare Worker:** `https://nutrition-reciever.margidowiggen.workers.dev` — handles `/` (nutrition from Health Auto Export), `/save-review` + `/delete-review` (Målsetninger tab) and `/calendar`. Secrets: `GITHUB_TOKEN`, `CAL_KEY`, `CAL_FEEDS`. All GitHub writes go through `updateRepoJson()` (UTF-8 safe, retries on sha conflicts). Source is `worker.js` in the repo; deploy by pasting it into the Cloudflare dashboard.
 
+## Design (Claude Design overhaul, Sept 2026)
+- The visual layer came from Claude Design: a **"v2" CSS layer at the bottom of `<style>`** overrides the older rules. Change styling there rather than in the old rules above it.
+- Mobile (≤680px): the tab bar is a **fixed bottom nav** (CSS only; `viewport-fit=cover` + safe-area insets). `showNav()` scrolls to top. Desktop keeps the top nav.
+- Sub-tabs are a segmented control (44px). On ≤480px labels may wrap; Aktiviteter stacks icon over text.
+- Shared classes: `eyebrow`, `chart-title`, `card-title`, `card-note`, `form-card`, `field`, `btn-primary`, `icon-btn`, `date-row`/`date-field`. Tokens `--r-card`, `--r-inner`, `--tap`, `--nav-h`, `--glass`.
+- Chart.js defaults are set by `applyChartDefaults()` (Hanken Grotesk 11px, line width 2). Chart heights: 160 small / 180 standard / 200 multi-series. Series palette: #c07a52, #647bb0, #5a9a6c, #b48f2c, #8a7bd8, #c0594e.
+
 ## App conventions (Sept 2026 cleanup)
 - **Periods:** shared `rangeChips(active, fnName, opts)` renders period chips (7 d / 14 d / 30 d / 3 mnd / Alt). Defaults: Kosthold 14 d, Kosthold→Trender kaloriunderskudd 14 d + ukedagsnitt 8 uker, Helse→Trender 3 mnd, Kropp 1 mnd, Søvn 30 d, Innsikt 3 mnd (intensitet 30 d).
 - **Dates:** chart axes are always DD/MM (`ddmm()`), tables DD/MM/YYYY (`ddmmyyyy()`). Irregular series (weigh-ins, body fat, Kropp) use a real time axis (`dayNum()` + `dayAxis()`), not one slot per measurement.
