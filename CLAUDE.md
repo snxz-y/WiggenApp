@@ -12,10 +12,9 @@ The GitHub repo is the source of truth for all code. The Windows folder `C:\User
 ## Repo files
 - `index.html` — the whole app. `manifest.json` + `icon-*.png` — PWA metadata.
 - `sw.js` — **kill switch only** (clears caches + unregisters a service worker briefly registered in June 2026). `index.html` does not register a service worker. Can be deleted after a while.
-- `garmin_sync.py` — the Garmin sync that runs on the HA box (repo copy == box copy). At the end of each run it calls `shifts_sync.py`.
-- `shifts_sync.py` — shift calendar (iCal) → `shifts.json`. Must sit next to `garmin_sync.py` on the box.
+- `garmin_sync.py` — the Garmin sync that runs on the HA box (repo copy == box copy).
 - `worker.js` — source of the Cloudflare Worker (must be pasted into Cloudflare manually to deploy).
-- `activities.json`, `health.json`, `nutrition.json`, `reviews.json`, `shifts.json` — data.
+- `activities.json`, `health.json`, `nutrition.json`, `reviews.json` — data.
 - `scriptable/WiggenKalender.js` — iOS home-screen calendar widget (Scriptable app).
 - `.github/workflows/pages-deploy.yml` — deploys GitHub Pages when site files change.
 
@@ -40,7 +39,7 @@ The GitHub repo is the source of truth for all code. The Windows folder `C:\User
   - **No cloud sync:** the GitHub Actions `garmin-sync.yml` workflow and the cloud (OAuth1-from-env) mode in `garmin_sync.py` were deleted in Sept 2026. There is no Windows Task Scheduler task either.
   - **Activities are upserted, not skipped:** `sync_activities` re-processes the last ~2 days every run. It inserts new activities, repairs partial/foreign-schema entries (e.g. ones hand-added via Garmin MCP that lack `distanceM`), and refreshes metrics Garmin computes minutes after a run (power, running dynamics, HR zones, VO2max, load). Do **not** hand-write activity entries with a custom schema — let the sync own `activities.json`.
 - **On-demand sync:** removed. The in-app "Sync Garmin" button (and its `triggerGarminSync()` handler) was deleted on 22 June 2026 because the HA box now auto-syncs every 15 min, and the old button dispatched the now-disabled `garmin-sync.yml` workflow. For a manual sync, run `python3 /config/garmin/ha_garmin.py` on the HA box (e.g. via the SSH add-on web terminal).
-- **Shifts (no longer shown in the app):** the Jobb tab was removed in Sept 2026; `shifts.json` is still synced but nothing in `index.html` reads it. `shifts_sync.py` runs with every Garmin sync (every 15 min). It downloads the shift calendar's iCal feed (the same one Google Calendar imports as «94327_calendar»), keeps one entry per date (`date, shiftName, start, end, shiftType, unit`), rebuilds everything from the feed's first date onwards (days without events = `off`), keeps older history, and pushes `shifts.json` only when something changed. The iCal URL is private: it lives only in `/config/garmin/shifts_ics_url.txt` (gitignored) or env `SHIFTS_ICS_URL`; without it the step is skipped. Rules: all-day `Ferie`/`FraværFE` = vacation, other all-day (F1/F2) = off, timed start <11 = day, <19 = evening, else night. Loan pairs (`FL fra DSKBS1` + `(FL til X)`) collapse to the `(FL til X)` entry.
+- **No work/shift data in the repo.** The repo is public, so shift schedules (and any calendar data) must never be committed. `shifts.json` and `shifts_sync.py` were removed in Sept 2026; the calendar is only reachable through the private Worker `/calendar` endpoint.
 - **Nutrition:** Health Auto Export iPhone app → Cloudflare Worker → GitHub. Syncs every 6h. Widget on home screen keeps it reliable.
 - **Cloudflare Worker:** `https://nutrition-reciever.margidowiggen.workers.dev` — handles `/` (nutrition from Health Auto Export), `/save-review` + `/delete-review` (Målsetninger tab) and `/calendar`. Secrets: `GITHUB_TOKEN`, `CAL_KEY`, `CAL_FEEDS`. All GitHub writes go through `updateRepoJson()` (UTF-8 safe, retries on sha conflicts). Source is `worker.js` in the repo; deploy by pasting it into the Cloudflare dashboard.
 
