@@ -570,6 +570,10 @@ tr:hover td{background:var(--surface2)}
   .nav-tab{font-size:10px}
   .nav-tab .nav-ic{width:38px}
 }
+
+/* App password gate */
+.app-login{position:fixed;inset:0;z-index:2000;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:16px}
+.app-login .cal-login{width:100%;margin:0}
 </style>
 <script>
 (function(){try{var t=localStorage.getItem('wiggen-theme')||'light';document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','light');}})();
@@ -861,8 +865,9 @@ document.addEventListener('DOMContentLoaded',function(){var t=document.documentE
 </div>
 
 <script>
-const ACT_URL='https://raw.githubusercontent.com/snxz-y/WiggenApp/main/activities.json';
-const HEALTH_URL='https://raw.githubusercontent.com/snxz-y/WiggenApp/main/health.json';
+// All personal data is served by the Worker from a PRIVATE repo, behind the
+// app password (stored per device in localStorage 'calKey', shared with Kalender).
+const WORKER_URL='https://nutrition-reciever.margidowiggen.workers.dev';
 let activities=[],healthData=[];
 // Pulssone-gulv (bpm). Standardverdier til health.json har hrZones fra Garmin.
 let HRZ={z1:104,z2:125,z3:146,z4:166,z5:187};
@@ -2688,10 +2693,10 @@ async function doDeleteReview(rev) {
   const btn = document.getElementById('del-review-confirm');
   if (btn) { btn.disabled = true; btn.textContent = 'Sletter…'; btn.style.opacity = '0.6'; }
   try {
-    const r = await fetch('https://nutrition-reciever.margidowiggen.workers.dev/delete-review', {
+    const r = await fetch(WORKER_URL + '/delete-review', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ date: rev.date, period: rev.period, content: rev.content })
+      body: JSON.stringify({ key: lsGet('calKey'), date: rev.date, period: rev.period, content: rev.content })
     });
     const data = await r.json().catch(() => ({}));
     if (r.ok && data.ok) {
@@ -2712,10 +2717,10 @@ async function doDeleteReview(rev) {
 
 async function pushReviewToGithub(review) {
   // Route through Cloudflare Worker which holds the GitHub token securely
-  const r = await fetch('https://nutrition-reciever.margidowiggen.workers.dev/save-review', {
+  const r = await fetch(WORKER_URL + '/save-review', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(review)
+    body: JSON.stringify({ key: lsGet('calKey'), goal: review })
   });
   return r.ok;
 }
@@ -2804,8 +2809,6 @@ document.addEventListener('click', e => {
 });
 
 // ── NUTRITION ─────────────────────────────────────────────────────────────────
-const NUTR_URL = 'https://raw.githubusercontent.com/snxz-y/WiggenApp/main/nutrition.json';
-const REVIEWS_URL = 'https://raw.githubusercontent.com/snxz-y/WiggenApp/main/reviews.json';
 let nutritionData = [];
 let reviewsData = [];
 
@@ -3117,13 +3120,15 @@ function renderNutrition() {
 // ── DATA LOAD ────────────────────────────────────────────────────────────────
 // Fetches all data files (cache-busted) and assigns the globals.
 async function loadData() {
-  const nc = '?nc=' + Date.now();
-  const [acts, health, nutr, reviews] = await Promise.all([
-    fetch(ACT_URL + nc).then(r => r.json()),
-    fetch(HEALTH_URL + nc).then(r => r.json()),
-    fetch(NUTR_URL + nc).then(r => r.json()),
-    fetch(REVIEWS_URL + nc).then(r => r.json())
-  ]);
+  const r = await fetch(WORKER_URL + '/data', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ key: lsGet('calKey') })
+  });
+  if (r.status === 401) throw new Error('unauthorized');
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const { files } = await r.json();
+  const acts = files['activities.json'], health = files['health.json'];
+  const nutr = files['nutrition.json'], reviews = files['reviews.json'];
   activities = acts || []; healthData = health || []; setHRZones();
   nutritionData = nutr || []; reviewsData = reviews || [];
   // Floor daily RESTING burn to BURN_FLOOR. On days the watch is off for a long
@@ -3154,7 +3159,7 @@ async function loadData() {
 // The password is kept only in this device's localStorage.
 // Two views: "Liste" (21-day agenda) and "Måned" (month grid + selected day).
 // Tapping an event opens a detail sheet with time, place and description.
-const CAL_URL='https://nutrition-reciever.margidowiggen.workers.dev/calendar';
+const CAL_URL=WORKER_URL+'/calendar';
 const CAL_DAYS=21;
 const CAL_PALETTE=['var(--accent)','#8a7bd8','var(--green)','var(--amber)','#4a9fb0','var(--red)','var(--accent2)'];
 let calView=null,calStart=null,calMonth=null,calSel=null,calData=null,calMsg='',calReq=0;
@@ -3202,7 +3207,7 @@ function renderCalendar(){
   loadCalendar();
 }
 function calLogin(){const v=(document.getElementById('cal-key')||{}).value;if(!v)return;lsSet('calKey',v);calMsg='';calCache.clear();renderCalendar();}
-function calLogout(){lsSet('calKey',null);calData=null;calCache.clear();calMsg='';renderCalendar();}
+function calLogout(){lsSet('calKey',null);calData=null;calCache.clear();calMsg='';showAppLogin('');}
 function calSetView(v){calView=v;lsSet('calView',v);renderCalendar();}
 function calShift(dir){
   if(calView==='month'){
@@ -3321,12 +3326,33 @@ function calClose(){const o=document.getElementById('cal-sheet');if(o)o.remove()
 document.addEventListener('keydown',e=>{if(e.key==='Escape')calClose();});
 
 // ── INIT ─────────────────────────────────────────────────────────────────────
-(async () => {
-  try { await loadData(); } catch(e) { console.error('Init load failed:', e); }
+// App start: ask for the app password (once per device), then load data.
+function showAppLogin(msg){
+  let ov=document.getElementById('app-login');
+  if(!ov){ov=document.createElement('div');ov.id='app-login';ov.className='app-login';document.body.appendChild(ov);}
+  ov.innerHTML=`<div class="cal-login"><div class="card-title" style="font-size:18px">Wiggen</div>
+    <div style="font-size:13px;color:var(--muted);margin-top:4px">Skriv inn app-passordet. Det lagres bare på denne enheten.</div>
+    <input type="password" id="app-key" placeholder="Passord" autocomplete="current-password" onkeydown="if(event.key==='Enter')appLogin()">
+    ${msg?`<div class="cal-warn">${msg}</div>`:''}
+    <button class="cal-btn cal-btn-primary" onclick="appLogin()">Lås opp</button></div>`;
+  setTimeout(()=>{const i=document.getElementById('app-key');if(i)i.focus();},50);
+}
+function appLogin(){const v=(document.getElementById('app-key')||{}).value;if(!v)return;lsSet('calKey',v);startApp();}
+async function startApp(){
+  if(!lsGet('calKey')){showAppLogin('');return;}
+  try{await loadData();}
+  catch(e){
+    if(e.message==='unauthorized'){lsSet('calKey',null);showAppLogin('Feil passord.');return;}
+    console.error('Init load failed:',e);
+    showAppLogin(`Kunne ikke hente data (${e.message}). Sjekk nettet og prøv igjen.`);return;
+  }
+  const ov=document.getElementById('app-login');if(ov)ov.remove();
+  calCache.clear();
   initCompDates(); initHealthDates(); initNutrDates();
   renderHealth(); renderActivities(); renderCoachReviews();
   openTabFromHash();
-})();
+}
+startApp();
 
 // Deep link: ...WiggenApp/#kalender opens the Kalender tab (used by the
 // Scriptable home-screen widget). Other tabs: #helse, #innsikt, #aktiviteter,

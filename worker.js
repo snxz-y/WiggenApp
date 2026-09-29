@@ -1,18 +1,23 @@
 // Cloudflare Worker — WiggenApp backend
 // Deployed at https://nutrition-reciever.margidowiggen.workers.dev
 //
+// All personal data lives in the PRIVATE repo DATA_REPO. The app's code repo
+// (snxz-y/WiggenApp) is public and must never contain data.
+//
 // Endpoints (all POST):
-//   /               Kosthold: Health Auto Export → nutrition.json
-//   /save-review    Målsetninger: add a goal to reviews.json
-//   /delete-review  Målsetninger: remove a goal from reviews.json
-//   /calendar       Kalender: private overview of the iCal feeds in CAL_FEEDS
+//   /               Kosthold: Health Auto Export → nutrition.json (write-only, no password)
+//   /data           App: read health/activities/nutrition/reviews        (password)
+//   /save-review    Målsetninger: add a goal to reviews.json              (password)
+//   /delete-review  Målsetninger: remove a goal from reviews.json         (password)
+//   /calendar       Kalender: private overview of the iCal feeds in CAL_FEEDS (password)
 //
 // Secrets (Cloudflare → Settings → Variables and Secrets):
-//   GITHUB_TOKEN  token with write access to snxz-y/WiggenApp
-//   CAL_KEY       password the app sends for /calendar
+//   GITHUB_TOKEN  token with read/write access to DATA_REPO
+//   CAL_KEY       the app password (one password for data, goals and calendar)
 //   CAL_FEEDS     JSON list: [{"name":"Privat","url":"https://...ics","color":"#7c6dfa"}, ...]
 
-const REPO = 'snxz-y/WiggenApp';
+const REPO = 'snxz-y/WiggenApp-data';        // DATA_REPO (private)
+const DATA_FILES = ['health.json', 'activities.json', 'nutrition.json', 'reviews.json'];
 const GH = 'https://api.github.com';
 
 const CORS = {
@@ -91,15 +96,44 @@ async function saveNutrition(request, env) {
   return json({ ok: true, dates: entries.map(e => e.date) });
 }
 
+// ── Password check (shared by /data, goals and /calendar) ─────────────────
+async function authorized(body, env) {
+  return !!(env.CAL_KEY && body && body.key && await sameSecret(body.key, env.CAL_KEY));
+}
+
+// ── App data (private repo → app) ──────────────────────────────────────────
+// POST /data {key} → {files: {"health.json": [...], ...}}
+async function readData(request, env) {
+  const body = await request.json().catch(() => ({}));
+  if (!(await authorized(body, env))) return json({ error: 'unauthorized' }, 401);
+  const files = {};
+  await Promise.all(DATA_FILES.map(async f => {
+    const r = await gh(f, env.GITHUB_TOKEN);
+    if (r.status === 404) { files[f] = []; return; }
+    if (!r.ok) throw new Error(`GitHub read ${f}: HTTP ${r.status}`);
+    const meta = await r.json();
+    // Files over 1 MB come back without inline content; fetch the blob instead.
+    const content = meta.content || (await (await fetch(meta.git_url, { headers: { Authorization: `token ${env.GITHUB_TOKEN}`, 'User-Agent': 'wiggenapp-worker' } })).json()).content;
+    files[f] = JSON.parse(b64decode(content));
+  }));
+  return json({ files });
+}
+
 // ── Målsetninger (reviews.json) ────────────────────────────────────────────
+// Body: {key, goal:{...}} to save, {key, date, period, content} to delete.
 async function saveGoal(request, env) {
-  const goal = await request.json();
+  const body = await request.json().catch(() => ({}));
+  if (!(await authorized(body, env))) return json({ error: 'unauthorized' }, 401);
+  const goal = body.goal;
+  if (!goal || typeof goal !== 'object') return json({ error: 'goal mangler' }, 400);
   await updateRepoJson('reviews.json', env.GITHUB_TOKEN, 'Save review', current => ({ data: [goal, ...current] }));
   return json({ ok: true });
 }
 
 async function deleteGoal(request, env) {
-  const { date, period, content } = await request.json();
+  const body = await request.json().catch(() => ({}));
+  if (!(await authorized(body, env))) return json({ error: 'unauthorized' }, 401);
+  const { date, period, content } = body;
   const found = await updateRepoJson('reviews.json', env.GITHUB_TOKEN, 'Delete review', current => {
     // Remove only the first exact match (handles duplicates).
     const i = current.findIndex(r => r.date === date && r.period === period && r.content === content);
@@ -257,7 +291,7 @@ async function sameSecret(a, b) {
 
 async function handleCalendar(request, env) {
   const body = await request.json().catch(() => ({}));
-  if (!env.CAL_KEY || !body.key || !(await sameSecret(body.key, env.CAL_KEY))) return json({ error: 'unauthorized' }, 401);
+  if (!(await authorized(body, env))) return json({ error: 'unauthorized' }, 401);
   let feeds;
   try { feeds = JSON.parse(env.CAL_FEEDS || '[]'); } catch (e) { return json({ error: 'CAL_FEEDS er ikke gyldig JSON' }, 500); }
   const isoDay = s => /^\d{4}-\d{2}-\d{2}$/.test(s || '') ? new Date(s + 'T00:00:00Z') : null;
@@ -285,7 +319,7 @@ export default {
   async fetch(request, env) {
     if (request.method === 'OPTIONS') return new Response(null, { headers: CORS });
     if (request.method !== 'POST') return json({ error: 'Not found' }, 404);
-    const routes = { '/': saveNutrition, '/save-review': saveGoal, '/delete-review': deleteGoal, '/calendar': handleCalendar };
+    const routes = { '/': saveNutrition, '/data': readData, '/save-review': saveGoal, '/delete-review': deleteGoal, '/calendar': handleCalendar };
     const handler = routes[new URL(request.url).pathname];
     if (!handler) return json({ error: 'Not found' }, 404);
     try {

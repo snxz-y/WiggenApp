@@ -6,6 +6,13 @@ Personal health & training dashboard. Live at **https://snxz-y.github.io/WiggenA
 ## Owner context
 Jørgen, born 18 June 1997 (the app computes age from `BIRTH_DATE` in `index.html`), 171cm, ~76kg, goal 65kg. Shift nurse in Trondheim, Norway. Dairy allergy. Garmin Epix Pro Gen 2. HR zones and lactate threshold come from Garmin (see below); nothing zone-related is hardcoded in the app anymore. Nutrition targets: 1600 kcal, 150g protein, 145g carbs, 51g fat.
 
+## Private data (Sept 2026)
+- **This repo (`snxz-y/WiggenApp`) is PUBLIC and must contain no personal data.** All data lives in the **private** repo **`snxz-y/WiggenApp-data`**: `health.json`, `activities.json`, `nutrition.json`, `reviews.json`.
+- Writers: HA box `garmin_sync.py` (REPO = WiggenApp-data) and the Worker (nutrition + goals).
+- Reader: the app calls the Worker's `POST /data {key}`; the Worker reads the private repo with `GITHUB_TOKEN`. The app shows a password screen on first open (password = Worker secret `CAL_KEY`, stored in localStorage `calKey`, shared with Kalender). «Lås» logs out.
+- Goals (`/save-review`, `/delete-review`) also require the password. Nutrition POST `/` stays open (write-only) for Health Auto Export.
+- Plain Claude chat can no longer read training data from raw GitHub; use Cowork + Garmin MCP, or a Claude Code session with WiggenApp-data attached.
+
 ## Source of truth
 The GitHub repo is the source of truth for all code. The Windows folder `C:\Users\Jørgen\Documents\files\` is only a working copy, so don't treat files there as canonical. Garmin MCP tokens for Cowork: `C:\Users\Jørgen\.garmin-mcp\` (oauth1, oauth2, profile).
 
@@ -14,7 +21,7 @@ The GitHub repo is the source of truth for all code. The Windows folder `C:\User
 - `sw.js` — **kill switch only** (clears caches + unregisters a service worker briefly registered in June 2026). `index.html` does not register a service worker. Can be deleted after a while.
 - `garmin_sync.py` — the Garmin sync that runs on the HA box (repo copy == box copy).
 - `worker.js` — source of the Cloudflare Worker (must be pasted into Cloudflare manually to deploy).
-- `activities.json`, `health.json`, `nutrition.json`, `reviews.json` — data.
+- Data files are NOT here — see «Private data» above.
 - `scriptable/WiggenKalender.js` — iOS home-screen calendar widget (Scriptable app).
 - `.github/workflows/pages-deploy.yml` — deploys GitHub Pages when site files change.
 
@@ -89,4 +96,4 @@ Invoke-RestMethod "https://api.github.com/repos/$repo/contents/$file" -Headers $
 ```
 
 ## Getting run feedback remotely
-If PC is on + Claude Desktop running, use **Cowork** from iPhone: fetch latest run via Garmin MCP and trigger a manual sync on the HA box (`ssh ... "cd /config/garmin && sudo python3 ha_garmin.py"`) instead of waiting up to 15 min. Without the MCP (plain Claude app), read `https://raw.githubusercontent.com/snxz-y/WiggenApp/main/activities.json` — but only AFTER a sync has pushed the run.
+Use Cowork (Claude Desktop on the PC) with the Garmin MCP, or open a Claude Code session with `snxz-y/WiggenApp-data` attached and read `activities.json` there. The data is no longer readable from raw.githubusercontent.com.

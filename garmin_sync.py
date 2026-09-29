@@ -10,7 +10,7 @@ from datetime import date, datetime, timedelta
 
 # ── CONFIG ────────────────────────────────────────────────────────────────────
 GITHUB_TOKEN = os.environ.get("GH_PAT") or os.environ.get("GITHUB_TOKEN", "")
-REPO         = "snxz-y/WiggenApp"
+REPO         = "snxz-y/WiggenApp-data"   # PRIVATE data repo (the app code repo is public)
 TODAY        = date.today().isoformat()
 YESTERDAY    = (date.today() - timedelta(days=1)).isoformat()
 TOKEN_DIR    = os.path.join(os.environ.get("USERPROFILE", os.path.expanduser("~")), ".garmin-mcp")
