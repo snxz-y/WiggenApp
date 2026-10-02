@@ -9,6 +9,7 @@ on:
       - 'sw.js'
       - 'icon-192.png'
       - 'icon-512.png'
+      - 'apple-touch-icon.png'
       - '.github/workflows/pages-deploy.yml'
   workflow_dispatch:
 

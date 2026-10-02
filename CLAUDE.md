@@ -17,7 +17,7 @@ Jørgen, born 18 June 1997 (the app computes age from `BIRTH_DATE` in `index.htm
 The GitHub repo is the source of truth for all code. The Windows folder `C:\Users\Jørgen\Documents\files\` is only a working copy, so don't treat files there as canonical. Garmin MCP tokens for Cowork: `C:\Users\Jørgen\.garmin-mcp\` (oauth1, oauth2, profile).
 
 ## Repo files
-- `index.html` — the whole app. `manifest.json` + `icon-*.png` — PWA metadata.
+- `index.html` — the whole app. `manifest.json`, `icon-192.png`, `icon-512.png`, `apple-touch-icon.png` (180px, used by iPhone home screen) — app icon (Wiggen flower logo, Oct 2026). Icons are linked with `?v=N`; bump N when the icon changes.
 - `sw.js` — **kill switch only** (clears caches + unregisters a service worker briefly registered in June 2026). `index.html` does not register a service worker. Can be deleted after a while.
 - `garmin_sync.py` — the Garmin sync that runs on the HA box (repo copy == box copy).
 - `worker.js` — source of the Cloudflare Worker (must be pasted into Cloudflare manually to deploy).
@@ -31,7 +31,7 @@ The GitHub repo is the source of truth for all code. The Windows folder `C:\User
 - **Load-focus target ranges:** `aerobicLowMin/Max`, `aerobicHighMin/Max`, `anaerobicMin/Max` come from Garmin's training-load-balance data (old fixed numbers as fallback).
 - **Age:** computed in the app from `BIRTH_DATE`.
 
-## Data files in GitHub repo
+## Data files (in the private repo WiggenApp-data)
 - `activities.json` — workouts
 - `health.json` — daily Garmin metrics (complete from June 14; body-comp only before)
 - `nutrition.json` — macros from Kaloridagboken
