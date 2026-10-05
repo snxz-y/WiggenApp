@@ -133,13 +133,16 @@ function shortcutEntries(body) {
   const days = {}, skipped = [];
   for (const f of SHORTCUT_FIELDS) {
     const vals = asList(body[f]), dates = asList(body[f + '_dates'] ?? body.dates);   // per-field dates, or one shared list
-    const kJ = f === 'calories' && /kj/i.test(String(body.calories_unit || '') + ' ' + vals.join(' '));
+    // Energy may arrive in J (Shortcuts default), kJ or kcal → divisor to kcal
+    const unitText = f === 'calories' ? String(body.calories_unit || '') + ' ' + vals.join(' ') : '';
+    const div = !unitText ? 1 : /kj/i.test(unitText) ? 4.184 : /(^|[\s\d])j\b/i.test(unitText) ? 4184 : 1;
     vals.forEach((v, i) => {
       const date = toIsoDate(dates[i]), n = toNumber(v);
       if (!date || n == null) { skipped.push(`${f}[${i}]`); return; }
       if (n <= 0) return;                     // 0 = nothing logged (or Health locked): never overwrite real data
+      const kcal = div === 1 && f === 'calories' && n > 100000 ? n / 4184 : n / div;   // unlabelled joules
       days[date] ||= { date };
-      days[date][f] = Math.round((kJ ? n / 4.184 : n) * 10) / 10;
+      days[date][f] = Math.round(kcal * 10) / 10;
     });
   }
   return { entries: Object.values(days).sort((a, b) => a.date.localeCompare(b.date)), skipped };
