@@ -6,6 +6,7 @@
 //
 // Endpoints (all POST):
 //   /               Kosthold: Health Auto Export → nutrition.json (write-only, no password)
+//   /nutrition-shortcut  Kosthold: iOS Snarveier → nutrition.json (password)
 //   /data           App: read health/activities/nutrition/reviews        (password)
 //   /save-review    Målsetninger: add a goal to reviews.json              (password)
 //   /delete-review  Målsetninger: remove a goal from reviews.json         (password)
@@ -45,9 +46,9 @@ async function gh(path, token, init = {}) {
 async function updateRepoJson(path, token, message, change) {
   for (let attempt = 0; attempt < 3; attempt++) {
     const r = await gh(path, token);
-    if (!r.ok) throw new Error(`GitHub read ${path}: HTTP ${r.status}`);
-    const file = await r.json();
-    const out = change(JSON.parse(b64decode(file.content)));
+    if (!r.ok && r.status !== 404) throw new Error(`GitHub read ${path}: HTTP ${r.status}`);
+    const file = r.status === 404 ? { content: null, sha: undefined } : await r.json();   // 404 → create the file
+    const out = change(file.content ? JSON.parse(b64decode(file.content)) : []);
     if (!out) return null;
     const w = await gh(path, token, {
       method: 'PUT',
@@ -94,6 +95,70 @@ async function saveNutrition(request, env) {
     return { data: Object.values(byDate).sort((a, b) => b.date.localeCompare(a.date)) };
   });
   return json({ ok: true, dates: entries.map(e => e.date) });
+}
+
+// ── Kosthold via iOS Snarveier (Shortcuts) ─────────────────────────────────
+// The «Wiggen kosthold» shortcut reads Apple Health with "Find Health Samples,
+// Group by Day" for the last 7 days and posts one flat dictionary:
+//   {key, calories:"<values>", calories_dates:"<dates>", calories_unit:"kcal",
+//    protein:"…", protein_dates:"…", carbs…, fat…, fiber…, saturatedFat…, sugar…}
+// Values/dates arrive as lists, or as newline-joined text with Norwegian
+// formatting ("1 025,9", "4. okt. 2026 kl. 00:00") – all are accepted. Each
+// value is a FULL-DAY total, so it replaces that day's field; re-sending the
+// last 7 days every time heals gaps. The last raw payload is kept in the
+// private repo as nutrition_debug.json for troubleshooting.
+const SHORTCUT_FIELDS = ['calories', 'protein', 'carbs', 'fat', 'fiber', 'saturatedFat', 'sugar', 'water'];
+const MONTHS = { jan: 1, feb: 2, mar: 3, apr: 4, mai: 5, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, okt: 10, oct: 10, nov: 11, des: 12, dec: 12 };
+const asList = v => Array.isArray(v) ? v : (v == null || v === '' ? [] : String(v).split(/\r?\n/).map(x => x.trim()).filter(Boolean));
+function toNumber(v) {
+  if (typeof v === 'number') return v;
+  const m = String(v).replace(/[\s  ]/g, '').replace(',', '.').match(/-?\d+(\.\d+)?/);
+  return m ? +m[0] : null;
+}
+function toIsoDate(v) {
+  const s = String(v).trim();
+  let m = s.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::\d{2}(?:\.\d+)?)?Z$/);
+  if (m) return fmtNaive(utcToOslo(new Date(s)), true);                         // UTC → Oslo day
+  if ((m = s.match(/(\d{4})-(\d{2})-(\d{2})/))) return `${m[1]}-${m[2]}-${m[3]}`; // ISO (local)
+  if ((m = s.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/))) return `${m[3]}-${p2(+m[2])}-${p2(+m[1])}`;
+  if ((m = s.match(/(\d{1,2})\.?\s+([a-zæøå]+)\.?,?\s+(\d{4})/i))) {           // 4. okt. 2026
+    const mo = MONTHS[m[2].toLowerCase().slice(0, 3)]; if (mo) return `${m[3]}-${p2(mo)}-${p2(+m[1])}`;
+  }
+  if ((m = s.match(/([a-z]+)\.?\s+(\d{1,2}),?\s+(\d{4})/i))) {                 // Oct 4, 2026
+    const mo = MONTHS[m[1].toLowerCase().slice(0, 3)]; if (mo) return `${m[3]}-${p2(mo)}-${p2(+m[2])}`;
+  }
+  return null;
+}
+function shortcutEntries(body) {
+  const days = {}, skipped = [];
+  for (const f of SHORTCUT_FIELDS) {
+    const vals = asList(body[f]), dates = asList(body[f + '_dates']);
+    const kJ = f === 'calories' && /kj/i.test(String(body.calories_unit || '') + ' ' + vals.join(' '));
+    vals.forEach((v, i) => {
+      const date = toIsoDate(dates[i]), n = toNumber(v);
+      if (!date || n == null) { skipped.push(`${f}[${i}]`); return; }
+      days[date] ||= { date };
+      days[date][f] = Math.round((kJ ? n / 4.184 : n) * 10) / 10;
+    });
+  }
+  return { entries: Object.values(days).sort((a, b) => a.date.localeCompare(b.date)), skipped };
+}
+async function saveNutritionShortcut(request, env) {
+  const body = await request.json().catch(() => ({}));
+  if (!(await authorized(body, env))) return json({ error: 'unauthorized' }, 401);
+  const { key, ...raw } = body;
+  const { entries, skipped } = shortcutEntries(raw);
+  await updateRepoJson('nutrition_debug.json', env.GITHUB_TOKEN, 'Nutrition shortcut payload', () =>
+    ({ data: { receivedAt: new Date().toISOString(), parsed: entries, skipped, raw } })).catch(() => {});
+  if (entries.length) {
+    await updateRepoJson('nutrition.json', env.GITHUB_TOKEN, 'Nutrition sync (Snarveier)', current => {
+      const byDate = Object.fromEntries(current.map(e => [e.date, e]));
+      for (const e of entries) byDate[e.date] = { ...byDate[e.date], ...e };
+      return { data: Object.values(byDate).sort((a, b) => b.date.localeCompare(a.date)) };
+    });
+  }
+  const sum = entries.map(e => `${e.date.slice(8)}/${e.date.slice(5, 7)}: ${e.calories != null ? Math.round(e.calories) + ' kcal' : '–'}`).join(', ');
+  return json({ ok: true, days: entries.length, message: entries.length ? `Lagret ${entries.length} dager – ${sum}` : 'Fant ingen data å lagre', skipped });
 }
 
 // ── Password check (shared by /data, goals and /calendar) ─────────────────
@@ -319,7 +384,7 @@ export default {
   async fetch(request, env) {
     if (request.method === 'OPTIONS') return new Response(null, { headers: CORS });
     if (request.method !== 'POST') return json({ error: 'Not found' }, 404);
-    const routes = { '/': saveNutrition, '/data': readData, '/save-review': saveGoal, '/delete-review': deleteGoal, '/calendar': handleCalendar };
+    const routes = { '/': saveNutrition, '/nutrition-shortcut': saveNutritionShortcut, '/data': readData, '/save-review': saveGoal, '/delete-review': deleteGoal, '/calendar': handleCalendar };
     const handler = routes[new URL(request.url).pathname];
     if (!handler) return json({ error: 'Not found' }, 404);
     try {
