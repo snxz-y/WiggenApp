@@ -18,7 +18,7 @@
 //   CAL_FEEDS     JSON list: [{"name":"Privat","url":"https://...ics","color":"#7c6dfa"}, ...]
 
 const REPO = 'snxz-y/WiggenApp-data';        // DATA_REPO (private)
-const DATA_FILES = ['health.json', 'activities.json', 'nutrition.json', 'reviews.json'];
+const DATA_FILES = ['health.json', 'activities.json', 'nutrition.json', 'reviews.json', 'profile.json'];
 const GH = 'https://api.github.com';
 
 const CORS = {

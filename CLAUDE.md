@@ -4,17 +4,17 @@
 Personal health & training dashboard. Live at **https://snxz-y.github.io/WiggenApp/**. GitHub repo: `snxz-y/WiggenApp`. Single-page app (`index.html`), **all UI text in Norwegian (bokmål, `lang="nb"`)** — write any new UI text in Norwegian. Seven tabs, in this order: Helse, Innsikt, Aktiviteter, Kosthold, Søvn, Kalender, Målsetninger. Dark theme, lime (`#c8f53a`) + purple (`#7c6dfa`) accents.
 
 ## Owner context
-Jørgen, born 18 June 1997 (the app computes age from `BIRTH_DATE` in `index.html`), 171cm, ~76kg, goal 65kg. Shift nurse in Trondheim, Norway. Dairy allergy. Garmin Epix Pro Gen 2. HR zones and lactate threshold come from Garmin (see below); nothing zone-related is hardcoded in the app anymore. Nutrition targets: 1600 kcal, 150g protein, 145g carbs, 51g fat.
+Single owner/user. Personal details (birth date, goal weight, nutrition targets, background) are deliberately **not** in this public repo: settings the app needs live in `profile.json` and owner context in `PROFILE.md`, both in the private repo `snxz-y/WiggenApp-data`. Garmin Epix Pro Gen 2. HR zones and lactate threshold come from Garmin (see below); nothing zone-related is hardcoded in the app anymore.
 
 ## Private data (Sept 2026)
-- **This repo (`snxz-y/WiggenApp`) is PUBLIC and must contain no personal data.** All data lives in the **private** repo **`snxz-y/WiggenApp-data`**: `health.json`, `activities.json`, `nutrition.json`, `reviews.json`.
+- **This repo (`snxz-y/WiggenApp`) is PUBLIC and must contain no personal data.** All data lives in the **private** repo **`snxz-y/WiggenApp-data`**: `health.json`, `activities.json`, `nutrition.json`, `reviews.json`, `profile.json` (birthDate, goalWeight, bodyFatGoal, nutrition `targets`; read into `PROFILE`/`TARGETS` by `loadData()`). Never hardcode personal values in `index.html`.
 - Writers: HA box `garmin_sync.py` (REPO = WiggenApp-data) and the Worker (nutrition + goals).
 - Reader: the app calls the Worker's `POST /data {key}`; the Worker reads the private repo with `GITHUB_TOKEN`. The app shows a password screen on first open (password = Worker secret `CAL_KEY`, stored in localStorage `calKey`, shared with Kalender). «Lås» logs out.
 - Goals (`/save-review`, `/delete-review`) also require the password. Nutrition POST `/` stays open (write-only) for Health Auto Export.
 - Plain Claude chat can no longer read training data from raw GitHub; use Cowork + Garmin MCP, or a Claude Code session with WiggenApp-data attached.
 
 ## Source of truth
-The GitHub repo is the source of truth for all code. The Windows folder `C:\Users\Jørgen\Documents\files\` is only a working copy, so don't treat files there as canonical. Garmin MCP tokens for Cowork: `C:\Users\Jørgen\.garmin-mcp\` (oauth1, oauth2, profile).
+The GitHub repo is the source of truth for all code. The Windows folder `%USERPROFILE%\Documents\files\` is only a working copy, so don't treat files there as canonical. Garmin MCP tokens for Cowork: `%USERPROFILE%\.garmin-mcp\` (oauth1, oauth2, profile).
 
 ## Repo files
 - `index.html` — the whole app. `manifest.json`, `icon-192.png`, `icon-512.png`, `apple-touch-icon.png` (180px, used by iPhone home screen) — app icon (Wiggen flower logo, Oct 2026). Icons are linked with `?v=N`; bump N when the icon changes.
@@ -29,7 +29,7 @@ The GitHub repo is the source of truth for all code. The Windows folder `C:\User
 - **Lactate threshold:** `lactateHR`, `lactatePaceSec`, `lactatePower` in each `health.json` entry (from `/biometric-service/biometric/latestLactateThreshold`). Shown on the Health tab.
 - **HR zones:** `hrZones` = `{z1..z5 (zone floors, bpm), max, method}` from `/biometric-service/heartRateZones` (DEFAULT sport, else RUNNING). `index.html` loads the newest entry with `hrZones` into `HRZ` (`setHRZones()`), falling back to 104/125/146/166/187 if none exist. Used for HR colouring, max-HR highlighting, Insights zone legend and readiness advice. As of 27 Sept 2026 Garmin reports HR_MAX-based zones: Z1 99, Z2 118, Z3 138, Z4 158, Z5 177, max 197.
 - **Load-focus target ranges:** `aerobicLowMin/Max`, `aerobicHighMin/Max`, `anaerobicMin/Max` come from Garmin's training-load-balance data (old fixed numbers as fallback).
-- **Age:** computed in the app from `BIRTH_DATE`.
+- **Age:** computed in the app from `PROFILE.birthDate` (profile.json).
 
 ## Data files (in the private repo WiggenApp-data)
 - `activities.json` — workouts
@@ -72,7 +72,7 @@ The GitHub repo is the source of truth for all code. The Windows folder `C:\User
 **Home-screen widget:** `scriptable/WiggenKalender.js` is a Scriptable (iOS) widget that calls the same `/calendar` endpoint (password in the iOS Keychain, set by running the script once in Scriptable) and shows the list view in app colours; small/medium/large sizes. Tapping it opens `https://snxz-y.github.io/WiggenApp/#kalender`. iOS opens that in Safari, not the home-screen web app, so the password must also be entered once in Safari. The app supports hash deep links: `#kalender`, `#helse`, `#innsikt`, `#aktiviteter`, `#kosthold`, `#mal`, `#jobb`.
 
 ## Målsetninger (formerly Reviews)
-The old AI-generated weekly reviews are gone. The Målsetninger tab lets Jørgen write or paste goals (optional title + text); they are saved via the Worker's `/save-review` to `reviews.json` and shown as collapsible accordions with delete. `/generate-review` (Claude API) was removed from the Worker in Sept 2026.
+The old AI-generated weekly reviews are gone. The Målsetninger tab lets the owner write or paste goals (optional title + text); they are saved via the Worker's `/save-review` to `reviews.json` and shown as collapsible accordions with delete. `/generate-review` (Claude API) was removed from the Worker in Sept 2026.
 
 ## Removed features
 - **Zyn tracking** — removed from the app (Sept 2026). Don't re-add.
