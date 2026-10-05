@@ -100,8 +100,8 @@ async function saveNutrition(request, env) {
 // ── Kosthold via iOS Snarveier (Shortcuts) ─────────────────────────────────
 // The «Wiggen kosthold» shortcut reads Apple Health with "Find Health Samples,
 // Group by Day" for the last 7 days and posts one flat dictionary:
-//   {key, calories:"<values>", calories_dates:"<dates>", calories_unit:"kcal",
-//    protein:"…", protein_dates:"…", carbs…, fat…, fiber…, saturatedFat…, sugar…}
+//   {key, dates:"<dates>", calories:"<values>", calories_unit:"kcal",
+//    protein:"…", carbs…, fat…, fiber…, saturatedFat…, sugar…}   (or <field>_dates per field)
 // Values/dates arrive as lists, or as newline-joined text with Norwegian
 // formatting ("1 025,9", "4. okt. 2026 kl. 00:00") – all are accepted. Each
 // value is a FULL-DAY total, so it replaces that day's field; re-sending the
@@ -132,11 +132,12 @@ function toIsoDate(v) {
 function shortcutEntries(body) {
   const days = {}, skipped = [];
   for (const f of SHORTCUT_FIELDS) {
-    const vals = asList(body[f]), dates = asList(body[f + '_dates']);
+    const vals = asList(body[f]), dates = asList(body[f + '_dates'] ?? body.dates);   // per-field dates, or one shared list
     const kJ = f === 'calories' && /kj/i.test(String(body.calories_unit || '') + ' ' + vals.join(' '));
     vals.forEach((v, i) => {
       const date = toIsoDate(dates[i]), n = toNumber(v);
       if (!date || n == null) { skipped.push(`${f}[${i}]`); return; }
+      if (n <= 0) return;                     // 0 = nothing logged (or Health locked): never overwrite real data
       days[date] ||= { date };
       days[date][f] = Math.round((kJ ? n / 4.184 : n) * 10) / 10;
     });
