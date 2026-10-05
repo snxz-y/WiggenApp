@@ -13,7 +13,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2">
   <meta name="theme-color" content="#f3eee5">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<title>Jørgen — Training Hub</title>
+<title>Wiggen — Helse</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -877,8 +877,11 @@ const setHRZones=()=>{const e=[...healthData].sort((a,b)=>b.date.localeCompare(a
   const hn=document.getElementById('hr-note');if(hn)hn.textContent=`Rød makspuls = Z5 (≥${HRZ.z5}), oransje = Z4 (≥${HRZ.z4})`;
 };
 const zRange=i=>i===5?`${HRZ.z5}+`:`${HRZ['z'+i]}–${HRZ['z'+(i+1)]-1}`;
-const BIRTH_DATE='1997-06-18';
-const ageNow=()=>{const b=new Date(BIRTH_DATE),t=new Date();let a=t.getFullYear()-b.getFullYear();if(t.getMonth()<b.getMonth()||(t.getMonth()===b.getMonth()&&t.getDate()<b.getDate()))a--;return a;};
+// Personal settings come from profile.json in the private data repo (via /data).
+let PROFILE={};
+const goalW=()=>PROFILE.goalWeight??null;
+const goalTxt=()=>goalW()!=null?`Mål: ${goalW()} kg`:'';
+const ageNow=()=>{if(!PROFILE.birthDate)return'—';const b=new Date(PROFILE.birthDate),t=new Date();let a=t.getFullYear()-b.getFullYear();if(t.getMonth()<b.getMonth()||(t.getMonth()===b.getMonth()&&t.getDate()<b.getDate()))a--;return a;};
 const ss={runs:{col:'date',asc:false},bikes:{col:'date',asc:false},walks:{col:'date',asc:false}};
 let chartInstances={};
 // ── Shared date helpers ──
@@ -1091,9 +1094,9 @@ function renderHealthComp(){
       <div style="position:relative;display:inline-block"><input type="text" id="comp-end" readonly placeholder="DD/MM/YYYY" onclick="togglePicker('comp-end-picker','comp-end')" value="${toDisplay(compEndDate||'')}" style="font-size:11px;padding:4px 10px;border:1px solid var(--border);border-radius:20px;background:var(--surface2);color:var(--text);width:110px;cursor:pointer;text-align:center"><div id="comp-end-picker" class="date-picker" style="display:none"></div></div>
     </div>
     <div class="stat-grid" style="margin-bottom:1.25rem">
-      <div class="stat-card"><div class="stat-label">Vekt</div><div class="stat-value" style="font-size:22px">${cV('weight',1)}<span style="font-size:14px;color:var(--muted)"> kg</span>${cD('weight',1)}</div><div class="stat-sub">Mål: 65 kg</div></div>
+      <div class="stat-card"><div class="stat-label">Vekt</div><div class="stat-value" style="font-size:22px">${cV('weight',1)}<span style="font-size:14px;color:var(--muted)"> kg</span>${cD('weight',1)}</div><div class="stat-sub">${goalTxt()}</div></div>
       <div class="stat-card"><div class="stat-label">BMI</div><div class="stat-value" style="font-size:22px">${cV('bmi',1)}${cD('bmi',1)}</div><div class="stat-sub">Normal: 18.5–24.9</div></div>
-      <div class="stat-card"><div class="stat-label">Kroppsfett</div><div class="stat-value" style="color:var(--amber);font-size:22px">${cV('bodyFat',1)}<span style="font-size:14px;color:var(--muted)"> %</span>${cD('bodyFat',1)}</div><div class="stat-sub">Mål: &lt;20%</div></div>
+      <div class="stat-card"><div class="stat-label">Kroppsfett</div><div class="stat-value" style="color:var(--amber);font-size:22px">${cV('bodyFat',1)}<span style="font-size:14px;color:var(--muted)"> %</span>${cD('bodyFat',1)}</div><div class="stat-sub">${PROFILE.bodyFatGoal!=null?`Mål: &lt;${PROFILE.bodyFatGoal}%`:''}</div></div>
       <div class="stat-card"><div class="stat-label">Muskelmasse</div><div class="stat-value" style="font-size:22px;color:var(--green)">${cV('muscleMass',1)}<span style="font-size:14px;color:var(--muted)"> kg</span>${cD('muscleMass',1)}</div></div>
       <div class="stat-card"><div class="stat-label">Benmasse</div><div class="stat-value" style="font-size:22px">${cV('boneMass',2)}<span style="font-size:14px;color:var(--muted)">kg</span></div></div>
       <div class="stat-card"><div class="stat-label">Kroppsvann</div><div class="stat-value" style="font-size:22px;color:var(--accent2)">${cV('bodyWater',1)}<span style="font-size:14px;color:var(--muted)">%</span></div></div>
@@ -1188,11 +1191,11 @@ function renderWeightChart(sorted,from=''){
   const slope=den?xi.reduce((s,x,i)=>s+(x-meanX)*(smooth[i]-meanY),0)/den:0;   // kg per day
   const intercept=meanY-slope*meanX;
   let goalLabel='';
-  if(slope<0){
-    const goalDay=(65-intercept)/slope,lastDay=xi[n-1];
+  if(slope<0&&goalW()!=null){
+    const goalDay=(goalW()-intercept)/slope,lastDay=xi[n-1];
     if(goalDay>lastDay&&goalDay-lastDay<500){
       const g=new Date(pts[n-1].date+'T12:00');g.setDate(g.getDate()+Math.round(goalDay-lastDay));
-      goalLabel=`Mål 65 kg: ${g.toLocaleDateString('no-NO',{day:'2-digit',month:'short',year:'numeric'})}`;
+      goalLabel=`Mål ${goalW()} kg: ${g.toLocaleDateString('no-NO',{day:'2-digit',month:'short',year:'numeric'})}`;
     }
   }
   const goalLine=xi.map(x=>+(intercept+slope*x).toFixed(2));
@@ -1216,7 +1219,8 @@ function renderWeightChart(sorted,from=''){
 
 function renderGoalProjection(){
   const el=document.getElementById('health-goal-content');if(!el)return;
-  const GOAL=65;
+  const GOAL=goalW();
+  if(GOAL==null){el.innerHTML='<p style="color:var(--muted);padding:20px;text-align:center">Ingen målvekt er satt (profile.json).</p>';return;}
   const pts=[...healthData].filter(d=>d.weight!=null).sort((a,b)=>a.date.localeCompare(b.date));
   if(pts.length<2){el.innerHTML='<p style="color:var(--muted);padding:20px;text-align:center">Trenger minst to veiinger for å beregne en trend. Fortsett å logge vekta.</p>';return;}
   const smooth=pts.map((d,i)=>{const sl=pts.slice(Math.max(0,i-6),i+1).map(p=>p.weight);return{date:d.date,w:sl.reduce((a,b)=>a+b,0)/sl.length};});
@@ -1242,7 +1246,7 @@ function renderGoalProjection(){
       const wks=Math.round(daysToGoal/7);
       etaSub='≈ '+wks+(wks===1?' uke':' uker')+' unna';
     }
-  } else if(remaining<=0){ etaStr='Mål nådd'; etaSub='på eller under 65 kg'; onTrack=true; }
+  } else if(remaining<=0){ etaStr='Mål nådd'; etaSub=`på eller under ${GOAL} kg`; onTrack=true; }
   else { etaStr='Ikke i rute'; etaSub=slope>0.0005?'på vei opp':'stabil'; }
   let status,statusClr;
   if(remaining<=0){status='Mål nådd \ud83c\udf89';statusClr='var(--green)';}
@@ -2170,9 +2174,9 @@ function renderHealth(){
         ${bcStale?`<span style="font-size:10px;font-weight:400;color:var(--muted);margin-left:8px">siste måling ${bcDateLbl}</span>`:''}
       </div>
       <div class="stat-grid">
-        <div class="stat-card"><div class="stat-label">Vekt</div><div class="stat-value" style="font-size:22px">${bv('weight',1)}<span style="font-size:14px;color:var(--muted)">kg</span></div><div class="stat-sub" style="${bcDays>7?'color:var(--amber)':''}">${bcAgo}</div><div class="stat-sub">Mål: 65 kg</div></div>
+        <div class="stat-card"><div class="stat-label">Vekt</div><div class="stat-value" style="font-size:22px">${bv('weight',1)}<span style="font-size:14px;color:var(--muted)">kg</span></div><div class="stat-sub" style="${bcDays>7?'color:var(--amber)':''}">${bcAgo}</div><div class="stat-sub">${goalTxt()}</div></div>
         <div class="stat-card"><div class="stat-label">BMI</div><div class="stat-value" style="font-size:22px">${bv('bmi',1)}</div><div class="stat-sub">Normal: 18.5–24.9</div></div>
-        <div class="stat-card"><div class="stat-label">Kroppsfett</div><div class="stat-value" style="color:var(--amber);font-size:22px">${bv('bodyFat',1)}<span style="font-size:14px;color:var(--muted)">%</span></div><div class="stat-sub">Mål: &lt;20%</div></div>
+        <div class="stat-card"><div class="stat-label">Kroppsfett</div><div class="stat-value" style="color:var(--amber);font-size:22px">${bv('bodyFat',1)}<span style="font-size:14px;color:var(--muted)">%</span></div><div class="stat-sub">${PROFILE.bodyFatGoal!=null?`Mål: &lt;${PROFILE.bodyFatGoal}%`:''}</div></div>
         <div class="stat-card"><div class="stat-label">Muskelmasse</div><div class="stat-value" style="font-size:22px;color:var(--green)">${bv('muscleMass',1)}<span style="font-size:14px;color:var(--muted)">kg</span></div></div>
         <div class="stat-card"><div class="stat-label">Benmasse</div><div class="stat-value" style="font-size:22px">${bv('boneMass',2)}<span style="font-size:14px;color:var(--muted)">kg</span></div></div>
         <div class="stat-card"><div class="stat-label">Kroppsvann</div><div class="stat-value" style="font-size:22px;color:var(--accent2)">${bv('bodyWater',1)}<span style="font-size:14px;color:var(--muted)">%</span></div></div>
@@ -2563,7 +2567,7 @@ function formatCoachReview(text) {
     const line = raw.trim();
     if (!line) { closeList(); continue; }
     let m;
-    // Title: first content line mentioning "review" (e.g. "Weekly Review: Jørgen | June 21–27, 2026")
+    // Title: first content line mentioning "review" (e.g. "Weekly Review: <name> | June 21–27, 2026")
     if (!titleDone && /review/i.test(line)) {
       titleDone = true;
       const parts = line.split('|');
@@ -2813,7 +2817,7 @@ document.addEventListener('click', e => {
 let nutritionData = [];
 let reviewsData = [];
 
-const TARGETS = { calories: 1600, protein: 120, carbs: 164, fat: 51 };
+const TARGETS = {};   // filled from profile.json (PROFILE.targets) in loadData()
 
 function getFilteredNutr() {
   if (!nutritionData.length) return [];
@@ -3132,6 +3136,9 @@ async function loadData() {
   const nutr = files['nutrition.json'], reviews = files['reviews.json'];
   activities = acts || []; healthData = health || []; setHRZones();
   nutritionData = nutr || []; reviewsData = reviews || [];
+  const prof = files['profile.json'];
+  PROFILE = prof && !Array.isArray(prof) ? prof : {};
+  Object.assign(TARGETS, PROFILE.targets || {});
   // Floor daily RESTING burn to BURN_FLOOR. On days the watch is off for a long
   // stretch (or recorded no burn at all), the total comes out artificially low
   // (e.g. 1470 on a ~17h day). For those days, set resting burn to the floor and
