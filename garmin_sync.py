@@ -379,7 +379,7 @@ def sync_health(hdrs, dn, target_date=None):
         "aerobicLowMin": (lb.get("monthlyLoadAerobicLowTargetMin") or 130), "aerobicLowMax": (lb.get("monthlyLoadAerobicLowTargetMax") or 342),
         "aerobicHighMin": (lb.get("monthlyLoadAerobicHighTargetMin") or 256), "aerobicHighMax": (lb.get("monthlyLoadAerobicHighTargetMax") or 467),
         "anaerobicMin": (lb.get("monthlyLoadAnaerobicTargetMin") or 0), "anaerobicMax": (lb.get("monthlyLoadAnaerobicTargetMax") or 211),
-        "vo2max": (training.get("mostRecentVO2Max") or {}).get("generic", {}).get("vo2MaxValue") or stats.get("vo2Max"),
+        "vo2max": ((training.get("mostRecentVO2Max") or {}).get("generic") or {}).get("vo2MaxValue") or stats.get("vo2Max"),
         "enduranceScore": end_score,
         "enduranceClass": end_class,
         "fitnessAge": round(fa_val, 1) if fa_val else None,
@@ -441,7 +441,7 @@ def _translate_label(msg):
 
 def _is_indoor(act, atype):
     """Indoor = no real GPS distance (treadmill, trainer, indoor cycling)."""
-    t = (act.get("activityType", {}).get("typeKey", "") or "").lower()
+    t = ((act.get("activityType") or {}).get("typeKey", "") or "").lower()
     if "indoor" in t or "treadmill" in t or "virtual" in t:
         return True
     # No GPS track and no start coordinate → recorded indoors.
@@ -493,7 +493,7 @@ def sync_activities(hdrs):
                 })
         except: pass
 
-        t = act.get("activityType", {}).get("typeKey", "")
+        t = (act.get("activityType") or {}).get("typeKey", "")
         atype = "running" if "running" in t else "cycling" if ("cycling" in t or "biking" in t) else "walking" if "walking" in t else t
 
         entry = {
@@ -576,9 +576,20 @@ if __name__ == "__main__":
         tokens, display_name = load_tokens()
         hdrs = garmin_headers(tokens)
         print(f"  Expires: {datetime.fromtimestamp(tokens['expires_at']).strftime('%Y-%m-%d %H:%M')}")
-        sync_health(hdrs, display_name)        # yesterday (finalized)
-        sync_health(hdrs, display_name, TODAY)  # today (live)
-        sync_activities(hdrs)
+        # Each step runs on its own, so one bad day (e.g. Garmin returning null
+        # for a field) doesn't block the other day or the activities.
+        errors = []
+        for label, step in (("health " + YESTERDAY, lambda: sync_health(hdrs, display_name)),   # yesterday (finalized)
+                            ("health " + TODAY, lambda: sync_health(hdrs, display_name, TODAY)), # today (live)
+                            ("activities", lambda: sync_activities(hdrs))):
+            try:
+                step()
+            except Exception as e:
+                import traceback
+                traceback.print_exc()
+                errors.append(f"{label}: {e}")
+        if errors:
+            raise RuntimeError("; ".join(errors))
         print(f"\nDone. Synced health for {YESTERDAY}+{TODAY}, activities for {YESTERDAY}-{TODAY}.")
     except Exception as e:
         print(f"\nFailed: {e}")
