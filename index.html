@@ -1226,10 +1226,13 @@ function renderGoalProjection(){
   const smooth=pts.map((d,i)=>{const sl=pts.slice(Math.max(0,i-6),i+1).map(p=>p.weight);return{date:d.date,w:sl.reduce((a,b)=>a+b,0)/sl.length};});
   const dayNum=ds=>Math.round(new Date(ds+'T00:00:00').getTime()/86400000);
   const x0=dayNum(smooth[0].date);
-  const X=smooth.map(p=>dayNum(p.date)-x0), Y=smooth.map(p=>p.w), n=X.length;
-  const mX=X.reduce((a,b)=>a+b,0)/n, mY=Y.reduce((a,b)=>a+b,0)/n;
-  const denom=X.reduce((s,x)=>s+(x-mX)**2,0)||1;
-  const slope=X.reduce((s,x,i)=>s+(x-mX)*(Y[i]-mY),0)/denom;
+  const X=smooth.map(p=>dayNum(p.date)-x0), Y=smooth.map(p=>p.w);
+  // Pace (and the ETA built on it) uses only the latest PACE_N weigh-ins;
+  // start weight and progress still use the full history.
+  const PACE_N=14, rX=X.slice(-PACE_N), rY=Y.slice(-PACE_N), n=rX.length;
+  const mX=rX.reduce((a,b)=>a+b,0)/n, mY=rY.reduce((a,b)=>a+b,0)/n;
+  const denom=rX.reduce((s,x)=>s+(x-mX)**2,0)||1;
+  const slope=rX.reduce((s,x,i)=>s+(x-mX)*(rY[i]-mY),0)/denom;
   const startW=Y[0], lastAvg=Y[Y.length-1];
   const ratePerWk=slope*7;
   const remaining=lastAvg-GOAL;
