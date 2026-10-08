@@ -7,6 +7,9 @@
 // Endpoints (all POST, all require the app password):
 //   /nutrition-shortcut  Kosthold: iOS Snarveier «Wiggen kosthold» → nutrition.json
 //   /agenda         Dagen: Siri/snarvei «Wiggen dag» → påminnelser inn, «hva skal jeg i dag» ut
+//   /mcp            MCP-server (Streamable HTTP) for Claude: les helse, trening, søvn, kosthold, kalender, påminnelser.
+//                   Auth: OAuth (claude.ai custom connector; login page asks for the app password) or /mcp/<MCP_KEY>.
+//   /.well-known/…, /register, /authorize, /token   the Worker's own stateless OAuth server (see below)
 //   /data           App: read health/activities/nutrition/reviews        (password)
 //   /save-review    Målsetninger: add a goal to reviews.json              (password)
 //   /delete-review  Målsetninger: remove a goal from reviews.json         (password)
@@ -16,6 +19,7 @@
 //   GITHUB_TOKEN  token with read/write access to DATA_REPO
 //   CAL_KEY       the app password (one password for data, goals and calendar)
 //   CAL_FEEDS     JSON list: [{"name":"Privat","url":"https://...ics","color":"#7c6dfa"}, ...]
+//   MCP_KEY       long random string; the MCP endpoint is /mcp/<MCP_KEY> (falls back to CAL_KEY if unset)
 
 const REPO = 'snxz-y/WiggenApp-data';        // DATA_REPO (private)
 const DATA_FILES = ['health.json', 'activities.json', 'nutrition.json', 'reviews.json', 'profile.json', 'reminders.json'];
@@ -449,9 +453,12 @@ function freeSlots(timed, ds) {
 async function handleAgenda(request, env) {
   const body = await request.json().catch(() => ({}));
   if (!(await authorized(body, env))) return json({ error: 'unauthorized' }, 401);
+  return json(await buildAgenda(env, body.day, parseReminders(body)));
+}
+// Core of /agenda, also used by the MCP tool get_agenda.
+async function buildAgenda(env, dayText, sent) {
   const nowOslo = utcToOslo(new Date()), today = new Date(nowOslo); today.setUTCHours(0, 0, 0, 0);
   const todayS = fmtNaive(today, true);
-  const sent = parseReminders(body);
   let stored = null;
   if (sent) {
     stored = { updatedAt: new Date().toISOString(), items: sent };
@@ -460,7 +467,7 @@ async function handleAgenda(request, env) {
     stored = await readRepoJson('reminders.json', env).catch(() => null);
   }
   const reminders = (stored?.items || []).map(r => ({ ...r, overdue: !!r.due && r.due.slice(0, 10) < todayS }));
-  const { from, days, label } = resolveDay(body.day, today);
+  const { from, days, label } = resolveDay(dayText, today);
   const to = addDays(from, days);
   const [cal, health, nutrition, profile] = await Promise.all([
     fetchCalendars(env, from, to).catch(e => ({ calendars: [], events: [], error: e.message })),
@@ -499,13 +506,260 @@ async function handleAgenda(request, env) {
   if (days > 1 && lines.length === 0) { lines.push(`${label}: ingen avtaler og ingen påminnelser.`); spoken.push(`${label}: ingen avtaler og ingen påminnelser.`); }
   if (cal.error) lines.push(`⚠️ Kalenderen kunne ikke hentes (${cal.error})`);
   const message = lines.filter(l => l !== null).join('\n');
-  return json({ ok: true, day: { from: fmtNaive(from, true), to: fmtNaive(addDays(to, -1), true), label }, message, speech: spoken.join(' '),
-    events: cal.events, calendars: cal.calendars, reminders, remindersUpdatedAt: stored?.updatedAt || null, stored: !!sent });
+  return { ok: true, day: { from: fmtNaive(from, true), to: fmtNaive(addDays(to, -1), true), label }, message, speech: spoken.join(' '),
+    events: cal.events, calendars: cal.calendars, reminders, remindersUpdatedAt: stored?.updatedAt || null, stored: !!sent };
+}
+
+
+// ── MCP-server («Spør dataene dine») ───────────────────────────────────────
+// Streamable-HTTP MCP endpoint at /mcp/<MCP_KEY>. The secret lives in the URL
+// because claude.ai custom connectors and Claude Code can connect to a server
+// without OAuth; set MCP_KEY (Cloudflare secret) to a long random string.
+// Stateless JSON-RPC: initialize, ping, tools/list, tools/call. GET → 405.
+const MCP_PROTOCOL = '2025-06-18';
+const todayOslo = () => { const d = utcToOslo(new Date()); d.setUTCHours(0, 0, 0, 0); return d; };
+const isoDate = d => fmtNaive(d, true);
+const clampRange = (from, to, maxDays, defDays) => {
+  const t = todayOslo();
+  let b = /^\d{4}-\d{2}-\d{2}$/.test(to || '') ? new Date(to + 'T00:00:00Z') : t;
+  let a = /^\d{4}-\d{2}-\d{2}$/.test(from || '') ? new Date(from + 'T00:00:00Z') : addDays(b, -(defDays - 1));
+  if (a > b) [a, b] = [b, a];
+  if ((b - a) / DAY > maxDays) a = addDays(b, -maxDays);
+  return { from: isoDate(a), to: isoDate(b) };
+};
+const inRange = (rows, r) => (rows || []).filter(x => x.date >= r.from && x.date <= r.to).sort((a, b) => a.date.localeCompare(b.date));
+const avg = (rows, k, dec = 1) => { const v = rows.map(x => x[k]).filter(x => typeof x === 'number'); return v.length ? +(v.reduce((a, b) => a + b, 0) / v.length).toFixed(dec) : null; };
+const SERIES_KEYS = ['bodyBatterySeries', 'trainingReadinessSeries'];
+const slim = (h, keep) => { const o = {}; for (const k of Object.keys(h)) if (!SERIES_KEYS.includes(k) && (!keep || keep.includes(k) || k === 'date')) o[k] = h[k]; return o; };
+const SLEEP_KEYS = ['date', 'sleepScore', 'sleepSec', 'bedTime', 'wakeTime', 'deepSec', 'lightSec', 'remSec', 'awakeSec', 'hrvAvg', 'hrvStatus', 'rhr', 'avgResp', 'bbWake'];
+
+const MCP_TOOLS = [
+  { name: 'get_agenda', description: 'Hva som skjer en gitt dag: kalenderavtaler, påminnelser med frist, forfalte påminnelser, ledige luker og (for i dag) readiness, søvn, recovery og kalorier igjen. Samme svar som Siri-snarveien «Hva skal jeg i dag».',
+    inputSchema: { type: 'object', properties: { day: { type: 'string', description: '«i dag», «i morgen», «denne uka», «helga», en ukedag («fredag») eller en dato (YYYY-MM-DD). Standard: i dag.' } } } },
+  { name: 'get_calendar', description: 'Kalenderavtaler (alle abonnerte kalendere: privat, timeplan, helligdager) i et datointervall. Tider er norsk lokaltid.',
+    inputSchema: { type: 'object', properties: { from: { type: 'string', description: 'YYYY-MM-DD (standard: i dag)' }, to: { type: 'string', description: 'YYYY-MM-DD (standard: from + 7 dager, maks 120 dager)' } } } },
+  { name: 'get_reminders', description: 'Åpne påminnelser fra iOS Påminnelser (slik de sist ble sendt av snarveien «Wiggen dag»), med frist og liste. Forfalte er merket.', inputSchema: { type: 'object', properties: {} } },
+  { name: 'get_health', description: 'Daglige Garmin-målinger (Training Readiness, Sleep Score, HRV, hvilepuls, Body Battery, stress, skritt, Training Status, Acute/Chronic Load, VO2 Max, vekt m.m.) for et datointervall. Standard: siste 14 dager, maks 90.',
+    inputSchema: { type: 'object', properties: { from: { type: 'string' }, to: { type: 'string' }, fields: { type: 'array', items: { type: 'string' }, description: 'Valgfritt: bare disse feltene (date kommer alltid med)' } } } },
+  { name: 'get_sleep', description: 'Søvn per natt: Sleep Score, varighet, leggetid, våknetid, faser, HRV og hvilepuls. Standard: siste 14 netter, maks 90.',
+    inputSchema: { type: 'object', properties: { from: { type: 'string' }, to: { type: 'string' } } } },
+  { name: 'get_activities', description: 'Treningsøkter (løping, sykling, gåturer) med distanse, tid, puls, belastning, soner og dynamikk. Standard: siste 30 dager, maks 365. Runder (splits) hentes med get_activity.',
+    inputSchema: { type: 'object', properties: { from: { type: 'string' }, to: { type: 'string' }, type: { type: 'string', enum: ['running', 'cycling', 'walking'] } } } },
+  { name: 'get_activity', description: 'Én økt i detalj, inkludert runder (splits).', inputSchema: { type: 'object', properties: { activityId: { type: 'number' } }, required: ['activityId'] } },
+  { name: 'get_nutrition', description: 'Kosthold per dag (kcal, protein, karbohydrater, fett, fiber, sukker) fra MacroFactor, pluss målene. Standard: siste 14 dager, maks 120.',
+    inputSchema: { type: 'object', properties: { from: { type: 'string' }, to: { type: 'string' } } } },
+  { name: 'get_summary', description: 'Oppsummering av en periode mot perioden før: trening (økter, km, belastning), søvn, readiness, hvilepuls, HRV, skritt, kosthold mot mål og vekt. Bruk denne først for «hvordan gikk uka».',
+    inputSchema: { type: 'object', properties: { days: { type: 'number', description: 'Antall dager (standard 7, maks 90)' } } } },
+  { name: 'get_profile', description: 'Profil: alder, målvekt, kroppsfettmål, kostholdsmål, pulssoner og terskel fra Garmin.', inputSchema: { type: 'object', properties: {} } },
+  { name: 'get_goals', description: 'Lagrede målsetninger fra appen.', inputSchema: { type: 'object', properties: {} } },
+  { name: 'add_goal', description: 'Lagre en ny målsetning i appen (vises under Målsetninger).', inputSchema: { type: 'object', properties: { title: { type: 'string' }, text: { type: 'string' } }, required: ['text'] } },
+];
+
+async function mcpCall(name, a, env) {
+  a = a || {};
+  switch (name) {
+    case 'get_agenda': { const r = await buildAgenda(env, a.day, null); return { day: r.day, message: r.message, events: r.events, reminders: r.reminders, remindersUpdatedAt: r.remindersUpdatedAt }; }
+    case 'get_calendar': {
+      const t = todayOslo(), from = /^\d{4}-\d{2}-\d{2}$/.test(a.from || '') ? new Date(a.from + 'T00:00:00Z') : t;
+      let to = /^\d{4}-\d{2}-\d{2}$/.test(a.to || '') ? addDays(new Date(a.to + 'T00:00:00Z'), 1) : addDays(from, 7);
+      if ((to - from) / DAY > 120) to = addDays(from, 120);
+      const cal = await fetchCalendars(env, from, to);
+      return { from: isoDate(from), to: isoDate(addDays(to, -1)), calendars: cal.calendars, events: cal.events.map(e => ({ ...e, calendar: cal.calendars[e.cal]?.name, cal: undefined, description: e.description ? e.description.slice(0, 500) : null })) };
+    }
+    case 'get_reminders': { const r = await readRepoJson('reminders.json', env); const todayS = isoDate(todayOslo());
+      return { updatedAt: r?.updatedAt || null, items: (r?.items || []).map(x => ({ ...x, overdue: !!x.due && x.due.slice(0, 10) < todayS })) }; }
+    case 'get_health': { const r = clampRange(a.from, a.to, 90, 14); const rows = inRange(await readRepoJson('health.json', env), r); return { ...r, days: rows.map(h => slim(h, Array.isArray(a.fields) && a.fields.length ? a.fields : null)) }; }
+    case 'get_sleep': { const r = clampRange(a.from, a.to, 90, 14); const rows = inRange(await readRepoJson('health.json', env), r).filter(h => h.sleepSec); return { ...r, nights: rows.map(h => slim(h, SLEEP_KEYS)) }; }
+    case 'get_activities': { const r = clampRange(a.from, a.to, 365, 30); let rows = inRange(await readRepoJson('activities.json', env), r); if (a.type) rows = rows.filter(x => x.type === a.type);
+      return { ...r, count: rows.length, activities: rows.map(({ splits, ...x }) => ({ ...x, laps: Array.isArray(splits) ? splits.length : 0 })) }; }
+    case 'get_activity': { const x = (await readRepoJson('activities.json', env) || []).find(y => y.activityId === +a.activityId); if (!x) throw new Error('Fant ingen økt med activityId ' + a.activityId); return x; }
+    case 'get_nutrition': { const r = clampRange(a.from, a.to, 120, 14); const [n, p] = await Promise.all([readRepoJson('nutrition.json', env), readRepoJson('profile.json', env)]); const rows = inRange(n, r);
+      return { ...r, targets: p?.targets || null, days: rows }; }
+    case 'get_summary': return summarize(env, Math.min(90, Math.max(1, +a.days || 7)));
+    case 'get_profile': { const [p, h] = await Promise.all([readRepoJson('profile.json', env), readRepoJson('health.json', env)]); const latest = [...(h || [])].sort((x, y) => y.date.localeCompare(x.date));
+      const pick = k => latest.find(x => x[k] != null)?.[k] ?? null; let age = null;
+      if (p?.birthDate) { const b = new Date(p.birthDate), t = new Date(); age = t.getFullYear() - b.getFullYear() - ((t.getMonth() < b.getMonth() || (t.getMonth() === b.getMonth() && t.getDate() < b.getDate())) ? 1 : 0); }
+      return { age, goalWeight: p?.goalWeight ?? null, bodyFatGoal: p?.bodyFatGoal ?? null, sleepTargetH: p?.sleepTargetH ?? 7.5, targets: p?.targets || null, hrZones: pick('hrZones'), lactateHR: pick('lactateHR'), lactatePaceSec: pick('lactatePaceSec'), vo2max: pick('vo2max'), fitnessAge: pick('fitnessAge'), weight: pick('weight') }; }
+    case 'get_goals': return { goals: (await readRepoJson('reviews.json', env)) || [] };
+    case 'add_goal': { if (!a.text) throw new Error('text mangler'); const today = isoDate(todayOslo()); const goal = { date: today, period: a.title || today, content: String(a.text), kind: 'coach' };
+      await updateRepoJson('reviews.json', env.GITHUB_TOKEN, 'Save review (MCP)', cur => ({ data: [goal, ...cur] })); return { ok: true, goal }; }
+    default: throw new Error('Ukjent verktøy: ' + name);
+  }
+}
+
+async function summarize(env, days) {
+  const [h, acts, n, p] = await Promise.all(['health.json', 'activities.json', 'nutrition.json', 'profile.json'].map(f => readRepoJson(f, env)));
+  const t = todayOslo(), cur = { from: isoDate(addDays(t, -(days - 1))), to: isoDate(t) }, prev = { from: isoDate(addDays(t, -(2 * days - 1))), to: isoDate(addDays(t, -days)) };
+  const period = r => {
+    const H = inRange(h, r), A = inRange(acts, r), N = inRange(n, r).filter(x => x.calories > 0);
+    const km = ty => +(A.filter(x => x.type === ty && x.distanceM > 1).reduce((s, x) => s + x.distanceM, 0) / 1000).toFixed(1);
+    const w = H.filter(x => x.weight != null);
+    return { ...r, days: H.length,
+      training: { sessions: A.length, runKm: km('running'), bikeKm: km('cycling'), walkKm: km('walking'), hours: +(A.reduce((s, x) => s + (x.durationSec || 0), 0) / 3600).toFixed(1), load: +A.reduce((s, x) => s + (x.load || 0), 0).toFixed(0), acuteLoad: H.length ? H[H.length - 1].acuteLoad ?? null : null, trainingStatus: H.length ? H[H.length - 1].trainingStatus ?? null : null },
+      sleep: { score: avg(H, 'sleepScore', 0), hours: H.filter(x => x.sleepSec).length ? +(avg(H.filter(x => x.sleepSec), 'sleepSec', 0) / 3600).toFixed(2) : null, nights: H.filter(x => x.sleepSec).length },
+      readiness: avg(H, 'trainingReadiness', 0), rhr: avg(H, 'rhr', 0), hrv: avg(H, 'hrvAvg', 0), stress: avg(H, 'avgStress', 0), steps: avg(H, 'steps', 0),
+      nutrition: { daysLogged: N.length, kcal: avg(N, 'calories', 0), protein: avg(N, 'protein', 0), carbs: avg(N, 'carbs', 0), fat: avg(N, 'fat', 0) },
+      weight: w.length ? { first: w[0].weight, last: w[w.length - 1].weight, change: +(w[w.length - 1].weight - w[0].weight).toFixed(1), weighIns: w.length } : null };
+  };
+  return { period: period(cur), previous: period(prev), targets: p?.targets || null, goalWeight: p?.goalWeight ?? null };
+}
+
+
+// ── OAuth 2.1 for the MCP server (claude.ai custom connectors) ─────────────
+// claude.ai always runs the OAuth flow for custom connectors, so the Worker is
+// its own tiny authorization server. Everything is stateless: client ids,
+// codes and tokens are HMAC-signed blobs (key = MCP_KEY), so no storage is
+// needed and changing MCP_KEY revokes everything. The login page asks for the
+// app password (CAL_KEY). Flow: /.well-known metadata → POST /register →
+// GET /authorize (login page) → POST /authorize (302 with code) → POST /token
+// → Bearer token on POST /mcp. PKCE S256 is required.
+const b64u = buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+const b64uStr = str => b64u(new TextEncoder().encode(str));
+const unb64u = s => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0)));
+async function hmac(secret, data) {
+  const k = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  return b64u(await crypto.subtle.sign('HMAC', k, new TextEncoder().encode(data)));
+}
+const signSecret = env => env.MCP_KEY || env.CAL_KEY;
+async function sign(env, obj) { const p = b64uStr(JSON.stringify(obj)); return p + '.' + await hmac(signSecret(env), p); }
+async function verify(env, tok) {
+  const [p, sig] = String(tok || '').split('.'); if (!p || !sig) return null;
+  if (!(await sameSecret(sig, await hmac(signSecret(env), p)))) return null;
+  try { const o = JSON.parse(unb64u(p)); return o.exp && o.exp < Date.now() / 1000 ? null : o; } catch (e) { return null; }
+}
+const now = () => Math.floor(Date.now() / 1000);
+const ACCESS_TTL = 30 * 86400, REFRESH_TTL = 180 * 86400;
+async function issueTokens(env, cid) {
+  const n = crypto.randomUUID().slice(0, 8);   // makes every token unique
+  return { access_token: await sign(env, { t: 'a', cid, n, exp: now() + ACCESS_TTL }), token_type: 'Bearer', expires_in: ACCESS_TTL,
+    refresh_token: await sign(env, { t: 'r', cid, n, exp: now() + REFRESH_TTL }), scope: 'wiggen' };
+}
+const oauthErr = (error, description, status = 400) => json({ error, error_description: description }, status);
+
+function oauthMetadata(origin) {
+  return json({ issuer: origin, authorization_endpoint: origin + '/authorize', token_endpoint: origin + '/token', registration_endpoint: origin + '/register',
+    response_types_supported: ['code'], grant_types_supported: ['authorization_code', 'refresh_token'], code_challenge_methods_supported: ['S256'],
+    token_endpoint_auth_methods_supported: ['none', 'client_secret_post'], scopes_supported: ['wiggen'] });
+}
+const resourceMetadata = origin => json({ resource: origin + '/mcp', authorization_servers: [origin], scopes_supported: ['wiggen'], bearer_methods_supported: ['header'] });
+
+async function oauthRegister(request, env) {
+  const b = await request.json().catch(() => ({}));
+  const uris = Array.isArray(b.redirect_uris) ? b.redirect_uris.filter(u => /^https:\/\//.test(u) || /^http:\/\/(localhost|127\.0\.0\.1)/.test(u)).slice(0, 10) : [];
+  if (!uris.length) return oauthErr('invalid_redirect_uri', 'redirect_uris mangler');
+  const client_id = await sign(env, { c: 1, ru: uris, n: String(b.client_name || '').slice(0, 60) });
+  return json({ client_id, client_name: b.client_name || null, redirect_uris: uris, token_endpoint_auth_method: 'none',
+    grant_types: ['authorization_code', 'refresh_token'], response_types: ['code'], client_id_issued_at: now() }, 201);
+}
+
+function loginPage(q, msg) {
+  const esc = v => String(v == null ? '' : v).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const hidden = ['response_type', 'client_id', 'redirect_uri', 'state', 'code_challenge', 'code_challenge_method', 'scope', 'resource'].map(k => `<input type="hidden" name="${k}" value="${esc(q.get(k))}">`).join('');
+  return new Response(`<!doctype html><html lang="nb"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Wiggen – koble til</title>
+<style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f1ebe0;color:#2c261f;font:15px/1.5 -apple-system,system-ui,sans-serif}
+.c{background:#fbf8f1;border:1px solid #e0d6c6;border-radius:16px;padding:28px 26px;width:min(92vw,360px);box-shadow:0 10px 30px rgba(0,0,0,.08)}
+h1{font:600 22px Georgia,serif;margin:0 0 6px}p{margin:0 0 16px;color:#6f6354;font-size:13.5px}input[type=password]{width:100%;box-sizing:border-box;font-size:17px;padding:11px 12px;border:1px solid #e0d6c6;border-radius:10px;background:#fff;margin-bottom:12px}
+button{width:100%;font-size:15px;font-weight:600;padding:12px;border:0;border-radius:24px;background:#b56a45;color:#fff}.e{color:#b5544a;font-size:13px;margin:-6px 0 12px}
+@media(prefers-color-scheme:dark){body{background:#1a1611;color:#ece3d8}.c{background:#221d17;border-color:rgba(255,255,255,.09)}p{color:#b3a596}input[type=password]{background:#2c261e;color:#ece3d8;border-color:rgba(255,255,255,.12)}}</style></head>
+<body><form class="c" method="post"><h1>Wiggen</h1><p>Claude ber om tilgang til helse-, trenings- og kalenderdataene dine. Skriv inn app-passordet for å godkjenne.</p>
+${msg ? `<div class="e">${esc(msg)}</div>` : ''}${hidden}<input type="password" name="password" placeholder="App-passord" autocomplete="current-password" autofocus required><button type="submit">Gi tilgang</button></form></body></html>`,
+    { status: msg ? 401 : 200, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' } });
+}
+
+async function oauthAuthorize(request, env) {
+  const url = new URL(request.url);
+  const q = request.method === 'POST' ? new URLSearchParams(await request.text()) : url.searchParams;
+  const client = await verify(env, q.get('client_id'));
+  const ru = q.get('redirect_uri');
+  if (!client || !client.c || !client.ru.includes(ru)) return oauthErr('invalid_client', 'Ukjent client_id eller redirect_uri');
+  if (q.get('response_type') !== 'code') return oauthErr('unsupported_response_type', 'response_type må være code');
+  if (!q.get('code_challenge') || (q.get('code_challenge_method') || 'S256') !== 'S256') return oauthErr('invalid_request', 'PKCE (S256) kreves');
+  if (request.method === 'GET') return loginPage(q, '');
+  if (!(await authorized({ key: q.get('password') }, env))) return loginPage(q, 'Feil passord.');
+  const code = await sign(env, { t: 'c', cid: q.get('client_id').slice(-24), ru, cc: q.get('code_challenge'), exp: now() + 300 });
+  const to = new URL(ru); to.searchParams.set('code', code); if (q.get('state')) to.searchParams.set('state', q.get('state'));
+  return new Response(null, { status: 302, headers: { Location: to.toString(), 'Cache-Control': 'no-store' } });
+}
+
+async function oauthToken(request, env) {
+  const ct = request.headers.get('Content-Type') || '';
+  const b = ct.includes('json') ? await request.json().catch(() => ({})) : Object.fromEntries(new URLSearchParams(await request.text()));
+  if (b.grant_type === 'authorization_code') {
+    const c = await verify(env, b.code);
+    if (!c || c.t !== 'c') return oauthErr('invalid_grant', 'Koden er ugyldig eller utløpt');
+    if (b.redirect_uri && b.redirect_uri !== c.ru) return oauthErr('invalid_grant', 'redirect_uri stemmer ikke');
+    if (b.client_id && b.client_id.slice(-24) !== c.cid) return oauthErr('invalid_grant', 'client_id stemmer ikke');
+    const ver = b.code_verifier || '';
+    const want = b64u(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(ver)));
+    if (!ver || !(await sameSecret(want, c.cc))) return oauthErr('invalid_grant', 'PKCE-verifisering feilet');
+    return json(await issueTokens(env, c.cid));
+  }
+  if (b.grant_type === 'refresh_token') {
+    const r = await verify(env, b.refresh_token);
+    if (!r || r.t !== 'r') return oauthErr('invalid_grant', 'refresh_token er ugyldig eller utløpt');
+    return json(await issueTokens(env, r.cid));
+  }
+  return oauthErr('unsupported_grant_type', 'grant_type må være authorization_code eller refresh_token');
+}
+
+async function bearerOk(request, env) {
+  const m = (request.headers.get('Authorization') || '').match(/^Bearer\s+(.+)$/i);
+  const t = m && await verify(env, m[1]);
+  return !!(t && t.t === 'a');
+}
+
+async function handleMcp(request, env, key) {
+  // Either the secret in the URL (/mcp/<MCP_KEY>) or an OAuth bearer token (/mcp).
+  const secret = env.MCP_KEY || env.CAL_KEY;
+  const keyOk = !!(secret && key && await sameSecret(key, secret));
+  if (!keyOk && !(await bearerOk(request, env))) {
+    const origin = new URL(request.url).origin;
+    return new Response(JSON.stringify({ error: 'unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json',
+      'WWW-Authenticate': `Bearer realm="wiggen", resource_metadata="${origin}/.well-known/oauth-protected-resource"` } });
+  }
+  if (request.method === 'GET') return new Response('Method Not Allowed', { status: 405, headers: { Allow: 'POST' } });
+  if (request.method === 'DELETE') return new Response(null, { status: 200 });
+  if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+  let body; try { body = await request.json(); } catch (e) { return json({ jsonrpc: '2.0', id: null, error: { code: -32700, message: 'Parse error' } }, 400); }
+  const one = async m => {
+    if (!m || m.jsonrpc !== '2.0') return { jsonrpc: '2.0', id: m?.id ?? null, error: { code: -32600, message: 'Invalid Request' } };
+    if (m.id === undefined) return null;                                   // notification: no reply
+    const ok = result => ({ jsonrpc: '2.0', id: m.id, result });
+    try {
+      switch (m.method) {
+        case 'initialize': return ok({ protocolVersion: m.params?.protocolVersion || MCP_PROTOCOL, capabilities: { tools: { listChanged: false } }, serverInfo: { name: 'wiggenapp', version: '1.0' },
+          instructions: 'Personlige helse-, trenings-, søvn-, kosthold- og kalenderdata for eieren av WiggenApp. Datoer er YYYY-MM-DD, tider norsk lokaltid. Garmin-begreper (Training Readiness, Sleep Score, Body Battery …) brukes på engelsk; svar ellers på norsk. Start gjerne med get_summary eller get_agenda.' });
+        case 'ping': return ok({});
+        case 'tools/list': return ok({ tools: MCP_TOOLS });
+        case 'tools/call': {
+          const name = m.params?.name, args = m.params?.arguments || {};
+          if (!MCP_TOOLS.some(t => t.name === name)) return { jsonrpc: '2.0', id: m.id, error: { code: -32602, message: 'Unknown tool: ' + name } };
+          try { const data = await mcpCall(name, args, env); return ok({ content: [{ type: 'text', text: JSON.stringify(data, null, 1) }], structuredContent: data }); }
+          catch (e) { return ok({ content: [{ type: 'text', text: 'Feil: ' + e.message }], isError: true }); }
+        }
+        case 'resources/list': return ok({ resources: [] });
+        case 'prompts/list': return ok({ prompts: [] });
+        default: return { jsonrpc: '2.0', id: m.id, error: { code: -32601, message: 'Method not found: ' + m.method } };
+      }
+    } catch (e) { return { jsonrpc: '2.0', id: m.id, error: { code: -32603, message: e.message } }; }
+  };
+  const out = Array.isArray(body) ? (await Promise.all(body.map(one))).filter(Boolean) : await one(body);
+  if (out === null || (Array.isArray(out) && !out.length)) return new Response(null, { status: 202 });
+  return json(out);
 }
 
 export default {
   async fetch(request, env) {
     if (request.method === 'OPTIONS') return new Response(null, { headers: CORS });
+    const url = new URL(request.url), path = url.pathname;
+    try {
+      if (path === '/mcp' || path.startsWith('/mcp/')) return await handleMcp(request, env, path === '/mcp' ? '' : decodeURIComponent(path.slice(5).replace(/\/+$/, '')));
+      if (path === '/.well-known/oauth-authorization-server' || path.startsWith('/.well-known/oauth-authorization-server/')) return oauthMetadata(url.origin);
+      if (path.startsWith('/.well-known/oauth-protected-resource')) return resourceMetadata(url.origin);
+      if (path === '/register' && request.method === 'POST') return await oauthRegister(request, env);
+      if (path === '/authorize' && (request.method === 'GET' || request.method === 'POST')) return await oauthAuthorize(request, env);
+      if (path === '/token' && request.method === 'POST') return await oauthToken(request, env);
+    } catch (e) { return json({ error: e.message }, 500); }
     if (request.method !== 'POST') return json({ error: 'Not found' }, 404);
     const routes = { '/nutrition-shortcut': saveNutritionShortcut, '/data': readData, '/save-review': saveGoal, '/delete-review': deleteGoal, '/calendar': handleCalendar, '/agenda': handleAgenda };
     const handler = routes[new URL(request.url).pathname];
