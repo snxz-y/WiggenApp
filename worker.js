@@ -6,6 +6,7 @@
 //
 // Endpoints (all POST, all require the app password):
 //   /nutrition-shortcut  Kosthold: iOS Snarveier «Wiggen kosthold» → nutrition.json
+//   /agenda         Dagen: Siri/snarvei «Wiggen dag» → påminnelser inn, «hva skal jeg i dag» ut
 //   /data           App: read health/activities/nutrition/reviews        (password)
 //   /save-review    Målsetninger: add a goal to reviews.json              (password)
 //   /delete-review  Målsetninger: remove a goal from reviews.json         (password)
@@ -17,7 +18,7 @@
 //   CAL_FEEDS     JSON list: [{"name":"Privat","url":"https://...ics","color":"#7c6dfa"}, ...]
 
 const REPO = 'snxz-y/WiggenApp-data';        // DATA_REPO (private)
-const DATA_FILES = ['health.json', 'activities.json', 'nutrition.json', 'reviews.json', 'profile.json'];
+const DATA_FILES = ['health.json', 'activities.json', 'nutrition.json', 'reviews.json', 'profile.json', 'reminders.json'];
 const GH = 'https://api.github.com';
 
 const CORS = {
@@ -151,19 +152,20 @@ async function authorized(body, env) {
 
 // ── App data (private repo → app) ──────────────────────────────────────────
 // POST /data {key} → {files: {"health.json": [...], ...}}
+async function readRepoJson(path, env) {
+  const r = await gh(path, env.GITHUB_TOKEN);
+  if (r.status === 404) return null;
+  if (!r.ok) throw new Error(`GitHub read ${path}: HTTP ${r.status}`);
+  const meta = await r.json();
+  // Files over 1 MB come back without inline content; fetch the blob instead.
+  const content = meta.content || (await (await fetch(meta.git_url, { headers: { Authorization: `token ${env.GITHUB_TOKEN}`, 'User-Agent': 'wiggenapp-worker' } })).json()).content;
+  return JSON.parse(b64decode(content));
+}
 async function readData(request, env) {
   const body = await request.json().catch(() => ({}));
   if (!(await authorized(body, env))) return json({ error: 'unauthorized' }, 401);
   const files = {};
-  await Promise.all(DATA_FILES.map(async f => {
-    const r = await gh(f, env.GITHUB_TOKEN);
-    if (r.status === 404) { files[f] = []; return; }
-    if (!r.ok) throw new Error(`GitHub read ${f}: HTTP ${r.status}`);
-    const meta = await r.json();
-    // Files over 1 MB come back without inline content; fetch the blob instead.
-    const content = meta.content || (await (await fetch(meta.git_url, { headers: { Authorization: `token ${env.GITHUB_TOKEN}`, 'User-Agent': 'wiggenapp-worker' } })).json()).content;
-    files[f] = JSON.parse(b64decode(content));
-  }));
+  await Promise.all(DATA_FILES.map(async f => { files[f] = (await readRepoJson(f, env)) ?? []; }));
   return json({ files });
 }
 
@@ -337,16 +339,9 @@ async function sameSecret(a, b) {
   return diff === 0;
 }
 
-async function handleCalendar(request, env) {
-  const body = await request.json().catch(() => ({}));
-  if (!(await authorized(body, env))) return json({ error: 'unauthorized' }, 401);
+async function fetchCalendars(env, from, to) {
   let feeds;
-  try { feeds = JSON.parse(env.CAL_FEEDS || '[]'); } catch (e) { return json({ error: 'CAL_FEEDS er ikke gyldig JSON' }, 500); }
-  const isoDay = s => /^\d{4}-\d{2}-\d{2}$/.test(s || '') ? new Date(s + 'T00:00:00Z') : null;
-  const now = utcToOslo(new Date()); now.setUTCHours(0, 0, 0, 0);
-  const from = isoDay(body.from) || new Date(now.getTime() - 7 * DAY);
-  let to = isoDay(body.to) || new Date(now.getTime() + 60 * DAY);
-  if (to - from > 400 * DAY) to = new Date(from.getTime() + 400 * DAY);
+  try { feeds = JSON.parse(env.CAL_FEEDS || '[]'); } catch (e) { throw new Error('CAL_FEEDS er ikke gyldig JSON'); }
   const cals = await Promise.all(feeds.map(async f => {
     try {
       const r = await fetch(String(f.url).replace(/^webcal:/i, 'https:'), { cf: { cacheTtl: 600, cacheEverything: true } });
@@ -356,18 +351,163 @@ async function handleCalendar(request, env) {
       return { name: f.name, color: f.color || null, error: e.message, events: [] };
     }
   }));
-  return json({
-    from: fmtNaive(from, true), to: fmtNaive(to, true),
+  return {
     calendars: cals.map(c => ({ name: c.name, color: c.color, error: c.error || null })),
     events: cals.flatMap((c, i) => c.events.map(e => ({ ...e, cal: i }))),
-  });
+  };
+}
+
+async function handleCalendar(request, env) {
+  const body = await request.json().catch(() => ({}));
+  if (!(await authorized(body, env))) return json({ error: 'unauthorized' }, 401);
+  const isoDay = s => /^\d{4}-\d{2}-\d{2}$/.test(s || '') ? new Date(s + 'T00:00:00Z') : null;
+  const now = utcToOslo(new Date()); now.setUTCHours(0, 0, 0, 0);
+  const from = isoDay(body.from) || new Date(now.getTime() - 7 * DAY);
+  let to = isoDay(body.to) || new Date(now.getTime() + 60 * DAY);
+  if (to - from > 400 * DAY) to = new Date(from.getTime() + 400 * DAY);
+  let cal;
+  try { cal = await fetchCalendars(env, from, to); } catch (e) { return json({ error: e.message }, 500); }
+  return json({ from: fmtNaive(from, true), to: fmtNaive(to, true), ...cal });
+}
+
+// ── Dagen («Hva skal jeg i dag?») ──────────────────────────────────────────
+// POST /agenda {key, day, titles, dues, lists, titles_overdue, dues_overdue, lists_overdue}
+// The iOS shortcut «Wiggen dag» sends the open reminders it finds (titles,
+// due dates and list names as aligned lists or newline text). When reminders
+// are included they replace reminders.json; when they are left out the stored
+// ones are used (the app and Siri can then ask without re-reading Reminders).
+// `day` is spoken language: «i dag», «i morgen», «denne uka», «helga»,
+// a weekday («fredag») or a date. The answer has `message` (for the screen)
+// and `speech` (shorter, for Siri), plus the raw events/reminders/health.
+const WDAYS = ['søndag', 'mandag', 'tirsdag', 'onsdag', 'torsdag', 'fredag', 'lørdag'];
+const MNAMES = ['januar', 'februar', 'mars', 'april', 'mai', 'juni', 'juli', 'august', 'september', 'oktober', 'november', 'desember'];
+const addDays = (d, n) => new Date(d.getTime() + n * DAY);
+const dayLabel = d => `${WDAYS[d.getUTCDay()]} ${d.getUTCDate()}. ${MNAMES[d.getUTCMonth()]}`;
+function toIsoDateTime(v) {
+  const s = String(v ?? '').trim();
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?Z$/.test(s)) return fmtNaive(utcToOslo(new Date(s)), false);
+  const d = toIsoDate(s); if (!d) return null;
+  const m = s.match(/(\d{1,2}):(\d{2})/);                       // «9. okt. 2026, 12:00»
+  return m && !(+m[1] === 0 && m[2] === '00') ? `${d}T${p2(+m[1])}:${m[2]}` : d;   // 00:00 = no time set
+}
+function parseReminders(body) {
+  const seen = new Set(), out = []; let any = false;
+  for (const suf of ['', '_overdue']) {
+    if (body['titles' + suf] == null) continue;
+    any = true;
+    const t = asList(body['titles' + suf]), d = asList(body['dues' + suf]), l = asList(body['lists' + suf]);
+    t.forEach((title, i) => {
+      const due = d[i] ? toIsoDateTime(d[i]) : null, k = title + '|' + (due || '');
+      if (!title || seen.has(k)) return;
+      seen.add(k); out.push({ title, due, list: l[i] || null });
+    });
+  }
+  return any ? out.sort((a, b) => String(a.due || '9').localeCompare(String(b.due || '9'))) : null;
+}
+function resolveDay(v, today) {
+  const s = String(v ?? '').trim().toLowerCase().replace(/^(på|for)\s+/, '');
+  if (!s || /^(i ?dag|today|0)$/.test(s)) return { from: today, days: 1, label: 'I dag' };
+  if (/^(i ?morgen|tomorrow|1)$/.test(s)) return { from: addDays(today, 1), days: 1, label: 'I morgen' };
+  if (/^(i ?overmorgen|2)$/.test(s)) return { from: addDays(today, 2), days: 1, label: 'I overmorgen' };
+  if (/uk[ae]|week/.test(s)) return { from: today, days: 7, label: 'Denne uka' };
+  if (/helg|weekend/.test(s)) { const n = (6 - today.getUTCDay() + 7) % 7; return { from: addDays(today, n), days: 2, label: 'Helga' }; }
+  const wd = WDAYS.indexOf(s);
+  if (wd >= 0) { let n = (wd - today.getUTCDay() + 7) % 7; if (!n) n = 7; return { from: addDays(today, n), days: 1, label: null }; }
+  const iso = toIsoDate(s);
+  if (iso) return { from: new Date(iso + 'T00:00:00Z'), days: 1, label: null };
+  return { from: today, days: 1, label: 'I dag' };
+}
+const evTime = (e, ds) => e.allDay ? 'Hele dagen'
+  : e.start.slice(0, 10) === ds && e.end.slice(0, 10) === ds ? `${e.start.slice(11)}–${e.end.slice(11)}`
+  : e.start.slice(0, 10) === ds ? `${e.start.slice(11)} →` : e.end.slice(0, 10) === ds ? `→ ${e.end.slice(11)}` : 'Hele dagen';
+const say = t => String(t).replace(/–/g, ' til ').replace(/\s+/g, ' ').trim();
+const fmtN = n => Math.round(n).toLocaleString('nb-NO').replace(/\u00a0/g, ' ');
+
+function healthLine(h, nutr, targets) {
+  if (!h && !nutr) return null;
+  const parts = [], spoken = [];
+  if (h?.trainingReadiness != null) { const lvl = h.trainingReadinessLevel ? ` (${garminTitle(h.trainingReadinessLevel)})` : ''; parts.push(`Readiness ${h.trainingReadiness}${lvl}`); spoken.push(`Readiness ${h.trainingReadiness}`); }
+  if (h?.sleepScore != null) { parts.push(`Sleep Score ${h.sleepScore}`); spoken.push(`Sleep Score ${h.sleepScore}`); }
+  if (h?.recoveryTimeHrs != null) { const t = h.recoveryTimeHrs ? `${Math.round(h.recoveryTimeHrs)} t` : '0 t'; parts.push(`Recovery Time ${t}`); if (h.recoveryTimeHrs >= 12) spoken.push(`${Math.round(h.recoveryTimeHrs)} timer Recovery Time igjen`); }
+  if (h?.trainingStatus) parts.push(`Training Status ${garminTitle(h.trainingStatus)}`);
+  if (targets?.calories) { const left = targets.calories - (nutr?.calories || 0); parts.push(`${fmtN(left)} kcal igjen`); spoken.push(`${fmtN(left)} kalorier igjen`); }
+  return parts.length ? { text: parts.join(' · '), speech: spoken.join(', ') } : null;
+}
+const garminTitle = v => String(v).toLowerCase().replace(/_/g, ' ').replace(/(^|\s)\S/g, c => c.toUpperCase());
+
+function freeSlots(timed, ds) {
+  // Gaps of 90 min or more between 08:00 and 21:00 on one day.
+  const toMin = t => +t.slice(11, 13) * 60 + +t.slice(14, 16);
+  const busy = timed.map(e => [e.start.slice(0, 10) < ds ? 0 : toMin(e.start), e.end.slice(0, 10) > ds ? 1440 : toMin(e.end)]).sort((a, b) => a[0] - b[0]);
+  const out = []; let cur = 8 * 60;
+  const fm = m => `${p2(Math.floor(m / 60))}:${p2(m % 60)}`;
+  for (const [s, e] of busy) { if (s - cur >= 90) out.push(`${fm(cur)}–${fm(Math.min(s, 21 * 60))}`); cur = Math.max(cur, e); if (cur >= 21 * 60) break; }
+  if (21 * 60 - cur >= 90) out.push(`${fm(cur)}–21:00`);
+  return out;
+}
+
+async function handleAgenda(request, env) {
+  const body = await request.json().catch(() => ({}));
+  if (!(await authorized(body, env))) return json({ error: 'unauthorized' }, 401);
+  const nowOslo = utcToOslo(new Date()), today = new Date(nowOslo); today.setUTCHours(0, 0, 0, 0);
+  const todayS = fmtNaive(today, true);
+  const sent = parseReminders(body);
+  let stored = null;
+  if (sent) {
+    stored = { updatedAt: new Date().toISOString(), items: sent };
+    await updateRepoJson('reminders.json', env.GITHUB_TOKEN, 'Reminders sync (Snarveier)', () => ({ data: stored })).catch(() => {});
+  } else {
+    stored = await readRepoJson('reminders.json', env).catch(() => null);
+  }
+  const reminders = (stored?.items || []).map(r => ({ ...r, overdue: !!r.due && r.due.slice(0, 10) < todayS }));
+  const { from, days, label } = resolveDay(body.day, today);
+  const to = addDays(from, days);
+  const [cal, health, nutrition, profile] = await Promise.all([
+    fetchCalendars(env, from, to).catch(e => ({ calendars: [], events: [], error: e.message })),
+    days === 1 && fmtNaive(from, true) === todayS ? readRepoJson('health.json', env).catch(() => null) : null,
+    days === 1 && fmtNaive(from, true) === todayS ? readRepoJson('nutrition.json', env).catch(() => null) : null,
+    readRepoJson('profile.json', env).catch(() => null),
+  ]);
+  const lines = [], spoken = [];
+  const remOn = ds => reminders.filter(r => r.due && r.due.slice(0, 10) === ds);
+  const fmtRem = r => `${r.title}${r.due && r.due.length > 10 ? ` (${r.due.slice(11)})` : ''}${r.list && !/^(påminnelser|reminders)$/i.test(r.list) ? ` · ${r.list}` : ''}`;
+  const overdue = reminders.filter(r => r.overdue);
+  for (let k = 0; k < days; k++) {
+    const d = addDays(from, k), ds = fmtNaive(d, true), ns = fmtNaive(addDays(d, 1), true);
+    const evs = cal.events.filter(e => e.allDay ? (e.start <= ds && e.end > ds) : (e.start < ns + 'T00:00' && e.end > ds + 'T00:00'))
+      .sort((a, b) => (b.allDay - a.allDay) || a.start.localeCompare(b.start));
+    const rems = remOn(ds);
+    const head = (k === 0 && label ? label + ' · ' : '') + dayLabel(d);
+    if (days > 1 && !evs.length && !rems.length) continue;
+    lines.push(k ? '' : null, head.charAt(0).toUpperCase() + head.slice(1));
+    spoken.push(head.charAt(0).toUpperCase() + head.slice(1) + '.');
+    if (!evs.length && !rems.length) { lines.push('Ingen avtaler og ingen påminnelser.'); spoken.push('Ingen avtaler og ingen påminnelser.'); }
+    for (const e of evs) {
+      const cn = cal.calendars[e.cal]?.name;
+      lines.push(`🗓 ${evTime(e, ds)} ${e.title}${e.location ? ' · ' + e.location : ''}${cn && days === 1 ? ` (${cn})` : ''}`);
+      spoken.push(e.allDay ? `${e.title} hele dagen.` : `${say(evTime(e, ds))}: ${e.title}${e.location ? ', ' + e.location : ''}.`);
+    }
+    if (rems.length) { for (const r of rems) lines.push(`✅ ${fmtRem(r)}`); spoken.push((rems.length === 1 ? 'Påminnelse: ' : 'Påminnelser: ') + rems.map(r => r.title + (r.due.length > 10 ? ` klokka ${r.due.slice(11)}` : '')).join(', ') + '.'); }
+    if (k === 0 && overdue.length) { for (const r of overdue) lines.push(`⚠️ Forfalt: ${r.title} (${r.due.slice(8, 10)}/${r.due.slice(5, 7)})`); spoken.push(`${overdue.length === 1 ? 'Én forfalt påminnelse' : overdue.length + ' forfalte påminnelser'}: ${overdue.map(r => r.title).join(', ')}.`); }
+    if (days === 1) {
+      const hl = healthLine(Array.isArray(health) ? health.find(x => x.date === ds) : null, Array.isArray(nutrition) ? nutrition.find(x => x.date === ds) : null, profile?.targets);
+      if (hl) { lines.push(`💪 ${hl.text}`); spoken.push(hl.speech + '.'); }
+      const timed = evs.filter(e => !e.allDay);
+      if (timed.length) { const fs = freeSlots(timed, ds); if (fs.length) { lines.push(`⏱ Ledig ${fs.join(', ')}`); spoken.push('Ledig ' + fs.map(say).join(' og ') + '.'); } }
+    }
+  }
+  if (days > 1 && lines.length === 0) { lines.push(`${label}: ingen avtaler og ingen påminnelser.`); spoken.push(`${label}: ingen avtaler og ingen påminnelser.`); }
+  if (cal.error) lines.push(`⚠️ Kalenderen kunne ikke hentes (${cal.error})`);
+  const message = lines.filter(l => l !== null).join('\n');
+  return json({ ok: true, day: { from: fmtNaive(from, true), to: fmtNaive(addDays(to, -1), true), label }, message, speech: spoken.join(' '),
+    events: cal.events, calendars: cal.calendars, reminders, remindersUpdatedAt: stored?.updatedAt || null, stored: !!sent });
 }
 
 export default {
   async fetch(request, env) {
     if (request.method === 'OPTIONS') return new Response(null, { headers: CORS });
     if (request.method !== 'POST') return json({ error: 'Not found' }, 404);
-    const routes = { '/nutrition-shortcut': saveNutritionShortcut, '/data': readData, '/save-review': saveGoal, '/delete-review': deleteGoal, '/calendar': handleCalendar };
+    const routes = { '/nutrition-shortcut': saveNutritionShortcut, '/data': readData, '/save-review': saveGoal, '/delete-review': deleteGoal, '/calendar': handleCalendar, '/agenda': handleAgenda };
     const handler = routes[new URL(request.url).pathname];
     if (!handler) return json({ error: 'Not found' }, 404);
     try {
