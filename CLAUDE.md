@@ -57,6 +57,7 @@ The GitHub repo is the source of truth for all code. The Windows folder `%USERPR
 
 ## Design (Claude Design overhaul, Sept 2026)
 - The visual layer came from Claude Design: a **"v2" CSS layer at the bottom of `<style>`** overrides the older rules. Change styling there rather than in the old rules above it.
+- iOS status bar is `default` (opaque, app-coloured via `theme-color`), not `black-translucent`: iOS 26 draws a frosted progressive blur over content under a translucent status bar («dugg i toppen»). The header is sticky and opaque on mobile and the nav has no backdrop blur for the same reason.
 - Mobile (≤680px): the tab bar is a **fixed bottom nav** (CSS only; `viewport-fit=cover` + safe-area insets). `showNav()` scrolls to top and sets the header suffix (`#logo-tab`, «Wiggen / Kosthold»). Desktop keeps the top nav.
 - Sub-tabs are a segmented control (44px). On ≤480px labels may wrap; Aktiviteter stacks icon over text.
 - Shared classes: `eyebrow`, `chart-title`, `card-title`, `card-note`, `form-card`, `field`, `btn-primary`, `icon-btn`, `date-row`/`date-field`. Tokens `--r-card`, `--r-inner`, `--tap`, `--nav-h`, `--glass`.
