@@ -10,7 +10,7 @@ Single owner/user. Personal details (birth date, goal weight, nutrition targets,
 - **This repo (`snxz-y/WiggenApp`) is PUBLIC and must contain no personal data.** All data lives in the **private** repo **`snxz-y/WiggenApp-data`**: `health.json`, `activities.json`, `nutrition.json`, `reviews.json`, `profile.json` (birthDate, goalWeight, bodyFatGoal, nutrition `targets`; read into `PROFILE`/`TARGETS` by `loadData()`). Never hardcode personal values in `index.html`.
 - Writers: HA box `garmin_sync.py` (REPO = WiggenApp-data) and the Worker (nutrition + goals).
 - Reader: the app calls the Worker's `POST /data {key}`; the Worker reads the private repo with `GITHUB_TOKEN`. The app shows a password screen on first open (password = Worker secret `CAL_KEY`, stored in localStorage `calKey`, shared with Kalender). «Lås» logs out.
-- Goals (`/save-review`, `/delete-review`) also require the password. Nutrition POST `/` stays open (write-only) for Health Auto Export.
+- Goals (`/save-review`, `/delete-review`) also require the password. **Every Worker endpoint requires the password** (the old open Health Auto Export `POST /` was removed in Oct 2026).
 - Plain Claude chat can no longer read training data from raw GitHub; use Cowork + Garmin MCP, or a Claude Code session with WiggenApp-data attached.
 
 ## Source of truth
@@ -34,7 +34,7 @@ The GitHub repo is the source of truth for all code. The Windows folder `%USERPR
 ## Data files (in the private repo WiggenApp-data)
 - `activities.json` — workouts
 - `health.json` — daily Garmin metrics (complete from June 14; body-comp only before)
-- `nutrition.json` — daily macros (MacroFactor → Apple Health → «Wiggen kosthold» shortcut → Worker)
+- `nutrition.json` — daily macros (MacroFactor → Apple Health → «Wiggen kosthold» shortcut → Worker); `nutrition_debug.json` — last shortcut payload
 - `reviews.json` — saved goals (Målsetninger tab; entries with `kind: 'coach'`)
 
 ## Automation
@@ -47,13 +47,14 @@ The GitHub repo is the source of truth for all code. The Windows folder `%USERPR
   - **Activities are upserted, not skipped:** `sync_activities` re-processes the last ~2 days every run. It inserts new activities, repairs partial/foreign-schema entries (e.g. ones hand-added via Garmin MCP that lack `distanceM`), and refreshes metrics Garmin computes minutes after a run (power, running dynamics, HR zones, VO2max, load). Do **not** hand-write activity entries with a custom schema — let the sync own `activities.json`.
 - **On-demand sync:** removed. The in-app "Sync Garmin" button (and its `triggerGarminSync()` handler) was deleted on 22 June 2026 because the HA box now auto-syncs every 15 min, and the old button dispatched the now-disabled `garmin-sync.yml` workflow. For a manual sync, run `python3 /config/garmin/ha_garmin.py` on the HA box (e.g. via the SSH add-on web terminal).
 - **No work/shift data in the repo.** The repo is public, so shift schedules (and any calendar data) must never be committed. `shifts.json` and `shifts_sync.py` were removed in Sept 2026; the calendar is only reachable through the private Worker `/calendar` endpoint.
-- **Nutrition (Oct 2026):** the iOS shortcut **«Wiggen kosthold»** (Snarveier) reads Apple Health — Find Health Samples, *Group by Day*, last 7 days — for kostenergi, protein, karbohydrater, fett, fiber, mettet fett, sukker, and POSTs a flat JSON body (`key`, `dates` (shared list, Fill Missing on) or `<field>_dates`, `calories`, `calories_unit`, `protein`, `carbs`, `fat`, `fiber`, `saturatedFat`, `sugar`) to the Worker's `/nutrition-shortcut` (password). The Worker accepts lists or newline text, Norwegian number/date formats and energy in J (Shortcuts default), kJ or kcal, replaces each day's totals, and stores the last raw payload in `nutrition_debug.json` (private repo) for troubleshooting. Zero values are ignored (never overwrite). Food is logged in **MacroFactor** (since Oct 2026), which writes nutrition to Apple Health; the shortcut runs via Personal Automation on the iPhone when MacroFactor is closed + nightly. Sending 7 days each time heals gaps.
-- Health Auto Export (old path, `POST /`) still works if the app is ever used again; it crashed on launch in Oct 2026, which caused missing days 2–3 Oct.
-- **Cloudflare Worker:** `https://nutrition-reciever.margidowiggen.workers.dev` — handles `/` (nutrition from Health Auto Export), `/save-review` + `/delete-review` (Målsetninger tab) and `/calendar`. Secrets: `GITHUB_TOKEN`, `CAL_KEY`, `CAL_FEEDS`. All GitHub writes go through `updateRepoJson()` (UTF-8 safe, retries on sha conflicts). Source is `worker.js` in the repo; deploy by pasting it into the Cloudflare dashboard.
+- **Nutrition (Oct 2026):** the iOS shortcut **«Wiggen kosthold»** (Snarveier) reads Apple Health — Find Health Samples, *Group by Day*, last 7 days — for kostenergi, protein, karbohydrater, fett, fiber, mettet fett, sukker, and POSTs a flat JSON body (`key`, `dates` (shared list, Fill Missing on) or `<field>_dates`, `calories`, `calories_unit`, `protein`, `carbs`, `fat`, `fiber`, `saturatedFat`, `sugar`) to the Worker's `/nutrition-shortcut` (password). The Worker accepts lists or newline text, Norwegian number/date formats and energy in J (Shortcuts default), kJ or kcal, replaces each day's totals, and stores the last raw payload in `nutrition_debug.json` (private repo) for troubleshooting. Zero values are ignored (never overwrite). Identical payloads within 2 min are acknowledged without writing (the «app closed» automation fires in bursts), and a GitHub write failure still answers HTTP 200 with `ok:false` so iOS doesn't show «Automatisering feilet» — the next run re-sends the same 7 days. Food is logged in **MacroFactor** (since Oct 2026), which writes nutrition to Apple Health.
+  - **Automation (iPhone):** trigger on **«Når MacroFactor åpnes»** (phone is unlocked, so Health is readable). Do **not** use a time-of-day trigger: Apple Health is encrypted while the phone is locked, so «Finn helseprøver» fails and iOS reports «Automatisering feilet» (the 22:00 trigger never produced a single commit). «Når MacroFactor lukkes» also fails whenever «closed» means «phone locked».
+- Health Auto Export is gone (it crashed on launch in Oct 2026 and caused missing days 2–3 Oct; the open `POST /` endpoint was removed from the Worker). Nutrition between 2 Aug and 29 Sep 2026 is missing in `nutrition.json`.
+- **Cloudflare Worker:** `https://nutrition-reciever.margidowiggen.workers.dev` — handles `/nutrition-shortcut`, `/data`, `/save-review` + `/delete-review` (Målsetninger tab) and `/calendar`. All GitHub writes retry up to 5 times with backoff on sha conflicts. Secrets: `GITHUB_TOKEN`, `CAL_KEY`, `CAL_FEEDS`. All GitHub writes go through `updateRepoJson()` (UTF-8 safe, retries on sha conflicts). Source is `worker.js` in the repo; deploy by pasting it into the Cloudflare dashboard.
 
 ## Design (Claude Design overhaul, Sept 2026)
 - The visual layer came from Claude Design: a **"v2" CSS layer at the bottom of `<style>`** overrides the older rules. Change styling there rather than in the old rules above it.
-- Mobile (≤680px): the tab bar is a **fixed bottom nav** (CSS only; `viewport-fit=cover` + safe-area insets). `showNav()` scrolls to top. Desktop keeps the top nav.
+- Mobile (≤680px): the tab bar is a **fixed bottom nav** (CSS only; `viewport-fit=cover` + safe-area insets). `showNav()` scrolls to top and sets the header suffix (`#logo-tab`, «Wiggen / Kosthold»). Desktop keeps the top nav.
 - Sub-tabs are a segmented control (44px). On ≤480px labels may wrap; Aktiviteter stacks icon over text.
 - Shared classes: `eyebrow`, `chart-title`, `card-title`, `card-note`, `form-card`, `field`, `btn-primary`, `icon-btn`, `date-row`/`date-field`. Tokens `--r-card`, `--r-inner`, `--tap`, `--nav-h`, `--glass`.
 - Chart.js defaults are set by `applyChartDefaults()` (Hanken Grotesk 11px, line width 2). Chart heights: 160 small / 180 standard / 200 multi-series. Series palette: #c07a52, #647bb0, #5a9a6c, #b48f2c, #8a7bd8, #c0594e.
@@ -95,6 +96,9 @@ $sha=(Invoke-RestMethod "https://api.github.com/repos/$repo/contents/$file" -Hea
 $b=@{message="update $file";content=$c;sha=$sha}|ConvertTo-Json
 Invoke-RestMethod "https://api.github.com/repos/$repo/contents/$file" -Headers $h -Method PUT -Body ([Text.Encoding]::UTF8.GetBytes($b)) -ContentType "application/json; charset=utf-8" | Out-Null
 ```
+
+## Testing
+Playwright test harnesses live in the session scratchpad (`/tmp/claude-0/pw/`): `smoke.js` (all tabs, both themes, JS errors) and `full.js` (every tab/sub-tab/chip/picker in 390 px + 1280 px, both themes, mocked Worker for `/data`, `/calendar` and goals, login flow, deep links, empty data; checks NaN/undefined text, horizontal overflow and zero-size charts). Run: `DATA=<private repo clone> node full.js <repo>`. The Worker has a unit test with a fake GitHub contents API (`workertest.mjs`): dedupe, bursts, soft failure, joule conversion, goals, `/data`.
 
 ## Getting run feedback remotely
 Use Cowork (Claude Desktop on the PC) with the Garmin MCP, or open a Claude Code session with `snxz-y/WiggenApp-data` attached and read `activities.json` there. The data is no longer readable from raw.githubusercontent.com.

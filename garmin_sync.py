@@ -6,7 +6,7 @@ tokens in <USERPROFILE>/.garmin-mcp/ and pushes health.json + activities.json.
 """
 
 import json, base64, os, requests, time, hmac, hashlib, urllib.parse, secrets as _secrets
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 
 # ── CONFIG ────────────────────────────────────────────────────────────────────
 GITHUB_TOKEN = os.environ.get("GH_PAT") or os.environ.get("GITHUB_TOKEN", "")
@@ -291,7 +291,7 @@ def sync_health(hdrs, dn, target_date=None):
         if ts is None or lvl is None:
             continue
         try:
-            tl = datetime.utcfromtimestamp((ts + off_ms) / 1000).strftime("%H:%M")
+            tl = datetime.fromtimestamp((ts + off_ms) / 1000, timezone.utc).strftime("%H:%M")
         except Exception:
             continue
         bb_series.append({"time": tl, "level": lvl})

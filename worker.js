@@ -4,9 +4,8 @@
 // All personal data lives in the PRIVATE repo DATA_REPO. The app's code repo
 // (snxz-y/WiggenApp) is public and must never contain data.
 //
-// Endpoints (all POST):
-//   /               Kosthold: Health Auto Export → nutrition.json (write-only, no password)
-//   /nutrition-shortcut  Kosthold: iOS Snarveier → nutrition.json (password)
+// Endpoints (all POST, all require the app password):
+//   /nutrition-shortcut  Kosthold: iOS Snarveier «Wiggen kosthold» → nutrition.json
 //   /data           App: read health/activities/nutrition/reviews        (password)
 //   /save-review    Målsetninger: add a goal to reviews.json              (password)
 //   /delete-review  Målsetninger: remove a goal from reviews.json         (password)
@@ -44,7 +43,8 @@ async function gh(path, token, init = {}) {
 // `change` returns { data, result } (or null to skip writing). Retries if the
 // file changed on GitHub in between (HTTP 409/422 sha mismatch).
 async function updateRepoJson(path, token, message, change) {
-  for (let attempt = 0; attempt < 3; attempt++) {
+  for (let attempt = 0; attempt < 5; attempt++) {
+    if (attempt) await new Promise(r => setTimeout(r, 150 * attempt + Math.random() * 400));   // let a parallel writer finish
     const r = await gh(path, token);
     if (!r.ok && r.status !== 404) throw new Error(`GitHub read ${path}: HTTP ${r.status}`);
     const file = r.status === 404 ? { content: null, sha: undefined } : await r.json();   // 404 → create the file
@@ -58,43 +58,6 @@ async function updateRepoJson(path, token, message, change) {
     if (w.status !== 409 && w.status !== 422) throw new Error(`GitHub write ${path}: HTTP ${w.status}`);
   }
   throw new Error(`GitHub write ${path}: kept conflicting`);
-}
-
-// ── Kosthold (Health Auto Export) ──────────────────────────────────────────
-// HAE sends { data: { metrics: [{ name, data: [{ date: "2026-06-15 12:00:00 +0200", qty }] }] } }.
-// Values are summed per day. Older senders posted plain {date, ...} objects.
-const NUTRITION_FIELDS = {
-  dietary_energy: 'calories', protein: 'protein', carbohydrates: 'carbs', total_fat: 'fat',
-  dietary_sugar: 'sugar', fiber: 'fiber', saturated_fat: 'saturatedFat', water: 'water',
-};
-
-function nutritionEntries(body) {
-  if (!body?.data?.metrics) return (Array.isArray(body) ? body : [body]).filter(e => e && e.date);
-  const days = {};
-  for (const metric of body.data.metrics) {
-    const field = NUTRITION_FIELDS[metric.name];
-    if (!field) continue;
-    const kJ = metric.name === 'dietary_energy';            // Apple Health energy is kJ → kcal
-    for (const point of metric.data || []) {
-      const date = point.date?.slice(0, 10);
-      if (!date) continue;
-      days[date] ||= { date };
-      days[date][field] = (days[date][field] || 0) + (kJ ? (point.qty || 0) / 4.184 : (point.qty || 0));
-    }
-  }
-  return Object.values(days).map(({ date, ...v }) =>
-    ({ date, ...Object.fromEntries(Object.entries(v).map(([k, x]) => [k, Math.round(x * 10) / 10])) }));
-}
-
-async function saveNutrition(request, env) {
-  const entries = nutritionEntries(await request.json());
-  if (!entries.length) return json({ ok: true, dates: [] });
-  await updateRepoJson('nutrition.json', env.GITHUB_TOKEN, 'Nutrition sync', current => {
-    const byDate = Object.fromEntries(current.map(e => [e.date, e]));
-    for (const e of entries) byDate[e.date] = { ...byDate[e.date], ...e };
-    return { data: Object.values(byDate).sort((a, b) => b.date.localeCompare(a.date)) };
-  });
-  return json({ ok: true, dates: entries.map(e => e.date) });
 }
 
 // ── Kosthold via iOS Snarveier (Shortcuts) ─────────────────────────────────
@@ -152,17 +115,33 @@ async function saveNutritionShortcut(request, env) {
   if (!(await authorized(body, env))) return json({ error: 'unauthorized' }, 401);
   const { key, ...raw } = body;
   const { entries, skipped } = shortcutEntries(raw);
-  await updateRepoJson('nutrition_debug.json', env.GITHUB_TOKEN, 'Nutrition shortcut payload', () =>
-    ({ data: { receivedAt: new Date().toISOString(), parsed: entries, skipped, raw } })).catch(() => {});
-  if (entries.length) {
+  const sum = entries.map(e => `${e.date.slice(8)}/${e.date.slice(5, 7)}: ${e.calories != null ? Math.round(e.calories) + ' kcal' : '–'}`).join(', ');
+  const reply = (ok, extra) => json({ ok, days: entries.length, skipped, ...extra });
+  // The iOS "app closed" automation often fires several times within a minute.
+  // Identical payloads inside 2 minutes are acknowledged without touching GitHub.
+  const rawJson = JSON.stringify(raw);
+  let duplicate = false;
+  try {
+    await updateRepoJson('nutrition_debug.json', env.GITHUB_TOKEN, 'Nutrition shortcut payload', prev => {
+      const p = prev && !Array.isArray(prev) ? prev : {};
+      if (p.rawJson === rawJson && Date.now() - Date.parse(p.receivedAt || 0) < 120e3) { duplicate = true; return null; }
+      return { data: { receivedAt: new Date().toISOString(), parsed: entries, skipped, raw, rawJson } };
+    });
+  } catch (e) { /* diagnostics only */ }
+  if (duplicate) return reply(true, { message: `Allerede lagret – ${sum}`, duplicate: true });
+  if (!entries.length) return reply(true, { message: 'Fant ingen data å lagre' });
+  try {
     await updateRepoJson('nutrition.json', env.GITHUB_TOKEN, 'Nutrition sync (Snarveier)', current => {
       const byDate = Object.fromEntries(current.map(e => [e.date, e]));
       for (const e of entries) byDate[e.date] = { ...byDate[e.date], ...e };
       return { data: Object.values(byDate).sort((a, b) => b.date.localeCompare(a.date)) };
     });
+  } catch (e) {
+    // Answer 200 anyway: a failed automation only produces an iOS error banner,
+    // and the next run re-sends the same 7 days, so nothing is lost.
+    return reply(false, { message: `Kunne ikke lagre nå (${e.message}) – neste kjøring prøver igjen` });
   }
-  const sum = entries.map(e => `${e.date.slice(8)}/${e.date.slice(5, 7)}: ${e.calories != null ? Math.round(e.calories) + ' kcal' : '–'}`).join(', ');
-  return json({ ok: true, days: entries.length, message: entries.length ? `Lagret ${entries.length} dager – ${sum}` : 'Fant ingen data å lagre', skipped });
+  return reply(true, { message: `Lagret ${entries.length} dager – ${sum}` });
 }
 
 // ── Password check (shared by /data, goals and /calendar) ─────────────────
@@ -388,7 +367,7 @@ export default {
   async fetch(request, env) {
     if (request.method === 'OPTIONS') return new Response(null, { headers: CORS });
     if (request.method !== 'POST') return json({ error: 'Not found' }, 404);
-    const routes = { '/': saveNutrition, '/nutrition-shortcut': saveNutritionShortcut, '/data': readData, '/save-review': saveGoal, '/delete-review': deleteGoal, '/calendar': handleCalendar };
+    const routes = { '/nutrition-shortcut': saveNutritionShortcut, '/data': readData, '/save-review': saveGoal, '/delete-review': deleteGoal, '/calendar': handleCalendar };
     const handler = routes[new URL(request.url).pathname];
     if (!handler) return json({ error: 'Not found' }, 404);
     try {

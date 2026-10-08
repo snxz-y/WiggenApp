@@ -606,7 +606,7 @@ document.addEventListener('DOMContentLoaded',function(){var t=document.documentE
 <div id="bg-layer"></div>
 <div class="header">
   <div class="header-inner">
-    <div class="logo">Wiggen <span>/ Helse</span></div>
+    <div class="logo">Wiggen <span id="logo-tab">/ Helse</span></div>
     <div style="display:flex;align-items:center;gap:14px">
       <div id="last-updated" style="display:none"></div>
       <button class="icon-btn" onclick="location.href=location.pathname+'?v='+Date.now()" title="Last inn ny versjon" style="background:none;border:1px solid var(--border);color:var(--muted);font-size:13px;padding:4px 10px;border-radius:6px;cursor:pointer;line-height:1" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">↺</button>
@@ -1348,7 +1348,7 @@ function renderNutritionExtras(){
   const logged=[...nutritionData].filter(d=>(d.calories||0)>=NX_MIN_KCAL).sort((a,b)=>a.date.localeCompare(b.date));
   const lastLogged=logged.length?logged[logged.length-1].date:null;
   const stale=lastLogged&&lastLogged<daysAgoIso(3)
-    ?`<div class="empty-note" style="border-style:solid">Siste kostholdsregistrering er <b>${ddmmyyyy(lastLogged)}</b>. Perioder etter det er tomme til Health Auto Export sender data igjen.</div>`:'';
+    ?`<div class="empty-note" style="border-style:solid">Siste kostholdsregistrering er <b>${ddmmyyyy(lastLogged)}</b>. Perioder etter det er tomme til snarveien «Wiggen kosthold» har kjørt igjen.</div>`:'';
 
   // Protein per kg lean mass (latest weight × (1 − fat%)), last 7 logged days
   const hDesc=[...healthData].sort((a,b)=>b.date.localeCompare(a.date));
@@ -2468,6 +2468,7 @@ function showNav(id,el){
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('nav-'+id).classList.add('active');
   el.classList.add('active');
+  const lt=document.getElementById('logo-tab');if(lt)lt.textContent='/ '+(el.textContent||'').replace(/^[^A-Za-zÆØÅæøå]+/,'').trim();   // header follows the tab
   if(id==='sleep'){renderSleep();}
   if(id==='calendar'){renderCalendar();}
   if(id==='nutrition'){
@@ -2853,7 +2854,7 @@ function renderNutrition() {
   const rows = getFilteredNutr();
   if (!rows.length) {
     const last=[...nutritionData].sort((a,b)=>b.date.localeCompare(a.date))[0];
-    document.getElementById('nutrition-content').innerHTML = `<div class="empty-note">Ingen kostholdsdata i valgt periode.${last?`<br>Siste registrering: <b>${ddmmyyyy(last.date)}</b> — sjekk at Health Auto Export sender data.`:''}</div>`;
+    document.getElementById('nutrition-content').innerHTML = `<div class="empty-note">Ingen kostholdsdata i valgt periode.${last?`<br>Siste registrering: <b>${ddmmyyyy(last.date)}</b> — sjekk at snarveien «Wiggen kosthold» kjører på iPhonen.`:''}</div>`;
     return;
   }
   const isToday = nutrSingleDay;
