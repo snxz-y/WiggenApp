@@ -607,6 +607,8 @@ tr:hover td{background:var(--surface2)}
 .rem-card .rem-head b{font-size:13px}
 .rem-card .rem-head span{font-size:11px;color:var(--muted)}
 @media(max-width:480px){.today-stats{grid-template-columns:repeat(2,1fr)}.ta-row{grid-template-columns:78px 1fr}}
+/* påminnelser i kalenderlista */
+.cal-rem{cursor:default}.cal-rem .cal-time{color:var(--green)}.cal-rem.overdue .cal-time,.cal-rem.overdue .cal-title{color:var(--red)}
 /* ── Detaljark for økt ── */
 .act-row{cursor:pointer}.act-row:hover td{background:var(--surface2)}
 .act-stats{grid-template-columns:repeat(4,1fr)}@media(max-width:480px){.act-stats{grid-template-columns:repeat(2,1fr)}}
@@ -3505,11 +3507,19 @@ function remindersCardHtml(){
     return `<div class="ta-row rem${od?' overdue':''}"><span class="ta-time">${od?'Forfalt':when}</span><span class="ta-title">${calEsc(r.title)}${remListName(r)?` <span class="ta-sub">· ${calEsc(remListName(r))}</span>`:''}</span></div>`;}).join('');
   return `<div class="rem-card"><div class="rem-head"><b>Påminnelser (${rems.length})</b><span>${upd?'oppdatert '+upd.toLocaleDateString('nb-NO',{day:'2-digit',month:'2-digit'})+' '+upd.toLocaleTimeString('nb-NO',{hour:'2-digit',minute:'2-digit'}):''}</span></div>${rows}</div>`;
 }
+// Reminders due on a day (plus overdue ones on today), rendered like event rows.
+function calRemRows(ds){
+  const today=daysAgoIso(0),rems=openRems();
+  const due=rems.filter(r=>remIsOn(r,ds)),od=ds===today?rems.filter(remOverdue):[];
+  const row=(r,isOd)=>`<div class="cal-ev cal-rem${isOd?' overdue':''}"><div class="cal-bar-c" style="background:${isOd?'var(--red)':'var(--green)'}"></div><div class="cal-time">${isOd?'Forfalt':(remTime(r)||'Påminnelse')}</div>
+      <div><div class="cal-title">${calEsc(r.title)}</div><div class="cal-sub">${isOd?'frist '+ddmm(r.due):'Påminnelse'}${remListName(r)?' · '+calEsc(remListName(r)):''}</div></div></div>`;
+  return due.map(r=>row(r,false)).join('')+od.map(r=>row(r,true)).join('');
+}
 function calListHtml(){
   const todayS=calIso(calToday());let out='';
   for(let k=0;k<CAL_DAYS;k++){
-    const ds=calIso(calAdd(calStart,k)),list=calDayEvents(ds);
-    out+=`<div class="cal-day${ds===todayS?' today':''}${list.length?'':' empty'}"><div class="cal-dh"><span>${calDayHeader(ds)}</span>${list.length?'':'<span>—</span>'}</div>${calRows(list,ds)}</div>`;
+    const ds=calIso(calAdd(calStart,k)),list=calDayEvents(ds),rem=calRemRows(ds);
+    out+=`<div class="cal-day${ds===todayS?' today':''}${list.length||rem?'':' empty'}"><div class="cal-dh"><span>${calDayHeader(ds)}</span>${list.length||rem?'':'<span>—</span>'}</div>${calRows(list,ds)}${rem}</div>`;
   }
   return out;
 }
@@ -3519,13 +3529,15 @@ function calMonthHtml(){
   for(let k=0;k<42;k++){
     const d=calAdd(first,k),ds=calIso(d),list=calDayEvents(ds),max=3;
     const chips=list.slice(0,max).map(e=>`<div class="cal-mchip" style="--c:${calColor(e.cal)}">${e.allDay?'':`<b>${calEsc(e.start.slice(0,10)===ds?e.start.slice(11):'→')}</b> `}${calEsc(e.title)}</div>`).join('');
-    const dots=list.slice(0,4).map(e=>`<span class="cal-dot" style="background:${calColor(e.cal)}"></span>`).join('');
+    const nRem=openRems().filter(r=>remIsOn(r,ds)).length;
+    const dots=list.slice(0,4).map(e=>`<span class="cal-dot" style="background:${calColor(e.cal)}"></span>`).join('')+(nRem?'<span class="cal-dot" style="background:var(--green)"></span>':'');
     cells+=`<button class="cal-cell${d.getMonth()!==mo?' out':''}${ds===todayS?' today':''}${ds===calSel?' sel':''}" onclick="calPick('${ds}')">
       <span class="cal-num">${d.getDate()}</span><div class="cal-mchips">${chips}${list.length>max?`<div class="cal-more">+${list.length-max}</div>`:''}</div><div class="cal-mdots">${dots}</div></button>`;
   }
   const heads=['man','tir','ons','tor','fre','lør','søn'].map(h=>`<div class="cal-wd">${h}</div>`).join('');
   const sel=calDayEvents(calSel);
-  const selHtml=`<div id="cal-selday" class="cal-day${calSel===todayS?' today':''}${sel.length?'':' empty'}"><div class="cal-dh"><span>${calDayHeader(calSel)}</span>${sel.length?'':'<span>Ingen avtaler</span>'}</div>${calRows(sel,calSel)}</div>`;
+  const selRem=calRemRows(calSel);
+  const selHtml=`<div id="cal-selday" class="cal-day${calSel===todayS?' today':''}${sel.length||selRem?'':' empty'}"><div class="cal-dh"><span>${calDayHeader(calSel)}</span>${sel.length||selRem?'':'<span>Ingen avtaler</span>'}</div>${calRows(sel,calSel)}${selRem}</div>`;
   return `<div class="cal-month">${heads}${cells}</div>${selHtml}`;
 }
 
