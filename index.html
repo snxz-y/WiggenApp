@@ -2,6 +2,8 @@
 <html lang="nb">
 <head>
 <meta charset="UTF-8">
+<!-- Content Security Policy: scripts only from this origin + Chart.js on cdnjs, data only to the Worker, no plugins/base tags. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src https://nutrition-reciever.margidowiggen.workers.dev; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -14,7 +16,7 @@
   <meta name="theme-color" content="#f3eee5">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>Wiggen — Helse</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js" integrity="sha384-dug+JxfBvklEQdJ4AYuBBAIScUz0bVN73xpy273gcAwHjb3qI0fXmuYNaNfdyYJG" crossorigin="anonymous"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -1086,7 +1088,7 @@ function renderAll(){
   const tbadge=t=>t==='running'?'<span class="type-badge tb-run">LØP</span>':t==='cycling'?'<span class="type-badge tb-bike">SYKKEL</span>':'<span class="type-badge tb-walk">GÅTUR</span>';
   document.getElementById('tbody-all').innerHTML=rows.map(a=>`<tr class="act-row" onclick="actOpen(${a.activityId})">
     <td>${fmtDate(a.date)}</td><td>${gcLinks(a.activityId)}</td><td>${tbadge(a.type)}</td>
-    <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis">${a.name}</td>
+    <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis">${calEsc(a.name)}</td>
     <td>${isIndoor(a)?INDOOR:fmtD(a.distanceM)}</td><td>${fmt(a.durationSec)}</td>
     <td style="font-weight:600">${isIndoor(a)?INDOOR:(a.type==='cycling'?fmtSpd(a.distanceM/a.durationSec):pace(a.distanceM,a.durationSec))}</td>
     <td style="${hrCls(a.avgHR)}">${a.avgHR}</td><td class="${a.maxHR>=HRZ.z5?'hi':a.maxHR>=HRZ.z4?'warn':''}">${a.maxHR}</td>
@@ -2766,7 +2768,7 @@ function renderCoachReviews() {
     sorted.map((r,i) => `
       <div style="border:1px solid var(--border);border-radius:10px;margin-bottom:8px;overflow:hidden">
         <div onclick="toggleCoach(${i})" style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:var(--surface);cursor:pointer;user-select:none">
-          <div style="font-size:13px;font-weight:600">Målsetning — ${formatReviewPeriod(r.period) || r.period || ''}</div>
+          <div style="font-size:13px;font-weight:600">Målsetning — ${calEsc(formatReviewPeriod(r.period) || r.period || '')}</div>
           <div style="display:flex;align-items:center;gap:12px">
             <div style="font-size:11px;color:var(--muted)">${fmtDate(r.date)}</div>
             <div id="coach-chevron-${i}" style="color:var(--muted);font-size:12px;transition:transform .2s">&#9660;</div>
@@ -2826,7 +2828,7 @@ function confirmDeleteReview(i, revArg) {
   ov.innerHTML = `
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px 24px;max-width:320px;width:100%;box-shadow:var(--shadow);text-align:center">
       <div style="font-size:15px;font-weight:600;margin-bottom:8px">Slette denne målsetningen?</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:18px">${rev.kind==='coach'?'Målsetning':'Weekly Review'} — ${formatReviewPeriod(rev.period)||rev.period||''}<br>Dette kan ikke angres.</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:18px">${rev.kind==='coach'?'Målsetning':'Weekly Review'} — ${calEsc(formatReviewPeriod(rev.period)||rev.period||'')}<br>Dette kan ikke angres.</div>
       <div style="display:flex;gap:10px;justify-content:center">
         <button onclick="closeDeleteReview()" style="padding:9px 18px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer;font-size:13px;font-weight:600">Avbryt</button>
         <button id="del-review-confirm" style="padding:9px 18px;border-radius:20px;border:1px solid var(--red);background:var(--red);color:var(--on-accent);cursor:pointer;font-size:13px;font-weight:600">Slett</button>
@@ -3587,7 +3589,7 @@ function showAppLogin(msg){
   ov.innerHTML=`<div class="cal-login"><div class="card-title" style="font-size:18px">Wiggen</div>
     <div style="font-size:13px;color:var(--muted);margin-top:4px">Skriv inn app-passordet. Det lagres bare på denne enheten.</div>
     <input type="password" id="app-key" placeholder="Passord" autocomplete="current-password" onkeydown="if(event.key==='Enter')appLogin()">
-    ${msg?`<div class="cal-warn">${msg}</div>`:''}
+    ${msg?`<div class="cal-warn">${calEsc(msg)}</div>`:''}
     <button class="cal-btn cal-btn-primary" onclick="appLogin()">Lås opp</button></div>`;
   setTimeout(()=>{const i=document.getElementById('app-key');if(i)i.focus();},50);
 }

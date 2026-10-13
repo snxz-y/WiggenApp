@@ -20,18 +20,31 @@
 //   CAL_KEY       the app password (one password for data, goals and calendar)
 //   CAL_FEEDS     JSON list: [{"name":"Privat","url":"https://...ics","color":"#7c6dfa"}, ...]
 //   MCP_KEY       long random string; the MCP endpoint is /mcp/<MCP_KEY> (falls back to CAL_KEY if unset)
+//
+// Hardening (Oct 2026): browsers may only call the Worker from the app's own
+// origin (APP_ORIGIN); wrong passwords/keys are rate-limited per IP (see
+// «Brute-force protection»); the OAuth login page cannot be framed and names
+// the client that is about to get access; goals are whitelisted and capped
+// before they are written; every JSON answer carries nosniff/no-referrer.
 
 const REPO = 'snxz-y/WiggenApp-data';        // DATA_REPO (private)
 const DATA_FILES = ['health.json', 'activities.json', 'nutrition.json', 'reviews.json', 'profile.json', 'reminders.json'];
 const GH = 'https://api.github.com';
 
+// Only the app itself (GitHub Pages) may call the Worker from a browser.
+// Non-browser clients (Snarveier, Scriptable, claude.ai, Claude Code) send no
+// Origin header and are not subject to CORS, so nothing else changes.
+const APP_ORIGIN = 'https://snxz-y.github.io';
 const CORS = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': APP_ORIGIN,
   'Access-Control-Allow-Methods': 'POST,OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Max-Age': '86400',
+  Vary: 'Origin',
 };
+const SEC_HEADERS = { 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer', 'Cache-Control': 'no-store' };
 const json = (obj, status = 200) =>
-  new Response(JSON.stringify(obj), { status, headers: { ...CORS, 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
+  new Response(JSON.stringify(obj), { status, headers: { ...CORS, ...SEC_HEADERS, 'Content-Type': 'application/json' } });
 
 // ── GitHub JSON files ───────────────────────────────────────────────────────
 const b64decode = b64 => new TextDecoder().decode(Uint8Array.from(atob((b64 || '').replace(/\s/g, '')), c => c.charCodeAt(0)));
@@ -117,7 +130,7 @@ function shortcutEntries(body) {
 }
 async function saveNutritionShortcut(request, env) {
   const body = await request.json().catch(() => ({}));
-  if (!(await authorized(body, env))) return json({ error: 'unauthorized' }, 401);
+  if (!(await authorized(request, body, env))) return unauthorized(request);
   const { key, ...raw } = body;
   const { entries, skipped } = shortcutEntries(raw);
   const sum = entries.map(e => `${e.date.slice(8)}/${e.date.slice(5, 7)}: ${e.calories != null ? Math.round(e.calories) + ' kcal' : '–'}`).join(', ');
@@ -149,9 +162,32 @@ async function saveNutritionShortcut(request, env) {
   return reply(true, { message: `Lagret ${entries.length} dager – ${sum}` });
 }
 
-// ── Password check (shared by /data, goals and /calendar) ─────────────────
-async function authorized(body, env) {
-  return !!(env.CAL_KEY && body && body.key && await sameSecret(body.key, env.CAL_KEY));
+// ── Brute-force protection ─────────────────────────────────────────────────
+// Wrong passwords/keys are counted per client IP in the edge cache. Best
+// effort (the counter is per Cloudflare location and can be evicted), but it
+// turns unlimited online guessing into ~MAX_FAILS tries per FAIL_WINDOW_S per
+// location. For a hard limit add a WAF rate-limiting rule in the dashboard.
+const MAX_FAILS = 10, FAIL_WINDOW_S = 900;
+const failKey = request => new Request(new URL(request.url).origin + '/__ratelimit/' + encodeURIComponent(request.headers.get('CF-Connecting-IP') || 'unknown'));
+async function failCount(request) {
+  try { const r = await caches.default.match(failKey(request)); return r ? (+(await r.text()) || 0) : 0; } catch (e) { return 0; }
+}
+async function noteFailure(request) {
+  try {
+    const n = (await failCount(request)) + 1;
+    await caches.default.put(failKey(request), new Response(String(n), { headers: { 'Cache-Control': `max-age=${FAIL_WINDOW_S}`, 'Content-Type': 'text/plain' } }));
+  } catch (e) { /* no cache available: skip */ }
+}
+const tooManyTries = async request => (await failCount(request)) >= MAX_FAILS;
+const tooMany = () => json({ error: 'too_many_attempts', message: 'For mange feil passord. Prøv igjen om 15 minutter.' }, 429);
+const unauthorized = async request => (await tooManyTries(request)) ? tooMany() : json({ error: 'unauthorized' }, 401);
+
+// ── Password check (shared by /data, goals, /calendar, /agenda, OAuth login) ─
+async function authorized(request, body, env) {
+  if (await tooManyTries(request)) return false;
+  const ok = !!(env.CAL_KEY && body && body.key && await sameSecret(body.key, env.CAL_KEY));
+  if (!ok) await noteFailure(request);
+  return ok;
 }
 
 // ── App data (private repo → app) ──────────────────────────────────────────
@@ -167,7 +203,7 @@ async function readRepoJson(path, env) {
 }
 async function readData(request, env) {
   const body = await request.json().catch(() => ({}));
-  if (!(await authorized(body, env))) return json({ error: 'unauthorized' }, 401);
+  if (!(await authorized(request, body, env))) return unauthorized(request);
   const files = {};
   await Promise.all(DATA_FILES.map(async f => { files[f] = (await readRepoJson(f, env)) ?? []; }));
   return json({ files });
@@ -175,18 +211,33 @@ async function readData(request, env) {
 
 // ── Målsetninger (reviews.json) ────────────────────────────────────────────
 // Body: {key, goal:{...}} to save, {key, date, period, content} to delete.
+// Only known fields are stored, each capped, so a goal can never carry
+// arbitrary objects or megabytes into reviews.json.
+const GOAL_MAX = { date: 10, period: 200, content: 20000, kind: 20 };
+function cleanGoal(g) {
+  if (!g || typeof g !== 'object') return null;
+  const s = (v, max) => (v == null ? '' : String(v)).slice(0, max);
+  const today = fmtNaive(utcToOslo(new Date()), true);
+  const goal = {
+    date: /^\d{4}-\d{2}-\d{2}$/.test(s(g.date, GOAL_MAX.date)) ? s(g.date, GOAL_MAX.date) : today,
+    period: s(g.period, GOAL_MAX.period) || today,
+    content: s(g.content, GOAL_MAX.content),
+    kind: s(g.kind, GOAL_MAX.kind) || 'coach',
+  };
+  return goal.content.trim() ? goal : null;
+}
 async function saveGoal(request, env) {
   const body = await request.json().catch(() => ({}));
-  if (!(await authorized(body, env))) return json({ error: 'unauthorized' }, 401);
-  const goal = body.goal;
-  if (!goal || typeof goal !== 'object') return json({ error: 'goal mangler' }, 400);
+  if (!(await authorized(request, body, env))) return unauthorized(request);
+  const goal = cleanGoal(body.goal);
+  if (!goal) return json({ error: 'goal mangler' }, 400);
   await updateRepoJson('reviews.json', env.GITHUB_TOKEN, 'Save review', current => ({ data: [goal, ...current] }));
   return json({ ok: true });
 }
 
 async function deleteGoal(request, env) {
   const body = await request.json().catch(() => ({}));
-  if (!(await authorized(body, env))) return json({ error: 'unauthorized' }, 401);
+  if (!(await authorized(request, body, env))) return unauthorized(request);
   const { date, period, content } = body;
   const found = await updateRepoJson('reviews.json', env.GITHUB_TOKEN, 'Delete review', current => {
     // Remove only the first exact match (handles duplicates).
@@ -363,7 +414,7 @@ async function fetchCalendars(env, from, to) {
 
 async function handleCalendar(request, env) {
   const body = await request.json().catch(() => ({}));
-  if (!(await authorized(body, env))) return json({ error: 'unauthorized' }, 401);
+  if (!(await authorized(request, body, env))) return unauthorized(request);
   const isoDay = s => /^\d{4}-\d{2}-\d{2}$/.test(s || '') ? new Date(s + 'T00:00:00Z') : null;
   const now = utcToOslo(new Date()); now.setUTCHours(0, 0, 0, 0);
   const from = isoDay(body.from) || new Date(now.getTime() - 7 * DAY);
@@ -452,7 +503,7 @@ function freeSlots(timed, ds) {
 
 async function handleAgenda(request, env) {
   const body = await request.json().catch(() => ({}));
-  if (!(await authorized(body, env))) return json({ error: 'unauthorized' }, 401);
+  if (!(await authorized(request, body, env))) return unauthorized(request);
   return json(await buildAgenda(env, body.day, parseReminders(body)));
 }
 // Core of /agenda, also used by the MCP tool get_agenda.
@@ -581,7 +632,7 @@ async function mcpCall(name, a, env) {
       if (p?.birthDate) { const b = new Date(p.birthDate), t = new Date(); age = t.getFullYear() - b.getFullYear() - ((t.getMonth() < b.getMonth() || (t.getMonth() === b.getMonth() && t.getDate() < b.getDate())) ? 1 : 0); }
       return { age, goalWeight: p?.goalWeight ?? null, bodyFatGoal: p?.bodyFatGoal ?? null, sleepTargetH: p?.sleepTargetH ?? 7.5, targets: p?.targets || null, hrZones: pick('hrZones'), lactateHR: pick('lactateHR'), lactatePaceSec: pick('lactatePaceSec'), vo2max: pick('vo2max'), fitnessAge: pick('fitnessAge'), weight: pick('weight') }; }
     case 'get_goals': return { goals: (await readRepoJson('reviews.json', env)) || [] };
-    case 'add_goal': { if (!a.text) throw new Error('text mangler'); const today = isoDate(todayOslo()); const goal = { date: today, period: a.title || today, content: String(a.text), kind: 'coach' };
+    case 'add_goal': { if (!a.text) throw new Error('text mangler'); const today = isoDate(todayOslo()); const goal = cleanGoal({ date: today, period: a.title || today, content: a.text, kind: 'coach' }); if (!goal) throw new Error('text mangler');
       await updateRepoJson('reviews.json', env.GITHUB_TOKEN, 'Save review (MCP)', cur => ({ data: [goal, ...cur] })); return { ok: true, goal }; }
     default: throw new Error('Ukjent verktøy: ' + name);
   }
@@ -652,18 +703,24 @@ async function oauthRegister(request, env) {
     grant_types: ['authorization_code', 'refresh_token'], response_types: ['code'], client_id_issued_at: now() }, 201);
 }
 
-function loginPage(q, msg) {
+function loginPage(q, msg, client, status) {
   const esc = v => String(v == null ? '' : v).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  // Say who gets access: anyone can register an OAuth client, so the owner
+  // must be able to see that the login really comes from claude.ai/Claude Code.
+  let host = ''; try { host = new URL(q.get('redirect_uri')).host; } catch (e) { /* validated by the caller */ }
+  const who = `<p class="w">Tilgang gis til <b>${esc(client?.n || 'ukjent klient')}</b>${host ? ` via <b>${esc(host)}</b>` : ''}. Er det ikke deg som kobler til nå, lukk siden.</p>`;
   const hidden = ['response_type', 'client_id', 'redirect_uri', 'state', 'code_challenge', 'code_challenge_method', 'scope', 'resource'].map(k => `<input type="hidden" name="${k}" value="${esc(q.get(k))}">`).join('');
   return new Response(`<!doctype html><html lang="nb"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Wiggen – koble til</title>
 <style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f1ebe0;color:#2c261f;font:15px/1.5 -apple-system,system-ui,sans-serif}
 .c{background:#fbf8f1;border:1px solid #e0d6c6;border-radius:16px;padding:28px 26px;width:min(92vw,360px);box-shadow:0 10px 30px rgba(0,0,0,.08)}
 h1{font:600 22px Georgia,serif;margin:0 0 6px}p{margin:0 0 16px;color:#6f6354;font-size:13.5px}input[type=password]{width:100%;box-sizing:border-box;font-size:17px;padding:11px 12px;border:1px solid #e0d6c6;border-radius:10px;background:#fff;margin-bottom:12px}
-button{width:100%;font-size:15px;font-weight:600;padding:12px;border:0;border-radius:24px;background:#b56a45;color:#fff}.e{color:#b5544a;font-size:13px;margin:-6px 0 12px}
-@media(prefers-color-scheme:dark){body{background:#1a1611;color:#ece3d8}.c{background:#221d17;border-color:rgba(255,255,255,.09)}p{color:#b3a596}input[type=password]{background:#2c261e;color:#ece3d8;border-color:rgba(255,255,255,.12)}}</style></head>
-<body><form class="c" method="post"><h1>Wiggen</h1><p>Claude ber om tilgang til helse-, trenings- og kalenderdataene dine. Skriv inn app-passordet for å godkjenne.</p>
-${msg ? `<div class="e">${esc(msg)}</div>` : ''}${hidden}<input type="password" name="password" placeholder="App-passord" autocomplete="current-password" autofocus required><button type="submit">Gi tilgang</button></form></body></html>`,
-    { status: msg ? 401 : 200, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' } });
+button{width:100%;font-size:15px;font-weight:600;padding:12px;border:0;border-radius:24px;background:#b56a45;color:#fff}.e{color:#b5544a;font-size:13px;margin:-6px 0 12px}.w{font-size:12.5px;background:#f1ebe0;border-radius:10px;padding:8px 10px}
+@media(prefers-color-scheme:dark){body{background:#1a1611;color:#ece3d8}.c{background:#221d17;border-color:rgba(255,255,255,.09)}p{color:#b3a596}input[type=password]{background:#2c261e;color:#ece3d8;border-color:rgba(255,255,255,.12)}.w{background:#2c261e}}</style></head>
+<body><form class="c" method="post"><h1>Wiggen</h1><p>En klient ber om tilgang til helse-, trenings- og kalenderdataene dine. Skriv inn app-passordet for å godkjenne.</p>
+${who}${msg ? `<div class="e">${esc(msg)}</div>` : ''}${hidden}<input type="password" name="password" placeholder="App-passord" autocomplete="current-password" autofocus required><button type="submit">Gi tilgang</button></form></body></html>`,
+    { status: status || (msg ? 401 : 200), headers: { 'Content-Type': 'text/html; charset=utf-8', ...SEC_HEADERS,
+      // Not frameable (clickjacking) and no external resources on the login page.
+      'X-Frame-Options': 'DENY', 'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; frame-ancestors 'none'; base-uri 'none'" } });
 }
 
 async function oauthAuthorize(request, env) {
@@ -674,8 +731,10 @@ async function oauthAuthorize(request, env) {
   if (!client || !client.c || !client.ru.includes(ru)) return oauthErr('invalid_client', 'Ukjent client_id eller redirect_uri');
   if (q.get('response_type') !== 'code') return oauthErr('unsupported_response_type', 'response_type må være code');
   if (!q.get('code_challenge') || (q.get('code_challenge_method') || 'S256') !== 'S256') return oauthErr('invalid_request', 'PKCE (S256) kreves');
-  if (request.method === 'GET') return loginPage(q, '');
-  if (!(await authorized({ key: q.get('password') }, env))) return loginPage(q, 'Feil passord.');
+  if (request.method === 'GET') return loginPage(q, '', client);
+  if (!(await authorized(request, { key: q.get('password') }, env))) {
+    return (await tooManyTries(request)) ? loginPage(q, 'For mange forsøk. Vent 15 minutter.', client, 429) : loginPage(q, 'Feil passord.', client);
+  }
   const code = await sign(env, { t: 'c', cid: q.get('client_id').slice(-24), ru, cc: q.get('code_challenge'), exp: now() + 300 });
   const to = new URL(ru); to.searchParams.set('code', code); if (q.get('state')) to.searchParams.set('state', q.get('state'));
   return new Response(null, { status: 302, headers: { Location: to.toString(), 'Cache-Control': 'no-store' } });
@@ -711,10 +770,12 @@ async function bearerOk(request, env) {
 async function handleMcp(request, env, key) {
   // Either the secret in the URL (/mcp/<MCP_KEY>) or an OAuth bearer token (/mcp).
   const secret = env.MCP_KEY || env.CAL_KEY;
+  if (key && await tooManyTries(request)) return tooMany();
   const keyOk = !!(secret && key && await sameSecret(key, secret));
+  if (key && !keyOk) await noteFailure(request);
   if (!keyOk && !(await bearerOk(request, env))) {
     const origin = new URL(request.url).origin;
-    return new Response(JSON.stringify({ error: 'unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json',
+    return new Response(JSON.stringify({ error: 'unauthorized' }), { status: 401, headers: { ...SEC_HEADERS, 'Content-Type': 'application/json',
       'WWW-Authenticate': `Bearer realm="wiggen", resource_metadata="${origin}/.well-known/oauth-protected-resource"` } });
   }
   if (request.method === 'GET') return new Response('Method Not Allowed', { status: 405, headers: { Allow: 'POST' } });

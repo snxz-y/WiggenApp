@@ -113,6 +113,12 @@ The old AI-generated weekly reviews are gone. The Målsetninger tab lets the own
 - Training readiness feedback codes are translated to plain Norwegian.
 - Activity tab keys in code stay English (`runs`, `bikes`, `walks`, `all`) — only visible labels are Norwegian. Translating the keys broke the Løping/Gåturer tables once (fixed Sept 2026).
 
+## Security (audit Oct 2026)
+- **Worker:** CORS is limited to the app's origin (`APP_ORIGIN` in `worker.js`; non-browser clients are unaffected). Wrong passwords/keys are rate-limited per IP with the edge Cache API (`MAX_FAILS` = 10 per 15 min per Cloudflare location, HTTP 429) — best effort; for a hard limit add a WAF rate-limiting rule on `/data`, `/calendar`, `/agenda`, `/authorize`, `/mcp/*` in the Cloudflare dashboard. The OAuth login page sends `X-Frame-Options: DENY` + CSP and shows the client name and redirect host (anyone can register a client, so check that it says claude.ai before typing the password). Goals are whitelisted to `date/period/content/kind` and capped (`cleanGoal()`), also for the MCP `add_goal`. All JSON answers carry `nosniff`/`no-referrer`. Authorization codes and refresh tokens are stateless, so they are reusable until they expire (PKCE still required) — rotate `MCP_KEY` to revoke everything.
+- **App:** `index.html` has a CSP meta tag (scripts: self + cdnjs; connect: only the Worker; no objects/base). Everything from feeds, reminders, goals and activity names is escaped with `calEsc()` before `innerHTML`. Keep the Worker URL in the CSP `connect-src` in sync with `WORKER_URL`.
+- **GitHub:** the public repo's history contains an old hardcoded `BIRTH_DATE` (commit with `const BIRTH_DATE=`) — only a history rewrite removes it. The Actions secrets from the deleted cloud sync (`GH_PAT`, `GARMIN_*`) should be deleted; the branches `privat-data` (merged) and `profil` are stale. Keep `GITHUB_TOKEN` (Worker) and `GH_PAT` (HA box) as fine-grained PATs scoped to `WiggenApp-data` → Contents read/write only, and keep 2FA on the account.
+- Tests for the hardening: `workertest.mjs` (scratchpad) — 401/429/CORS/headers, goal caps, OAuth flow, `/mcp/<key>`; the browser check uses `mock_worker.py` with XSS payloads in every feed/reminder/goal field.
+
 ## Push command (standard)
 Push via the GitHub contents API with `$env:GH_PAT`, sending the JSON body as UTF-8 bytes (PowerShell 5 otherwise mangles æøå):
 ```powershell
