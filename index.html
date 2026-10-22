@@ -3337,7 +3337,10 @@ const lsSet=(k,v)=>{try{v==null?localStorage.removeItem(k):localStorage.setItem(
 const calIso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 const calAdd=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x;};
 const calEsc=v=>String(v==null?'':v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const calHidden=()=>{try{return new Set(JSON.parse(lsGet('calHidden','[]')));}catch(e){return new Set();}};
+// Hidden calendars are remembered by NAME (calHiddenNames). The old index-based key (calHidden)
+// broke when a feed was added to CAL_FEEDS: a new calendar inherited the hidden slot.
+const calHiddenNames=()=>{try{return new Set(JSON.parse(lsGet('calHiddenNames','[]')));}catch(e){return new Set();}};
+const calHidden=(cals=calData&&calData.calendars)=>{const n=calHiddenNames();return new Set((cals||[]).map((c,i)=>n.has(c.name)?i:-1).filter(i=>i>=0));};
 const calColor=i=>(calData&&calData.calendars[i]&&calData.calendars[i].color)||CAL_PALETTE[i%CAL_PALETTE.length];
 const calToday=()=>{const t=new Date();t.setHours(0,0,0,0);return t;};
 
@@ -3384,7 +3387,7 @@ function calShift(dir){
   }else calStart=dir===0?calToday():calAdd(calStart,dir*CAL_DAYS);
   renderCalendar();
 }
-function calToggle(i){const h=calHidden();h.has(i)?h.delete(i):h.add(i);lsSet('calHidden',JSON.stringify([...h]));drawCalendar();}
+function calToggle(i){const name=calData&&calData.calendars[i]&&calData.calendars[i].name;if(name==null)return;const h=calHiddenNames();h.has(name)?h.delete(name):h.add(name);lsSet('calHiddenNames',JSON.stringify([...h]));lsSet('calHidden',null);drawCalendar();}
 function calPick(ds){calSel=ds;drawCalendar();const d=document.getElementById('cal-selday');if(d)d.scrollIntoView({behavior:'smooth',block:'nearest'});}
 
 // Visible range: list = calStart..+21 days; month = Monday before the 1st .. 6 weeks.
@@ -3482,7 +3485,7 @@ function drawTodayAgenda(data,err){
   const el=document.getElementById('today-agenda');if(!el)return;
   const today=daysAgoIso(0),tomorrow=calIso(calAdd(new Date(today+'T00:00'),1));
   const rems=openRems(),overdue=rems.filter(remOverdue);
-  const hidden=calHidden();
+  const hidden=calHidden(data&&data.calendars);
   const evOn=ds=>{if(!data)return[];const ns=calIso(calAdd(new Date(ds+'T00:00'),1));
     return data.events.filter(e=>!hidden.has(e.cal)&&(e.allDay?(e.start<=ds&&e.end>ds):(e.start<ns+'T00:00'&&e.end>ds+'T00:00'))).sort((a,b)=>(b.allDay-a.allDay)||a.start.localeCompare(b.start));};
   const evRow=(e,ds)=>`<div class="ta-row"><span class="ta-time">${calTimeLabel(e,ds)}</span><span class="ta-title">${calEsc(e.title)}${e.location?` <span class="ta-sub">· ${calEsc(e.location)}</span>`:''}</span></div>`;
