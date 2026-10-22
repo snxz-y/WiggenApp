@@ -1,0 +1,44 @@
+name: Deploy Cloudflare Worker
+
+# Deploys worker.js to Cloudflare whenever it changes on main.
+# Needs two repository secrets (Settings → Secrets and variables → Actions):
+#   CLOUDFLARE_API_TOKEN   token from the «Edit Cloudflare Workers» template
+#   CLOUDFLARE_ACCOUNT_ID  the account id shown on the Workers & Pages overview
+# Without them the job is skipped, so nothing breaks.
+on:
+  push:
+    branches: [main]
+    paths: ['worker.js', 'wrangler.toml', '.github/workflows/worker-deploy.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: worker
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Skip if Cloudflare secrets are missing
+        id: check
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "Cloudflare secrets not set – skipping deploy."; echo "go=false" >> "$GITHUB_OUTPUT"
+          else echo "go=true" >> "$GITHUB_OUTPUT"; fi
+      - name: Deploy with Wrangler
+        if: steps.check.outputs.go == 'true'
+        run: npx --yes wrangler@4 deploy
+      - name: Smoke test
+        if: steps.check.outputs.go == 'true'
+        run: |
+          sleep 5
+          curl -sf https://nutrition-reciever.margidowiggen.workers.dev/.well-known/oauth-authorization-server | grep -q authorization_endpoint
+          test "$(curl -s -o /dev/null -w '%{http_code}' -X POST https://nutrition-reciever.margidowiggen.workers.dev/agenda -d '{}')" = 401
+          echo "Worker is up."
