@@ -609,6 +609,8 @@ tr:hover td{background:var(--surface2)}
 .rem-card .rem-head b{font-size:13px}
 .rem-card .rem-head span{font-size:11px;color:var(--muted)}
 @media(max-width:480px){.today-stats{grid-template-columns:repeat(2,1fr)}.ta-row{grid-template-columns:78px 1fr}}
+/* kalenderfilter: valgt kalender markeres */
+.cal-chip.on{border-color:var(--accent);color:var(--text);font-weight:700}
 /* påminnelser i kalenderlista */
 .cal-rem{cursor:default}.cal-rem .cal-time{color:var(--green)}.cal-rem.overdue .cal-time,.cal-rem.overdue .cal-title{color:var(--red)}
 /* ── Detaljark for økt ── */
@@ -3337,10 +3339,10 @@ const lsSet=(k,v)=>{try{v==null?localStorage.removeItem(k):localStorage.setItem(
 const calIso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 const calAdd=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x;};
 const calEsc=v=>String(v==null?'':v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-// Hidden calendars are remembered by NAME (calHiddenNames). The old index-based key (calHidden)
-// broke when a feed was added to CAL_FEEDS: a new calendar inherited the hidden slot.
-const calHiddenNames=()=>{try{return new Set(JSON.parse(lsGet('calHiddenNames','[]')));}catch(e){return new Set();}};
-const calHidden=(cals=calData&&calData.calendars)=>{const n=calHiddenNames();return new Set((cals||[]).map((c,i)=>n.has(c.name)?i:-1).filter(i=>i>=0));};
+// Calendar chips are a filter: tapping one shows that calendar alone (calSolo, remembered by
+// NAME in localStorage), tapping it again or «Alle» shows everything.
+const calSolo=()=>lsGet('calSolo',null);
+const calHidden=(cals=calData&&calData.calendars)=>{const solo=calSolo();if(!solo||!(cals||[]).some(c=>c.name===solo))return new Set();return new Set((cals||[]).map((c,i)=>c.name===solo?-1:i).filter(i=>i>=0));};
 const calColor=i=>(calData&&calData.calendars[i]&&calData.calendars[i].color)||CAL_PALETTE[i%CAL_PALETTE.length];
 const calToday=()=>{const t=new Date();t.setHours(0,0,0,0);return t;};
 
@@ -3387,7 +3389,7 @@ function calShift(dir){
   }else calStart=dir===0?calToday():calAdd(calStart,dir*CAL_DAYS);
   renderCalendar();
 }
-function calToggle(i){const name=calData&&calData.calendars[i]&&calData.calendars[i].name;if(name==null)return;const h=calHiddenNames();h.has(name)?h.delete(name):h.add(name);lsSet('calHiddenNames',JSON.stringify([...h]));lsSet('calHidden',null);drawCalendar();}
+function calToggle(i){const name=i==null?null:calData&&calData.calendars[i]&&calData.calendars[i].name;lsSet('calSolo',name&&calSolo()!==name?name:null);lsSet('calHidden',null);lsSet('calHiddenNames',null);drawCalendar();}
 function calPick(ds){calSel=ds;drawCalendar();const d=document.getElementById('cal-selday');if(d)d.scrollIntoView({behavior:'smooth',block:'nearest'});}
 
 // Visible range: list = calStart..+21 days; month = Monday before the 1st .. 6 weeks.
@@ -3426,7 +3428,8 @@ async function loadCalendar(){
 function drawCalendar(){
   const el=document.getElementById('cal-content');if(!el||!calData)return;
   const hidden=calHidden();
-  const legend=calData.calendars.map((c,i)=>`<button class="cal-chip${hidden.has(i)?' off':''}" onclick="calToggle(${i})" title="${c.error?calEsc('Feil: '+c.error):'Vis/skjul'}"><span class="cal-dot" style="background:${calColor(i)}"></span>${calEsc(c.name)}${c.error?' ⚠':''}</button>`).join('');
+  const solo=hidden.size>0;
+  const legend=`<button class="cal-chip${solo?' off':' on'}" onclick="calToggle(null)" title="Vis alle kalendere">Alle</button>`+calData.calendars.map((c,i)=>`<button class="cal-chip${hidden.has(i)?' off':solo?' on':''}" onclick="calToggle(${i})" title="${c.error?calEsc('Feil: '+c.error):solo&&!hidden.has(i)?'Vis alle':'Vis bare denne'}"><span class="cal-dot" style="background:${calColor(i)}"></span>${calEsc(c.name)}${c.error?' ⚠':''}</button>`).join('');
   const body=calView==='month'?calMonthHtml():calListHtml();
   el.innerHTML=`<div class="cal-wrap">${calBar()}<div class="cal-legend">${legend}</div>${calView==='list'?remindersCardHtml():''}${body}</div>`;
 }
