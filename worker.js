@@ -398,13 +398,21 @@ async function fetchCalendars(env, from, to) {
   let feeds;
   try { feeds = JSON.parse(env.CAL_FEEDS || '[]'); } catch (e) { throw new Error('CAL_FEEDS er ikke gyldig JSON'); }
   const cals = await Promise.all(feeds.map(async f => {
-    try {
-      const r = await fetch(String(f.url).replace(/^webcal:/i, 'https:'), { cf: { cacheTtl: 600, cacheEverything: true } });
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      return { name: f.name, color: f.color || null, events: eventsInRange(await r.text(), from, to) };
-    } catch (e) {
-      return { name: f.name, color: f.color || null, error: e.message, events: [] };
+    // Only successful answers are cached (10 min); a failed fetch is retried once
+    // so a single hiccup from Google/iCloud doesn't show ⚠ in the app.
+    const url = String(f.url).replace(/^webcal:/i, 'https:');
+    let err;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        if (attempt) await new Promise(r => setTimeout(r, 600));
+        const r = await fetch(url, { cf: { cacheTtlByStatus: { '200-299': 600, '300-599': 0 }, cacheEverything: true } });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const text = await r.text();
+        if (!/BEGIN:VCALENDAR/.test(text)) throw new Error('svaret er ikke en kalender');
+        return { name: f.name, color: f.color || null, events: eventsInRange(text, from, to) };
+      } catch (e) { err = e; }
     }
+    return { name: f.name, color: f.color || null, error: err.message, events: [] };
   }));
   return {
     calendars: cals.map(c => ({ name: c.name, color: c.color, error: c.error || null })),
