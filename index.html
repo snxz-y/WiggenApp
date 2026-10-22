@@ -612,6 +612,7 @@ tr:hover td{background:var(--surface2)}
 /* kalenderfilter: valgt kalender markeres */
 .cal-chip.on{border-color:var(--accent);color:var(--text);font-weight:700}
 /* påminnelser i kalenderlista */
+.rem-upd{font-size:11px;color:var(--muted);align-self:center;margin-right:4px}
 .cal-rem{cursor:default}.cal-rem .cal-time{color:var(--green)}.cal-rem.overdue .cal-time,.cal-rem.overdue .cal-title{color:var(--red)}
 /* ── Detaljark for økt ── */
 .act-row{cursor:pointer}.act-row:hover td{background:var(--surface2)}
@@ -3373,7 +3374,7 @@ function renderCalendar(){
       <button class="cal-btn cal-btn-primary" onclick="calLogin()">Lås opp</button></div>`;
     return;
   }
-  if(!calView)calView=lsGet('calView','list')==='month'?'month':'list';
+  if(!calView){const v=lsGet('calView','list');calView=v==='month'||v==='rem'?v:'list';}
   if(!calStart)calStart=calToday();
   if(!calMonth){const t=calToday();calMonth=new Date(t.getFullYear(),t.getMonth(),1);}
   if(!calSel)calSel=calIso(calToday());
@@ -3398,7 +3399,10 @@ function calRange(){
   return[calStart,calAdd(calStart,CAL_DAYS)];
 }
 function calBar(){
-  const tabs=`<div class="cal-views"><button class="cal-view${calView==='list'?' active':''}" onclick="calSetView('list')">☰ Liste</button><button class="cal-view${calView==='month'?' active':''}" onclick="calSetView('month')">▦ Måned</button></div>`;
+  const nRem=openRems().length;
+  const tabs=`<div class="cal-views"><button class="cal-view${calView==='list'?' active':''}" onclick="calSetView('list')">☰ Liste</button><button class="cal-view${calView==='month'?' active':''}" onclick="calSetView('month')">▦ Måned</button><button class="cal-view${calView==='rem'?' active':''}" onclick="calSetView('rem')">✓ Påminnelser${nRem?` (${nRem})`:''}</button></div>`;
+  if(calView==='rem'){const u=REMINDERS.updatedAt?new Date(REMINDERS.updatedAt):null;
+    return `${tabs}<div class="cal-bar"><div class="cal-range">Påminnelser</div><div class="cal-btns"><span class="rem-upd">${u?'oppdatert '+u.toLocaleDateString('nb-NO',{day:'2-digit',month:'2-digit'})+' '+u.toLocaleTimeString('nb-NO',{hour:'2-digit',minute:'2-digit'}):''}</span><button class="cal-btn" onclick="calLogout()" title="Glem passordet på denne enheten">Lås</button></div></div>`;}
   let label;
   if(calView==='month'){const m=calMonth.toLocaleDateString('nb-NO',{month:'long',year:'numeric'});label=m.charAt(0).toUpperCase()+m.slice(1);}
   else{const f=d=>d.toLocaleDateString('nb-NO',{day:'numeric',month:'short'});label=`${f(calStart)} – ${f(calAdd(calStart,CAL_DAYS-1))}`;}
@@ -3430,8 +3434,9 @@ function drawCalendar(){
   const hidden=calHidden();
   const solo=hidden.size>0;
   const legend=`<button class="cal-chip${solo?' off':' on'}" onclick="calToggle(null)" title="Vis alle kalendere">Alle</button>`+calData.calendars.map((c,i)=>`<button class="cal-chip${hidden.has(i)?' off':solo?' on':''}" onclick="calToggle(${i})" title="${c.error?calEsc('Feil: '+c.error):solo&&!hidden.has(i)?'Vis alle':'Vis bare denne'}"><span class="cal-dot" style="background:${calColor(i)}"></span>${calEsc(c.name)}${c.error?' ⚠':''}</button>`).join('');
+  if(calView==='rem'){el.innerHTML=`<div class="cal-wrap">${calBar()}${remindersViewHtml()}</div>`;return;}
   const body=calView==='month'?calMonthHtml():calListHtml();
-  el.innerHTML=`<div class="cal-wrap">${calBar()}<div class="cal-legend">${legend}</div>${calView==='list'?remindersCardHtml():''}${body}</div>`;
+  el.innerHTML=`<div class="cal-wrap">${calBar()}<div class="cal-legend">${legend}</div>${body}</div>`;
 }
 function calDayHeader(ds){
   const d=new Date(ds+'T00:00'),wd=d.toLocaleDateString('nb-NO',{weekday:'long',day:'numeric',month:'long'});
@@ -3506,15 +3511,6 @@ function drawTodayAgenda(data,err){
   el.innerHTML=day(today,'I dag',' today')+day(tomorrow,'I morgen','')+
     `<div class="ta-foot"><span>${err?'⚠ Kalenderen kunne ikke hentes':updTxt}</span><a onclick="document.querySelector('.nav-tab[onclick*=calendar]').click()">Åpne kalender</a></div>`;
 }
-// Open reminders as a card in the Kalender tab (all lists, soonest first).
-function remindersCardHtml(){
-  const rems=openRems().slice().sort((a,b)=>String(a.due||'9').localeCompare(String(b.due||'9')));
-  if(!rems.length)return'';
-  const upd=REMINDERS.updatedAt?new Date(REMINDERS.updatedAt):null;
-  const rows=rems.map(r=>{const od=remOverdue(r);const when=r.due?`${ddmm(r.due)}${remTime(r)?' '+remTime(r):''}`:'Ingen frist';
-    return `<div class="ta-row rem${od?' overdue':''}"><span class="ta-time">${od?'Forfalt':when}</span><span class="ta-title">${calEsc(r.title)}${remListName(r)?` <span class="ta-sub">· ${calEsc(remListName(r))}</span>`:''}</span></div>`;}).join('');
-  return `<div class="rem-card"><div class="rem-head"><b>Påminnelser (${rems.length})</b><span>${upd?'oppdatert '+upd.toLocaleDateString('nb-NO',{day:'2-digit',month:'2-digit'})+' '+upd.toLocaleTimeString('nb-NO',{hour:'2-digit',minute:'2-digit'}):''}</span></div>${rows}</div>`;
-}
 // Reminders due on a day (plus overdue ones on today), rendered like event rows.
 function calRemRows(ds){
   const today=daysAgoIso(0),rems=openRems();
@@ -3522,6 +3518,23 @@ function calRemRows(ds){
   const row=(r,isOd)=>`<div class="cal-ev cal-rem${isOd?' overdue':''}"><div class="cal-bar-c" style="background:${isOd?'var(--red)':'var(--green)'}"></div><div class="cal-time">${isOd?'Forfalt':(remTime(r)||'Påminnelse')}</div>
       <div><div class="cal-title">${calEsc(r.title)}</div><div class="cal-sub">${isOd?'frist '+ddmm(r.due):'Påminnelse'}${remListName(r)?' · '+calEsc(remListName(r)):''}</div></div></div>`;
   return due.map(r=>row(r,false)).join('')+od.map(r=>row(r,true)).join('');
+}
+// «Påminnelser»-visningen i Kalender: åpne påminnelser gruppert etter frist.
+function remindersViewHtml(){
+  const rems=openRems().slice().sort((a,b)=>String(a.due||'9').localeCompare(String(b.due||'9')));
+  if(!rems.length)return`<div class="cal-empty">Ingen åpne påminnelser. De sendes fra iPhonen av snarveien «Wiggen dag» når du åpner MacroFactor.</div>`;
+  const today=daysAgoIso(0),tomorrow=calIso(calAdd(new Date(today+'T00:00'),1)),week=calIso(calAdd(new Date(today+'T00:00'),7));
+  const groups=[['Forfalt',r=>remOverdue(r),' overdue'],['I dag',r=>r.due&&r.due.slice(0,10)===today,''],['I morgen',r=>r.due&&r.due.slice(0,10)===tomorrow,''],
+    ['Neste 7 dager',r=>r.due&&r.due.slice(0,10)>tomorrow&&r.due.slice(0,10)<=week,''],['Senere',r=>r.due&&r.due.slice(0,10)>week,''],['Uten frist',r=>!r.due,'']];
+  const used=new Set();
+  return groups.map(([label,test,cls])=>{
+    const list=rems.filter(r=>!used.has(r)&&test(r));list.forEach(r=>used.add(r));
+    if(!list.length)return'';
+    const rows=list.map(r=>{const t=remTime(r);
+      return `<div class="cal-ev cal-rem${cls}"><div class="cal-bar-c" style="background:${cls?'var(--red)':'var(--green)'}"></div><div class="cal-time">${label==='Forfalt'?ddmm(r.due):label==='Neste 7 dager'||label==='Senere'?ddmm(r.due)+(t?' '+t:''):label==='Uten frist'?'—':(t||'Hele dagen')}</div>
+        <div><div class="cal-title">${calEsc(r.title)}</div>${remListName(r)?`<div class="cal-sub">${calEsc(remListName(r))}</div>`:''}</div></div>`;}).join('');
+    return `<div class="cal-day${label==='I dag'?' today':''}"><div class="cal-dh"><span>${label}</span><span>${list.length}</span></div>${rows}</div>`;
+  }).join('');
 }
 function calListHtml(){
   const todayS=calIso(calToday());let out='';
